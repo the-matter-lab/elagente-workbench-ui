@@ -206,12 +206,14 @@ describe('turn usage in the visible timeline', () => {
         expect(more.querySelector('time')?.getAttribute('dateTime')).toBe(turn.startedAt);
         expect(more.querySelector('.thread-turn-head-model')?.textContent).toBe('6 astra · high');
         expect(more.querySelector('.thread-turn-head-speed')?.textContent).toBe('100.0 tok/s');
-        // The time shows its date when tapped.
+        // The date is visible by default; tapping still offers a compact clock.
         const time = more.querySelector<HTMLButtonElement>('.thread-turn-head-time')!;
-        const clockOnly = time.textContent;
+        const withDate = time.textContent;
+        expect(time.getAttribute('aria-pressed')).toBe('true');
         flushSync(() => time.click());
-        expect(time.textContent).not.toBe(clockOnly);
-        expect(time.textContent).toContain(clockOnly!);
+        expect(time.textContent).not.toBe(withDate);
+        expect(withDate).toContain(time.textContent!);
+        expect(time.getAttribute('aria-pressed')).toBe('false');
       } finally {
         flushSync(() => root.unmount());
         container.remove();

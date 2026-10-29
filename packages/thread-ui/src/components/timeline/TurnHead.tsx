@@ -1,6 +1,5 @@
 import { useState, useSyncExternalStore, type MouseEvent, useContext } from 'react';
 import { getLocale, translate, useI18n } from '../../i18n';
-import { formatLongTimestamp } from '../threadPresentation';
 import { AddedPromptIcon } from './AddedPromptIcon';
 import { Collapse } from './Collapse';
 import type { TimelineTurn } from './timelineItems';
@@ -27,6 +26,10 @@ const dated = (at: string) => new Date(at).toLocaleString(getLocale(), {
   month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
   ...(new Date(at).getFullYear() !== new Date().getFullYear() ? { year: 'numeric' } : {}),
 });
+const preciseTimestamp = (at: string) => new Date(at).toLocaleString(getLocale(), {
+  year: 'numeric', month: 'short', day: 'numeric',
+  hour: 'numeric', minute: '2-digit', second: '2-digit', timeZoneName: 'short',
+});
 
 /** The top of a turn: a dot with the time it has worked, its cost, when it
     started, the model, the speed and the prompts added while it worked. On a
@@ -42,7 +45,7 @@ export function TurnHead({ turn, active, added, onBeforeResize }: {
   useI18n();
   const wide = useWideScreen();
   const [open, setOpen] = useState(false);
-  const [withDate, setWithDate] = useState(false);
+  const [withDate, setWithDate] = useState(true);
   const now = useSecondClock(active);
   // While the host cannot confirm the turn is running, its time is the
   // elapsed time when the loss was noticed: an unconfirmed estimate (the turn
@@ -72,7 +75,7 @@ export function TurnHead({ turn, active, added, onBeforeResize }: {
   const cost = usage || turn.priceEstimate ? <TokenUsageCost usage={usage} price={turn.priceEstimate} /> : null;
   const more = <>
     {started ? (
-      <button type="button" className="thread-turn-head-time" title={formatLongTimestamp(started)} aria-pressed={withDate}
+      <button type="button" className="thread-turn-head-time" title={preciseTimestamp(started)} aria-pressed={withDate}
         onClick={() => setWithDate(value => !value)}>
         <time dateTime={started}>{withDate ? dated(started) : clock(started)}</time>
       </button>
