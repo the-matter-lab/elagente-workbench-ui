@@ -1,4 +1,4 @@
-import { translate, useI18n } from '../i18n';
+import { useI18n } from '../i18n';
 import {
   ClipboardEvent,
   type Dispatch,
@@ -1235,6 +1235,7 @@ export function ThreadComposer({
       shellClassName={composerShellClassName}
       inputGroupClassName={graphChatInputGroupClassName}
       error={error ?? attachmentError}
+      onDismissError={error == null && attachmentError ? () => setAttachmentError(null) : undefined}
       followTail={followTail}
       attachmentCapabilities={attachmentCapabilities}
       photoInputRef={photoInputRef}

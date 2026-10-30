@@ -12,10 +12,14 @@ function Harness({
   caps,
   initial,
   picker,
+  busy = false,
+  error,
 }: {
   caps?: ThreadComposerProps['attachmentCapabilities'];
   initial?: { prompt: string; attachments: PromptAttachmentUpload[] };
   picker?: ThreadComposerProps['onPickAttachment'];
+  busy?: boolean;
+  error?: string;
 }) {
   const [value, setValue] = useState(
     initial ?? { prompt: '', attachments: [] },
@@ -24,6 +28,10 @@ function Harness({
   return (
     <ThreadComposer
       activeView="chat"
+      busy={busy}
+      disabled={busy}
+      threadRunning={busy}
+      error={error}
       onSubmit={submit}
       attachmentCapabilities={caps}
       onPickAttachment={picker}
@@ -94,6 +102,34 @@ afterEach(() => {
 });
 
 describe('composer attachment capability admission', () => {
+  it('dismisses a rejection while busy without submitting or losing the draft, then shows a new rejection', async () => {
+    await render({ files: true, images: false }, { prompt: 'Keep this draft', attachments: [] });
+    await transfer('paste', [image()]);
+    expect(host.querySelector('[role="alert"]')).not.toBeNull();
+
+    await act(async () => root.render(<Harness caps={{ files: true, images: false }} busy />));
+    const dismiss = host.querySelector<HTMLButtonElement>('[aria-label="Dismiss attachment error"]');
+    expect(dismiss).not.toBeNull();
+    expect(dismiss?.disabled).toBe(false);
+    await act(async () => dismiss?.click());
+    expect(host.querySelector('[role="alert"]')).toBeNull();
+    expect(submit).not.toHaveBeenCalled();
+    expect(draft.prompt).toBe('Keep this draft');
+    expect(draft.attachments).toEqual([]);
+
+    await render({ files: true, images: false });
+    await transfer('paste', [image()]);
+    expect(host.querySelector('[role="alert"]')?.textContent).toContain('unavailable');
+  });
+
+  it('does not offer attachment dismissal for a host error', async () => {
+    await render({ files: true, images: false });
+    await transfer('paste', [image()]);
+    await act(async () => root.render(<Harness caps={{ files: true, images: false }} error="Connection failed" />));
+    expect(host.querySelector('[role="alert"]')?.textContent).toBe('Connection failed');
+    expect(host.querySelector('[aria-label="Dismiss attachment error"]')).toBeNull();
+  });
+
   it('omission preserves the generic photo and file menu', async () => {
     await render();
     await act(async () =>

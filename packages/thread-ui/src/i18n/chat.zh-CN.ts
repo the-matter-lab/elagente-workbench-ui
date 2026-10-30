@@ -588,6 +588,7 @@ export const chatZhCN = {
   "chat.attachmentView": "查看大图",
   "chat.attachmentOpenInFiles": "在文件中打开",
   "chat.attachmentRemove": "移除",
+  "chat.dismissAttachmentError": "关闭附件错误提示",
   "chat.usageUnavailable": "用量不可用：{{value1}}",
   "chat.table": "表格",
   "chat.chooseEffort": "选择推理强度",

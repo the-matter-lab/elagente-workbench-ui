@@ -1,4 +1,6 @@
 import { usePhoneDock } from '../workbench/phoneDockContext';
+import { X } from 'lucide-react';
+import { translate, useI18n } from '../../i18n';
 import type {
   FormEvent,
   MutableRefObject,
@@ -22,6 +24,7 @@ export interface ComposerFrameProps {
   shellClassName: string;
   inputGroupClassName: string;
   error: string | null | undefined;
+  onDismissError?: (() => void) | undefined;
   followTail: boolean;
   attachmentCapabilities?: { files: boolean; images: boolean } | undefined;
   photoInputRef: MutableRefObject<HTMLInputElement | null>;
@@ -54,6 +57,7 @@ export function ComposerFrame({
   shellClassName,
   inputGroupClassName,
   error,
+  onDismissError,
   followTail,
   attachmentCapabilities,
   photoInputRef,
@@ -73,6 +77,7 @@ export function ComposerFrame({
   goalSlot,
   shellPromptSlot,
 }: ComposerFrameProps) {
+  useI18n();
   const { expanded, focusOwner, ...focusEvents } = useCompactComposer(formRef, activeView === 'chat');
   // The phone dock's status bar shows usage instead.
   const dock = usePhoneDock();
@@ -123,8 +128,18 @@ export function ComposerFrame({
           {usage ? <div className="thread-composer-usage-tag">{usage}</div> : null}
         </div>
         {error ? (
-          <div role="alert" className="mt-2 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-            {error}
+          <div role="alert" className="mt-2 flex items-start gap-3 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+            <span className="min-w-0 flex-1 break-words">{error}</span>
+            {onDismissError ? (
+              <button
+                type="button"
+                aria-label={translate('chat.dismissAttachmentError')}
+                onClick={onDismissError}
+                className="shrink-0 rounded p-1 hover:bg-rose-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              >
+                <X aria-hidden="true" className="h-4 w-4" />
+              </button>
+            ) : null}
           </div>
         ) : null}
       </form>
