@@ -3460,6 +3460,7 @@ declare const en: {
     readonly "chat.attachmentView": "View full size";
     readonly "chat.attachmentOpenInFiles": "Open in files";
     readonly "chat.attachmentRemove": "Remove";
+    readonly "chat.dismissAttachmentError": "Dismiss attachment error";
     readonly "chat.usageUnavailable": "Usage unavailable: {{value1}}";
     readonly "chat.table": "Table";
     readonly "chat.chooseEffort": "Choose effort";
@@ -7569,6 +7570,7 @@ declare const zhCN: {
     "chat.attachmentView": "查看大图";
     "chat.attachmentOpenInFiles": "在文件中打开";
     "chat.attachmentRemove": "移除";
+    "chat.dismissAttachmentError": "关闭附件错误提示";
     "chat.usageUnavailable": "用量不可用：{{value1}}";
     "chat.table": "表格";
     "chat.chooseEffort": "选择推理强度";
@@ -11700,6 +11702,7 @@ declare const resources: {
         readonly "chat.attachmentView": "View full size";
         readonly "chat.attachmentOpenInFiles": "Open in files";
         readonly "chat.attachmentRemove": "Remove";
+        readonly "chat.dismissAttachmentError": "Dismiss attachment error";
         readonly "chat.usageUnavailable": "Usage unavailable: {{value1}}";
         readonly "chat.table": "Table";
         readonly "chat.chooseEffort": "Choose effort";
@@ -15808,6 +15811,7 @@ declare const resources: {
         "chat.attachmentView": "查看大图";
         "chat.attachmentOpenInFiles": "在文件中打开";
         "chat.attachmentRemove": "移除";
+        "chat.dismissAttachmentError": "关闭附件错误提示";
         "chat.usageUnavailable": "用量不可用：{{value1}}";
         "chat.table": "表格";
         "chat.chooseEffort": "选择推理强度";

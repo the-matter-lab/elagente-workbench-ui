@@ -38,7 +38,7 @@ import {
   useMenuKeyboard,
   useModalFocus,
   useTabScrollEdges
-} from "./chunk-VGOEFHQQ.js";
+} from "./chunk-SM26PRC3.js";
 import {
   Button,
   Tooltip,
@@ -57,7 +57,7 @@ import {
   shellThemeProps,
   useDocumentThemeRevision,
   useThemeFeature
-} from "./chunk-4M4LA7D5.js";
+} from "./chunk-LPTBJWOL.js";
 import {
   DEFAULT_LOCALE,
   I18nProvider,
@@ -75,7 +75,7 @@ import {
   t,
   translate,
   useI18n
-} from "./chunk-YFGJC2TV.js";
+} from "./chunk-S2ZDXRUN.js";
 
 // #style-inject:#style-inject
 function styleInject(css, { insertAt } = {}) {
@@ -362,7 +362,7 @@ function liveStructureTrajectoryPath(row) {
 // src/components/live-structures/LiveStructureFrameViewer.tsx
 import { jsx as jsx3 } from "react/jsx-runtime";
 var GraphMoleculeViewer = lazy(
-  () => import("./GraphMoleculeViewer-4QNBWETM.js").then((module) => ({ default: module.GraphMoleculeViewer }))
+  () => import("./GraphMoleculeViewer-EORV6MGN.js").then((module) => ({ default: module.GraphMoleculeViewer }))
 );
 function LiveStructureFrameViewer({ frame }) {
   const { t: t2 } = useI18n();
@@ -653,7 +653,7 @@ import { FileText, X as X2 } from "lucide-react";
 import { lazy as lazy2, Suspense as Suspense2, useEffect, useMemo as useMemo3, useRef, useState as useState2 } from "react";
 import { Fragment as Fragment2, jsx as jsx5, jsxs as jsxs3 } from "react/jsx-runtime";
 var GraphMoleculeViewer2 = lazy2(
-  () => import("./GraphMoleculeViewer-4QNBWETM.js").then((module) => ({ default: module.GraphMoleculeViewer }))
+  () => import("./GraphMoleculeViewer-EORV6MGN.js").then((module) => ({ default: module.GraphMoleculeViewer }))
 );
 var LIVE_TRAJECTORY_UPDATE_MS = 1e3;
 var STATUS_LABEL2 = {
@@ -1821,6 +1821,9 @@ function usePhoneDock() {
   return useContext(PhoneDockContext);
 }
 
+// src/components/composer/ComposerFrame.tsx
+import { X as X3 } from "lucide-react";
+
 // src/components/composer/useCompactComposer.ts
 import {
   useId as useId2,
@@ -2553,6 +2556,7 @@ function ComposerFrame({
   shellClassName,
   inputGroupClassName,
   error,
+  onDismissError,
   followTail,
   attachmentCapabilities,
   photoInputRef,
@@ -2572,6 +2576,7 @@ function ComposerFrame({
   goalSlot,
   shellPromptSlot
 }) {
+  useI18n();
   const { expanded, focusOwner, ...focusEvents } = useCompactComposer(formRef, activeView === "chat");
   const dock = usePhoneDock();
   const usage = !dock && activeView === "chat" && visibleSubscriptionWindows(subscriptionUsage).length > 0 ? /* @__PURE__ */ jsx13(ComposerSubscriptionUsage, { usage: subscriptionUsage }) : null;
@@ -2626,7 +2631,19 @@ function ComposerFrame({
               ]
             }
           ),
-          error ? /* @__PURE__ */ jsx13("div", { role: "alert", className: "mt-2 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200", children: error }) : null
+          error ? /* @__PURE__ */ jsxs9("div", { role: "alert", className: "mt-2 flex items-start gap-3 rounded-2xl border border-rose-500/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-200", children: [
+            /* @__PURE__ */ jsx13("span", { className: "min-w-0 flex-1 break-words", children: error }),
+            onDismissError ? /* @__PURE__ */ jsx13(
+              "button",
+              {
+                type: "button",
+                "aria-label": translate("chat.dismissAttachmentError"),
+                onClick: onDismissError,
+                className: "shrink-0 rounded p-1 hover:bg-rose-500/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2",
+                children: /* @__PURE__ */ jsx13(X3, { "aria-hidden": "true", className: "h-4 w-4" })
+              }
+            ) : null
+          ] }) : null
         ]
       }
     )
@@ -2634,7 +2651,7 @@ function ComposerFrame({
 }
 
 // src/components/composer/ComposerPendingQueue.tsx
-import { CornerUpRight, Loader2, Pencil, X as X3 } from "lucide-react";
+import { CornerUpRight, Loader2, Pencil, X as X4 } from "lucide-react";
 import { useState as useState5 } from "react";
 import { Fragment as Fragment5, jsx as jsx14, jsxs as jsxs10 } from "react/jsx-runtime";
 function ComposerPendingQueue({
@@ -2748,7 +2765,7 @@ function ComposerPendingQueue({
                       title: translate("chat.removeFromQueue"),
                       onClick: () => void runAction(prompt.id, onCancel),
                       className: "thread-composer-queue-remove inline-flex h-8 w-8 items-center justify-center rounded-lg transition disabled:cursor-wait disabled:opacity-60",
-                      children: /* @__PURE__ */ jsx14(X3, { className: "h-4 w-4", "aria-hidden": "true" })
+                      children: /* @__PURE__ */ jsx14(X4, { className: "h-4 w-4", "aria-hidden": "true" })
                     }
                   ) : null
                 ] })
@@ -6107,7 +6124,7 @@ function ComposerGoalComposeCard({
 }
 
 // src/components/composer/ComposerModeChip.tsx
-import { X as X4 } from "lucide-react";
+import { X as X5 } from "lucide-react";
 import { jsx as jsx28, jsxs as jsxs24 } from "react/jsx-runtime";
 function ComposerModeChip({ busy, onExit }) {
   useI18n();
@@ -6122,7 +6139,7 @@ function ComposerModeChip({ busy, onExit }) {
         "aria-label": translate("chat.exitPlanMode"),
         title: translate("chat.exitPlanMode"),
         className: "thread-goal-compose-cancel composer-mode-chip-exit ml-auto inline-flex h-6 w-6 items-center justify-center rounded-full border transition disabled:opacity-60",
-        children: /* @__PURE__ */ jsx28(X4, { "aria-hidden": "true", className: "h-3.5 w-3.5" })
+        children: /* @__PURE__ */ jsx28(X5, { "aria-hidden": "true", className: "h-3.5 w-3.5" })
       }
     )
   ] });
@@ -6130,7 +6147,7 @@ function ComposerModeChip({ busy, onExit }) {
 
 // src/components/composer/ComposerPromptEditor.tsx
 import { useRef as useRef12, useState as useState16 } from "react";
-import { X as X5 } from "lucide-react";
+import { X as X6 } from "lucide-react";
 
 // src/components/attachments/AttachmentTile.tsx
 import { useEffect as useEffect11, useLayoutEffect as useLayoutEffect6, useRef as useRef11, useState as useState15 } from "react";
@@ -6434,7 +6451,7 @@ function ComposerPromptEditor({
                 onInput();
                 promptRef.current?.focus({ preventScroll: true });
               }, children: [
-                /* @__PURE__ */ jsx30(X5, { "aria-hidden": "true" }),
+                /* @__PURE__ */ jsx30(X6, { "aria-hidden": "true" }),
                 translate("chat.attachmentRemove")
               ] })
             ] })
@@ -7876,6 +7893,7 @@ ${current.prompt}` : text,
       shellClassName: composerShellClassName,
       inputGroupClassName: graphChatInputGroupClassName,
       error: error ?? attachmentError,
+      onDismissError: error == null && attachmentError ? () => setAttachmentError(null) : void 0,
       followTail,
       attachmentCapabilities,
       photoInputRef,
@@ -9716,7 +9734,7 @@ import {
   Settings,
   Sun,
   Trash2 as Trash22,
-  X as X9
+  X as X10
 } from "lucide-react";
 
 // src/app-shell/AppShellNavContext.tsx
@@ -9736,7 +9754,7 @@ import {
   useRef as useRef19,
   useState as useState26
 } from "react";
-import { ChevronLeft as ChevronLeft3, FolderOpen as FolderOpen2, X as X6 } from "lucide-react";
+import { ChevronLeft as ChevronLeft3, FolderOpen as FolderOpen2, X as X7 } from "lucide-react";
 
 // src/components/workbench/useTerminalKeyboardInset.ts
 import { useEffect as useEffect17, useState as useState24 } from "react";
@@ -10258,7 +10276,7 @@ function WorkbenchPanels({
                               onClick: close,
                               "aria-label": translate("workbench.closeSplit"),
                               title: translate("workbench.closeSplitContinues"),
-                              children: /* @__PURE__ */ jsx43(X6, { size: 17 })
+                              children: /* @__PURE__ */ jsx43(X7, { size: 17 })
                             }
                           )
                         ] }),
@@ -10322,7 +10340,7 @@ function WorkbenchPanels({
                       "data-testid": "workbench-close-files",
                       "aria-label": translate("workbench.closeFiles"),
                       onClick: closeFiles,
-                      children: /* @__PURE__ */ jsx43(X6, { size: 17 })
+                      children: /* @__PURE__ */ jsx43(X7, { size: 17 })
                     }
                   )
                 ] }),
@@ -10371,7 +10389,7 @@ import {
   SlidersHorizontal as SlidersHorizontal2,
   Star as Star2,
   Terminal as Terminal2,
-  X as X8
+  X as X9
 } from "lucide-react";
 
 // src/components/WorkbenchContext.ts
@@ -10482,7 +10500,7 @@ function ThreadToolsMenu({ id, open, anchorRef, path, title, favorite, favoriteB
 // src/components/GroupedThreadTabs.tsx
 import { useEffect as useEffect19, useLayoutEffect as useLayoutEffect12, useRef as useRef22, useState as useState29 } from "react";
 import { createPortal as createPortal4 } from "react-dom";
-import { Bot as Bot2, X as X7 } from "lucide-react";
+import { Bot as Bot2, X as X8 } from "lucide-react";
 import { Fragment as Fragment14, jsx as jsx46, jsxs as jsxs40 } from "react/jsx-runtime";
 var statusLabels = new Proxy({}, { get: (_, status) => navigationStatusLabel(String(status)) });
 function threadGroupActivity(root, children = []) {
@@ -10644,7 +10662,7 @@ ${activity.label}`,
                 "aria-label": translate("workbench.closeTab", { title: root.title }),
                 title: translate("workbench.closeTab", { title: root.title }),
                 onClick: () => onClose(root.key),
-                children: /* @__PURE__ */ jsx46(X7, { "aria-hidden": "true" })
+                children: /* @__PURE__ */ jsx46(X8, { "aria-hidden": "true" })
               }
             )
           ]
@@ -10941,11 +10959,11 @@ function useDragReorder(listRef, { axis, itemSelector, enabled, onCommit, scroll
       }
       drag.target = target;
       const shift = (sizes[index] ?? 0) + gap;
-      const translate3 = (value) => horizontal ? `translateX(${value}px)` : `translateY(${value}px)`;
+      const translate2 = (value) => horizontal ? `translateX(${value}px)` : `translateY(${value}px)`;
       items.forEach((item, other) => {
-        if (other === index) item.style.transform = translate3(offset);
-        else if (other > index && other <= target) item.style.transform = translate3(-shift);
-        else if (other < index && other >= target) item.style.transform = translate3(shift);
+        if (other === index) item.style.transform = translate2(offset);
+        else if (other > index && other <= target) item.style.transform = translate2(-shift);
+        else if (other < index && other >= target) item.style.transform = translate2(shift);
         else item.style.transform = "";
       });
     };
@@ -11962,7 +11980,7 @@ ${thread.subtitle} \xB7 ${activity.label}`,
                       className: "matter-mobile-close",
                       "aria-label": translate("workbench.closeSidebar"),
                       onClick: () => setSidebarOpen(false),
-                      children: /* @__PURE__ */ jsx49(X8, { "data-icon": "close" })
+                      children: /* @__PURE__ */ jsx49(X9, { "data-icon": "close" })
                     }
                   )
                 ] }),
@@ -12219,7 +12237,7 @@ ${thread.subtitle} \xB7 ${activity.label}`,
                   {
                     "aria-label": translate("workbench.closeExplorer"),
                     onClick: () => setExplorerOpen(false),
-                    children: /* @__PURE__ */ jsx49(X8, { "data-icon": "close" })
+                    children: /* @__PURE__ */ jsx49(X9, { "data-icon": "close" })
                   }
                 )
               ] }),
@@ -12402,7 +12420,7 @@ ${thread.subtitle} \xB7 ${activity.label}`,
                     {
                       "aria-label": translate("workbench.closeNotificationPanel"),
                       onClick: () => setBellOpen(false),
-                      children: /* @__PURE__ */ jsx49(X8, { "data-icon": "close" })
+                      children: /* @__PURE__ */ jsx49(X9, { "data-icon": "close" })
                     }
                   )
                 ] }),
@@ -13465,7 +13483,7 @@ function ThreadWorkspaceLayout({
                                         "aria-label": translate("files.closeRooms"),
                                         title: translate("files.closeRooms"),
                                         className: "thread-icon-button thread-mobile-only-inline-flex h-10 w-10 items-center justify-center rounded-full",
-                                        children: /* @__PURE__ */ jsx51(X9, { className: "h-4 w-4" })
+                                        children: /* @__PURE__ */ jsx51(X10, { className: "h-4 w-4" })
                                       }
                                     )
                                   }
@@ -13651,7 +13669,7 @@ import { mergeThreadHistoryItem as mergeThreadHistoryItem2 } from "@remote-codex
 import { memo as memo8, useCallback as useCallback18, useEffect as useEffect40, useMemo as useMemo17, useRef as useRef40, useState as useState59 } from "react";
 
 // src/components/LongTextDialog.tsx
-import { X as X10 } from "lucide-react";
+import { X as X11 } from "lucide-react";
 
 // src/components/DiffDetail.tsx
 import { useEffect as useEffect24, useMemo as useMemo10, useState as useState35 } from "react";
@@ -14909,7 +14927,7 @@ function LongTextDialog({
             {
               "aria-label": translate("workbench.closeDialog"),
               className: "relative inline-flex h-9 w-9 items-center justify-center rounded-md text-[var(--theme-fg-muted)] transition hover:bg-[var(--theme-hover)]",
-              children: /* @__PURE__ */ jsx58(X10, { "aria-hidden": "true", className: "h-4 w-4" })
+              children: /* @__PURE__ */ jsx58(X11, { "aria-hidden": "true", className: "h-4 w-4" })
             }
           )
         ] }),
@@ -18086,11 +18104,20 @@ var dated = (at) => new Date(at).toLocaleString(getLocale(), {
   minute: "2-digit",
   ...new Date(at).getFullYear() !== (/* @__PURE__ */ new Date()).getFullYear() ? { year: "numeric" } : {}
 });
+var preciseTimestamp = (at) => new Date(at).toLocaleString(getLocale(), {
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  second: "2-digit",
+  timeZoneName: "short"
+});
 function TurnHead({ turn, active, added, onBeforeResize }) {
   useI18n();
   const wide = useWideScreen();
   const [open, setOpen] = useState52(false);
-  const [withDate, setWithDate] = useState52(false);
+  const [withDate, setWithDate] = useState52(true);
   const now = useSecondClock(active);
   const turnClock = useContext13(TurnClockContext);
   const unconfirmed = active && turnClock?.frozenAt != null;
@@ -18117,7 +18144,7 @@ function TurnHead({ turn, active, added, onBeforeResize }) {
       {
         type: "button",
         className: "thread-turn-head-time",
-        title: formatLongTimestamp(started),
+        title: preciseTimestamp(started),
         "aria-pressed": withDate,
         onClick: () => setWithDate((value) => !value),
         children: /* @__PURE__ */ jsx77("time", { dateTime: started, children: withDate ? dated(started) : clock(started) })
@@ -18398,12 +18425,12 @@ import { ChevronRight as ChevronRight7, Maximize2 as Maximize23, TriangleAlert a
 // src/components/timeline/ActivityCount.tsx
 import { useEffect as useEffect35, useRef as useRef36, useState as useState53 } from "react";
 import { createPortal as createPortal6 } from "react-dom";
-import { Bot as Bot5, Check as Check6, FileText as FileText5, Lightbulb, Search as Search4, SquareTerminal, Wrench as Wrench3, X as X11 } from "lucide-react";
+import { Bot as Bot5, Check as Check6, FileText as FileText5, Lightbulb, Search as Search4, SquareTerminal, Wrench as Wrench3, X as X12 } from "lucide-react";
 import { jsx as jsx78, jsxs as jsxs68 } from "react/jsx-runtime";
 var HINT_DELAY_MS = 1e3;
 var ICONS = {
   commands: Check6,
-  failed: X11,
+  failed: X12,
   reads: FileText5,
   searches: Search4,
   agents: Bot5,
@@ -19562,9 +19589,7 @@ var ThreadTurnRow = memo7(function ThreadTurnRow2({
   }, [activeForRendering, mergedItems, visibleSummaryAgent]);
   const logEntries = leadingUserCount < 0 ? [] : groupedItems.slice(leadingUserCount);
   const finalAnswer = isTerminalTurnStatus(turn.status) && visibleSummaryAgent ? visibleSummaryAgent : null;
-  const lastLogEntry = logEntries.at(-1);
-  const answerInLog = Boolean(finalAnswer && lastLogEntry?.kind === "item" && lastLogEntry.item.id === finalAnswer.id);
-  const processEntries = answerInLog ? logEntries.slice(0, -1) : logEntries;
+  const processEntries = finalAnswer ? logEntries.filter((entry) => entry.kind !== "item" || entry.item.id !== finalAnswer.id) : logEntries;
   const leadingPrompts = leadingUserCount < 0 ? collapsedSummary.users.length : leadingUserCount;
   const renderPrompt = (item) => /* @__PURE__ */ jsx81(
     GraphChatCompactMessageItem,
@@ -19640,7 +19665,7 @@ var ThreadTurnRow = memo7(function ThreadTurnRow2({
     /* @__PURE__ */ jsx81(Collapse, { open: filesOpen, children: /* @__PURE__ */ jsx81(ChangedFiles, { files: changedFiles, total: activityCounts?.fileCount }) }),
     effectiveCollapsed ? collapsedSummary.users.slice(leadingPrompts).map(renderPrompt) : null,
     /* @__PURE__ */ jsx81(Collapse, { open: !effectiveCollapsed, children: story ? /* @__PURE__ */ jsxs70("div", { className: "thread-execution-timeline is-story", children: [
-      storyBlocks(processEntries, story, answerInLog ? finalAnswer.id : null).map((block) => block.kind === "run" ? /* @__PURE__ */ jsx81(
+      storyBlocks(processEntries, story, finalAnswer?.id ?? null).map((block) => block.kind === "run" ? /* @__PURE__ */ jsx81(
         RunPlaceholder,
         {
           segment: block.segment,
@@ -19692,7 +19717,7 @@ var ThreadTurnRow = memo7(function ThreadTurnRow2({
         open && block.work.length > 0 ? /* @__PURE__ */ jsx81("div", { className: "thread-stretch-work", children: renderHistoryEntries(block.work, { openLastRun: true }) }) : null
       ] }, `gap:${key}`);
     }) }) : null,
-    finalAnswer && (effectiveCollapsed || answerInLog || !mergedItems.some((item) => item.id === finalAnswer.id)) ? renderSummaryAgent(finalAnswer) : null,
+    finalAnswer ? renderSummaryAgent(finalAnswer) : null,
     effectiveCollapsed && !finalAnswer && visibleSummaryAgent && !answerSections?.some((entry) => entry.kind === "item" && entry.item.id === visibleSummaryAgent.id) ? renderSummaryAgent(visibleSummaryAgent) : null,
     effectiveCollapsed && currentOperation ? /* @__PURE__ */ jsx81("div", { className: "tlog-current", children: /* @__PURE__ */ jsx81(LogRow, { item: currentOperation }, currentOperation.id) }) : null,
     /* @__PURE__ */ jsx81(Collapse, { open: activeForRendering, children: /* @__PURE__ */ jsx81(
@@ -21597,7 +21622,7 @@ import {
   SquareTerminal as SquareTerminal3,
   Trash2 as Trash24,
   Unplug,
-  X as X12
+  X as X13
 } from "lucide-react";
 import {
   forwardRef as forwardRef2,
@@ -24742,7 +24767,7 @@ var ThreadShellPanel = forwardRef2(function ThreadShellPanel2({
         !compact && /* @__PURE__ */ jsx88(IconButton, { label: panelControls.collapsed ? translate("workbench.terminalExpand") : translate("workbench.terminalCollapse"), pressed: panelControls.collapsed, onClick: panelControls.toggleCollapsed, testId: "terminal-collapse", children: panelControls.collapsed ? /* @__PURE__ */ jsx88(PanelBottomOpen, { size: 16 }) : /* @__PURE__ */ jsx88(PanelBottomClose, { size: 16 }) }),
         (!compact || !panelControls.collapsed) && /* @__PURE__ */ jsx88(IconButton, { label: panelControls.maximized ? translate("workbench.terminalRestore") : translate("workbench.terminalMaximize"), pressed: panelControls.maximized, onClick: panelControls.toggleMaximized, testId: "terminal-maximize", keepFocus: true, children: panelControls.maximized ? /* @__PURE__ */ jsx88(ChevronDown7, { size: 16 }) : /* @__PURE__ */ jsx88(ChevronUp3, { size: 16 }) }),
         compact && panelControls.collapsed && /* @__PURE__ */ jsx88(IconButton, { label: translate("workbench.terminalExpand"), onClick: panelControls.toggleCollapsed, testId: "terminal-collapse", keepFocus: true, children: /* @__PURE__ */ jsx88(PanelBottomOpen, { size: 16 }) }),
-        /* @__PURE__ */ jsx88(IconButton, { label: translate("workbench.terminalHide"), onClick: panelControls.close, testId: "workbench-close-tools", children: /* @__PURE__ */ jsx88(X12, { size: 16 }) })
+        /* @__PURE__ */ jsx88(IconButton, { label: translate("workbench.terminalHide"), onClick: panelControls.close, testId: "workbench-close-tools", children: /* @__PURE__ */ jsx88(X13, { size: 16 }) })
       ] }),
       !panelControls && onBackToChat && /* @__PURE__ */ jsx88(IconButton, { label: translate("workbench.terminalBackToChat"), onClick: onBackToChat, children: /* @__PURE__ */ jsx88(MessageSquare4, { size: 16 }) })
     ] })
@@ -24758,7 +24783,7 @@ var ThreadShellPanel = forwardRef2(function ThreadShellPanel2({
         header,
         (error || workspacePathMissing) && !collapsed && /* @__PURE__ */ jsxs76("div", { role: "alert", className: "terminal-banner", children: [
           /* @__PURE__ */ jsx88("span", { children: workspacePathMissing ? translate("files.workspacePathIsMissingOnThisMachine") : error }),
-          error && /* @__PURE__ */ jsx88(IconButton, { label: translate("files.cancel"), onClick: () => setError(null), children: /* @__PURE__ */ jsx88(X12, { size: 14 }) })
+          error && /* @__PURE__ */ jsx88(IconButton, { label: translate("files.cancel"), onClick: () => setError(null), children: /* @__PURE__ */ jsx88(X13, { size: 14 }) })
         ] }),
         /* @__PURE__ */ jsxs76("div", { className: "terminal-body", hidden: collapsed, children: [
           /* @__PURE__ */ jsxs76(
@@ -28500,7 +28525,7 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
 }
 
 // src/components/threadMap/ThreadMapDialog.tsx
-import { X as X13 } from "lucide-react";
+import { X as X14 } from "lucide-react";
 import { jsx as jsx104 } from "react/jsx-runtime";
 function ThreadMapDialog({ open, onOpenChange, themeMode, effectiveTheme, ...map }) {
   useI18n();
@@ -28519,7 +28544,7 @@ function ThreadMapDialog({ open, onOpenChange, themeMode, effectiveTheme, ...map
           ...map,
           onDismiss: () => onOpenChange(false),
           heading: /* @__PURE__ */ jsx104(DialogTitle, { className: "thread-map-title", children: translate("workbench.threadMap") }),
-          actions: /* @__PURE__ */ jsx104(DialogClose, { className: "thread-map-icon-button thread-map-close", "aria-label": translate("workbench.close"), children: /* @__PURE__ */ jsx104(X13, { "aria-hidden": "true" }) })
+          actions: /* @__PURE__ */ jsx104(DialogClose, { className: "thread-map-icon-button thread-map-close", "aria-label": translate("workbench.close"), children: /* @__PURE__ */ jsx104(X14, { "aria-hidden": "true" }) })
         }
       )
     }
