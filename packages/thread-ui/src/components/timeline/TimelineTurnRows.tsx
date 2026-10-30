@@ -912,9 +912,10 @@ export const ThreadTurnRow = memo(function ThreadTurnRow({
   // A finished turn's answer has one place, below its work, folded or open: it
   // never moves into the opening work (where it would vanish for a moment).
   const finalAnswer = isTerminalTurnStatus(turn.status) && visibleSummaryAgent ? visibleSummaryAgent : null;
-  const lastLogEntry = logEntries.at(-1);
-  const answerInLog = Boolean(finalAnswer && lastLogEntry?.kind === 'item' && lastLogEntry.item.id === finalAnswer.id);
-  const processEntries = answerInLog ? logEntries.slice(0, -1) : logEntries;
+  // Native runtimes can update an early assistant message in place and append
+  // tool/artifact records after it. Its position is not a completion marker.
+  const processEntries = finalAnswer ? logEntries.filter(entry =>
+    entry.kind !== 'item' || entry.item.id !== finalAnswer.id) : logEntries;
   // Prompts that started the turn sit above its work line; prompts added while it
   // worked sit below it when folded, so opening or folding the turn never moves
   // what is above the line.
@@ -979,7 +980,7 @@ export const ThreadTurnRow = memo(function ThreadTurnRow({
         <Collapse open={!effectiveCollapsed}>
           {story ? (
             <div className="thread-execution-timeline is-story">
-              {storyBlocks(processEntries, story, answerInLog ? finalAnswer!.id : null).map((block) => block.kind === 'run'
+              {storyBlocks(processEntries, story, finalAnswer?.id ?? null).map((block) => block.kind === 'run'
                 ? <RunPlaceholder key={`run:${block.segment.before ?? 'end'}`} segment={block.segment} loading={deferredItemsLoading}
                     onOpen={() => { setOpenRunBefore(block.segment.before); onToggleCollapse(turn, true, true); }} />
                 : <Fragment key={block.entry.key}>{renderHistoryEntries([block.entry])}</Fragment>)}
@@ -1021,8 +1022,7 @@ export const ThreadTurnRow = memo(function ThreadTurnRow({
           })}
         </div> : null}
         {/* A finished turn's answer stays below its work, folded or not. */}
-        {finalAnswer && (effectiveCollapsed || answerInLog || !mergedItems.some(item => item.id === finalAnswer.id))
-          ? renderSummaryAgent(finalAnswer) : null}
+        {finalAnswer ? renderSummaryAgent(finalAnswer) : null}
         {effectiveCollapsed && !finalAnswer && visibleSummaryAgent && !answerSections?.some(entry => entry.kind === 'item' && entry.item.id === visibleSummaryAgent.id)
           ? renderSummaryAgent(visibleSummaryAgent) : null}
         {effectiveCollapsed && currentOperation ? <div className="tlog-current"><LogRow key={currentOperation.id} item={currentOperation} /></div> : null}

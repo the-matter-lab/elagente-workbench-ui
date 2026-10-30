@@ -73,6 +73,41 @@ describe('collapsed answer sections', () => {
     { id: 'narration', kind: 'agentMessage' as const, text: 'Running checks.' }, command('gap-1'), command('gap-2'), command('gap-3'), final,
   ] };
 
+  it.each((['completed', 'failed', 'interrupted'] as const).flatMap(status =>
+    (['loaded', 'deferred'] as const).map(mode => [status, mode] as const)))('keeps an early final reply below the work when a %s turn expands from %s history', async (status, mode) => {
+    // Native runtimes update their first assistant message in place, before
+    // the tool records appended later. The final reply need not be last.
+    const reply = {id: 'early-final', kind: 'agentMessage' as const, text: 'Final report. '.repeat(50)};
+    const operations = Array.from({length: 25}, (_, index) => ({
+      id: `tool-${index}`, kind: 'toolCall' as const, text: `Operation ${index}`, status: 'completed',
+      progress: {version: 1 as const, callId: `tool-${index}`, label: `Operation ${index}`, status: 'completed' as const,
+        startedAt: '2026-10-29T17:11:28Z', completedAt: '2026-10-29T17:18:40Z'},
+    }));
+    const turn = {...completedTurn([prompt, reply, ...operations, {id: 'trailing', kind: 'other' as const, text: 'Saved artifact'}]), status};
+    const displayed = mode === 'deferred' ? {...turn, items: [prompt, reply], hasDeferredItems: true, deferredItemCount: 25} : turn;
+    const load = vi.fn(async () => ({...turn, hasDeferredItems: false, deferredItemCount: 0}));
+    const props = {threadId: `early-final-${status}-${mode}`, liveOutput: '', autoCollapseCompletedTurns: true, onLoadTurnDetail: load};
+    const el = render(<ThreadTimeline {...props} turns={[displayed]} />);
+    const toggle = () => el.querySelector<HTMLButtonElement>('.thread-worked-toggle')!;
+    const finalReply = el.querySelector('[data-message-id="early-final"]');
+    expect(finalReply).not.toBeNull();
+    flushSync(() => toggle().click());
+    await vi.waitFor(() => expect(el.querySelectorAll('.thread-graph-tool-call')).toHaveLength(25));
+    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    expect(el.querySelectorAll('.thread-graph-tool-call')).toHaveLength(25);
+    expect(el.querySelector('[data-message-id="early-final"]')).toBe(finalReply);
+    expect(finalReply?.closest('.tlog-collapse')).toBeNull();
+    const lastOperation = el.querySelectorAll('.thread-graph-tool-call')[24]!;
+    expect(lastOperation.compareDocumentPosition(finalReply!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // An ordinary refreshed snapshot must retain both the open work and reply.
+    flushSync(() => root?.render(<ThreadTimeline {...props} turns={[structuredClone(displayed)]} />));
+    expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    expect(el.querySelectorAll('.thread-graph-tool-call')).toHaveLength(25);
+    flushSync(() => toggle().click());
+    expect(el.querySelector('[data-message-id="early-final"]')).toBe(finalReply);
+    expect(el.querySelectorAll('.thread-graph-tool-call')).toHaveLength(0);
+  });
+
   it('hides leading work and merges the gap into one counted placeholder without loading', () => {
     const load = vi.fn();
     const el = render(<ThreadTimeline turns={[summary]} liveOutput="" autoCollapseCompletedTurns onLoadTurnDetail={load} />);
@@ -251,7 +286,9 @@ describe('ThreadTimeline', () => {
       expect(load).not.toHaveBeenCalled();
       expect(toggle().getAttribute('aria-expanded')).toBe('true');
       expect(element.querySelector('.tlog-single')).toBeNull();
-      flushSync(() => element.querySelector<HTMLButtonElement>('.tlog-run-head')!.click());
+      // Once the final reply is kept outside the work, this is one run, so
+      // opening the work line opens its operations without an extra click.
+      expect(element.querySelector('.tlog-run-head')?.getAttribute('aria-expanded')).toBe('true');
       expect(element.querySelectorAll('.tlog-run .tlog-row')).toHaveLength(2);
       expect(element.textContent).toContain('first-command');
       expect(element.textContent).toContain('second-command');
