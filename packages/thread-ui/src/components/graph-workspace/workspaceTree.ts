@@ -53,6 +53,9 @@ export const MOLECULAR_EXTENSIONS = new Set([
   'pdb',
   'sdf',
   'mol',
+  // Gaussian cube volumetric grids (orbitals, densities, potentials).
+  'cube',
+  'cub',
 ]);
 export const IMAGE_EXTENSIONS = new Set([
   'png',
@@ -286,7 +289,8 @@ export function buildMoleculePreviewSnapshot(
   }
   return {
     content: [file.content.endsWith('\n') ? file.content : `${file.content}\n`],
-    format: extension === 'extxyz' ? 'xyz' : extension,
+    format:
+      extension === 'extxyz' ? 'xyz' : extension === 'cub' ? 'cube' : extension,
     name: file.name,
     uuid: file.path,
   };

@@ -1,7 +1,7 @@
 # Scientific file previews (ORCA, PySCF)
 
-Status: format routing implemented (ELA-219, B28); cube renderer planned
-(`feat/cube-volumetric-viewer`); ESD spectrum renderer designed, not
+Status: format routing implemented (ELA-219, B28); cube renderer
+implemented in v0.1.19 (ELA-293); ESD spectrum renderer designed, not
 implemented.
 
 Source of the format list: the ORCA/PySCF format table Juan Bernardo Perez
@@ -16,10 +16,11 @@ does not show which of these files failed on dev2.
 | `.carthess`, `.opt`, `.plt`, files with no extension (PySCF temporary checkpoints) | Encoding not confirmed, so the extension does not decide. The first chunk is checked for NUL bytes, control characters and the HDF5 signature. Binary data gets the generic "not text" download state. |
 | `.md`, `.markdown` | Markdown preview, with a source view. |
 | `.py` and other source files | Code view. App-servers report the bare extension as `language` (`py`, `sh`, `md`). `codeLanguage()` maps it to the Monaco/Shiki id (`python`, `shell`, `markdown`). Unknown ids fall back to plain text. |
-| `.inp`, `.out`, `.log`, `.hess`, `.mkl`, `.molden(.input)`, `.property.txt/.json`, `FCIDUMP`, `.cube/.cub`, `.spectrum(.rootN)` | Plain-text preview in chunks, with "load more". |
+| `.inp`, `.out`, `.log`, `.hess`, `.mkl`, `.molden(.input)`, `.property.txt/.json`, `FCIDUMP`, `.spectrum(.rootN)` | Plain-text preview in chunks, with "load more". |
 | `.xyz`, `*_trj.xyz` and the other molecular formats | Molecule viewer (unchanged). |
+| `.cube`, `.cub` | Molecule viewer with +/- isosurfaces, up to 20 MiB and 200³ points (see below). |
 
-## Cube renderer (planned)
+## Cube renderer
 
 `.cube/.cub` files are text volumetric grids (orbitals, densities,
 potentials). 3Dmol 2.x can parse them: `addModel(data, 'cube')` reads the atoms,
@@ -71,7 +72,7 @@ The 200³ point limit (`MAX_CUBE_GRID_POINTS`) is still checked: in the
 Explorer from the header in the first chunk, before the rest is read, and in
 the viewer for every source, including `chem.structure` artifacts.
 
-### Steps
+### Implementation
 
 1. `components/graph-workspace/GraphMoleculeCube.ts` (new): `readCubeHeader`
    (null while the first chunk ends inside the header), `parseCubeHeader`,

@@ -52,11 +52,13 @@ export function readGraphMoleculeViewerData(
   source: GraphMoleculeViewerSource,
 ): GraphMoleculeViewerData {
   if (!source) return { format: 'xyz', frames: [], exportContent: '' };
-  const format =
+  const declared =
     typeof source === 'string'
       ? 'xyz'
       : source.format?.trim().toLowerCase() || 'xyz';
-  if (!['xyz', 'extxyz', 'cif', 'pdb', 'sdf', 'mol'].includes(format))
+  // `.cub` is the same Gaussian cube format as `.cube`.
+  const format = declared === 'cub' ? 'cube' : declared;
+  if (!['xyz', 'extxyz', 'cif', 'pdb', 'sdf', 'mol', 'cube'].includes(format))
     throw new Error(`Unsupported structure format: ${format}`);
   const content = typeof source === 'string' ? [source] : source.content;
   const xyz = format === 'xyz' || format === 'extxyz';
@@ -72,7 +74,10 @@ export function readGraphMoleculeViewerData(
                 .match(/[\s\S]*?\$\$\$\$(?:\r\n|\n|\r|$)|[\s\S]+$/g)
                 ?.filter((text) => text.trim()) ?? [],
           )
-        : content.filter((text) => text.trim());
+        : format === 'cube'
+          ? // One grid per file: the whole text is the single frame.
+            [content.join('')].filter((text) => text.trim())
+          : content.filter((text) => text.trim());
   return { frames, format, exportContent: content.join('') };
 }
 
