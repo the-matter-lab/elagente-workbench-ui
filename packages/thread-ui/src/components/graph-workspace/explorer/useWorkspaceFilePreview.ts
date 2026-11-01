@@ -16,9 +16,39 @@ import type { WorkspaceExplorerIdentity } from './useWorkspaceExplorerPersistenc
 
 import type { WorkspaceDocuments } from "./useWorkspaceDocuments";
 import { DRAWIO_MAX_BYTES, downloadOnlyReason, isBinaryPreview, isDownloadOnlyPath, isDrawioPath } from './filePreviewPolicy';
+import { CubeFormatError, MAX_CUBE_GRID_POINTS, readCubeHeader } from '../GraphMoleculeCube';
 
 const PREVIEW_CHUNK_BYTES = 24_000;
-const MAX_MOLECULAR_PREVIEW_BYTES = 10 * 1024 * 1024;
+// Molecular files are read whole into the page.
+export const MAX_MOLECULAR_PREVIEW_BYTES = 10 * 1024 * 1024;
+const MOLECULAR_CHUNK_BYTES = 256 * 1024;
+// Cube grids are larger: a 100³ orbital is about 14 MB. 20 MiB is the
+// ElAgente app-server's own limit for any workspace file (MAX_FILE_BYTES), so
+// a larger cap would only trade the download state for a read error. Each
+// `file/read` re-reads the whole file on the server, so cubes use fewer,
+// larger chunks. See docs/scientific-file-previews.md.
+export const MAX_CUBE_PREVIEW_BYTES = 20 * 1024 * 1024;
+const CUBE_CHUNK_BYTES = 2 * 1024 * 1024;
+
+/**
+ * A cube grid too large to draw, from the header in the first chunk. Null
+ * when the grid is drawable or the header is not complete yet; the viewer
+ * checks the full file again.
+ */
+function cubeDownloadReason(content: string) {
+  try {
+    const header = readCubeHeader(content);
+    if (!header) return null;
+    if (header.pointCount > MAX_CUBE_GRID_POINTS) return 'volumetricGridTooLarge';
+    if (header.orbitalIndices.length > 1) return 'volumetricMultipleOrbitals';
+    return null;
+  } catch (error) {
+    if (error instanceof CubeFormatError && error.code === 'multipleOrbitals')
+      return 'volumetricMultipleOrbitals';
+    // A malformed header is reported by the viewer, with the file loaded.
+    return null;
+  }
+}
 
 export function useWorkspaceFilePreview({
   activeNode,
@@ -118,12 +148,26 @@ export function useWorkspaceFilePreview({
         });
         // Molecular parsers need complete frames, not a partial text preview.
         if (MOLECULAR_EXTENSIONS.has(extension)) {
+          const cube = extension === 'cube' || extension === 'cub';
+          const maxBytes = cube ? MAX_CUBE_PREVIEW_BYTES : MAX_MOLECULAR_PREVIEW_BYTES;
+          const chunkBytes = cube ? CUBE_CHUNK_BYTES : MOLECULAR_CHUNK_BYTES;
+          const cubeReason = cube ? cubeDownloadReason(file.content) : null;
+          if (cubeReason) {
+            if (!cancelled) {
+              setDownloadOnly(true);
+              setDownloadReason(cubeReason);
+            }
+            return;
+          }
           while (!cancelled) {
             if (
-              file.size > MAX_MOLECULAR_PREVIEW_BYTES ||
-              (file.truncated && file.nextOffset >= MAX_MOLECULAR_PREVIEW_BYTES)
+              file.size > maxBytes ||
+              (file.truncated && file.nextOffset >= maxBytes)
             ) {
-              if (!cancelled) setDownloadOnly(true);
+              if (!cancelled) {
+                setDownloadOnly(true);
+                setDownloadReason(cube ? 'volumetricPreviewTooLarge' : 'moleculePreviewTooLarge');
+              }
               return;
             }
             if (!file.truncated) break;
@@ -131,10 +175,7 @@ export function useWorkspaceFilePreview({
               ...identity,
               path: currentPath,
               offset: file.nextOffset,
-              limit: Math.min(
-                256 * 1024,
-                MAX_MOLECULAR_PREVIEW_BYTES - file.nextOffset,
-              ),
+              limit: Math.min(chunkBytes, maxBytes - file.nextOffset),
             });
             if (chunk.nextOffset <= file.nextOffset) {
               throw new Error(

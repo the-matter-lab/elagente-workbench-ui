@@ -32,10 +32,13 @@ import {
   useLongPress,
   useMenuKeyboard,
   useTabScrollEdges
-} from "./chunk-SM26PRC3.js";
+} from "./chunk-TGOMPZN3.js";
 import {
-  GraphMoleculeViewer
-} from "./chunk-NQIOS3XP.js";
+  CubeFormatError,
+  GraphMoleculeViewer,
+  MAX_CUBE_GRID_POINTS,
+  readCubeHeader
+} from "./chunk-4LKG7AHE.js";
 import "./chunk-R24MQJGW.js";
 import {
   DRAWIO_MAX_BYTES,
@@ -43,7 +46,7 @@ import {
   isBinaryPreview,
   isDownloadOnlyPath,
   isDrawioPath
-} from "./chunk-4LB7J3FW.js";
+} from "./chunk-GDHBMA5R.js";
 import {
   IMAGE_EXTENSIONS,
   MOLECULAR_EXTENSIONS,
@@ -67,13 +70,13 @@ import {
   useThemeFeature,
   workspaceRelativeFocusPath,
   workspaceTreeNodeToGraphNode
-} from "./chunk-LPTBJWOL.js";
+} from "./chunk-JCISROGI.js";
 import {
   en,
   getLocale,
   translate,
   useI18n
-} from "./chunk-S2ZDXRUN.js";
+} from "./chunk-4KSR34W7.js";
 
 // src/components/ThreadGraphWorkspacePanel.tsx
 import { memo as memo2, useEffect as useEffect12, useMemo as useMemo9, useState as useState11 } from "react";
@@ -1939,6 +1942,22 @@ function WorkspaceTrashDialog({
 import { useLayoutEffect, useRef as useRef3, useState as useState3 } from "react";
 var PREVIEW_CHUNK_BYTES = 24e3;
 var MAX_MOLECULAR_PREVIEW_BYTES = 10 * 1024 * 1024;
+var MOLECULAR_CHUNK_BYTES = 256 * 1024;
+var MAX_CUBE_PREVIEW_BYTES = 20 * 1024 * 1024;
+var CUBE_CHUNK_BYTES = 2 * 1024 * 1024;
+function cubeDownloadReason(content) {
+  try {
+    const header = readCubeHeader(content);
+    if (!header) return null;
+    if (header.pointCount > MAX_CUBE_GRID_POINTS) return "volumetricGridTooLarge";
+    if (header.orbitalIndices.length > 1) return "volumetricMultipleOrbitals";
+    return null;
+  } catch (error) {
+    if (error instanceof CubeFormatError && error.code === "multipleOrbitals")
+      return "volumetricMultipleOrbitals";
+    return null;
+  }
+}
 function useWorkspaceFilePreview({
   activeNode,
   adapter,
@@ -2026,9 +2045,23 @@ function useWorkspaceFilePreview({
           limit: isDrawioPath(currentPath) ? DRAWIO_MAX_BYTES : PREVIEW_CHUNK_BYTES
         });
         if (MOLECULAR_EXTENSIONS.has(extension)) {
+          const cube = extension === "cube" || extension === "cub";
+          const maxBytes = cube ? MAX_CUBE_PREVIEW_BYTES : MAX_MOLECULAR_PREVIEW_BYTES;
+          const chunkBytes = cube ? CUBE_CHUNK_BYTES : MOLECULAR_CHUNK_BYTES;
+          const cubeReason = cube ? cubeDownloadReason(file.content) : null;
+          if (cubeReason) {
+            if (!cancelled) {
+              setDownloadOnly(true);
+              setDownloadReason(cubeReason);
+            }
+            return;
+          }
           while (!cancelled) {
-            if (file.size > MAX_MOLECULAR_PREVIEW_BYTES || file.truncated && file.nextOffset >= MAX_MOLECULAR_PREVIEW_BYTES) {
-              if (!cancelled) setDownloadOnly(true);
+            if (file.size > maxBytes || file.truncated && file.nextOffset >= maxBytes) {
+              if (!cancelled) {
+                setDownloadOnly(true);
+                setDownloadReason(cube ? "volumetricPreviewTooLarge" : "moleculePreviewTooLarge");
+              }
               return;
             }
             if (!file.truncated) break;
@@ -2036,10 +2069,7 @@ function useWorkspaceFilePreview({
               ...identity,
               path: currentPath,
               offset: file.nextOffset,
-              limit: Math.min(
-                256 * 1024,
-                MAX_MOLECULAR_PREVIEW_BYTES - file.nextOffset
-              )
+              limit: Math.min(chunkBytes, maxBytes - file.nextOffset)
             });
             if (chunk.nextOffset <= file.nextOffset) {
               throw new Error(
@@ -4080,7 +4110,7 @@ function WorkspaceFileTabs({
 // src/components/graph-workspace/GraphWorkspacePreviewPane.tsx
 import { Fragment as Fragment6, jsx as jsx12, jsxs as jsxs10 } from "react/jsx-runtime";
 var GraphWorkspaceMonacoEditor = lazy(
-  () => import("./GraphWorkspaceMonacoEditor-UNLIUZZI.js")
+  () => import("./GraphWorkspaceMonacoEditor-OCNYHMOB.js")
 );
 var isHostFilePath = (path) => path.startsWith("/") || /^[a-z]:[\\/]/i.test(path);
 function fileSizeLabel(size) {
@@ -4179,7 +4209,7 @@ function translateReadOnly(reason) {
   const key = `files.safeReason.${reason}`;
   return Object.hasOwn(en, key) ? translate(key) : reason;
 }
-var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-LBMIVAET.js"));
+var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-N7YOHCUU.js"));
 var SMALL_TEXT_FILE_MAX_BYTES = 50 * 1024;
 var SMALL_TEXT_FILE_MAX_LINES = 1e3;
 var MARKDOWN_EXTENSIONS = /* @__PURE__ */ new Set(["md", "markdown"]);

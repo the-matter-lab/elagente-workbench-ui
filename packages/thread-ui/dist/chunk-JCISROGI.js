@@ -1,6 +1,6 @@
 import {
   translate
-} from "./chunk-S2ZDXRUN.js";
+} from "./chunk-4KSR34W7.js";
 
 // src/components/themeHooks.ts
 import { useSyncExternalStore } from "react";
@@ -130,7 +130,10 @@ var MOLECULAR_EXTENSIONS = /* @__PURE__ */ new Set([
   "cif",
   "pdb",
   "sdf",
-  "mol"
+  "mol",
+  // Gaussian cube volumetric grids (orbitals, densities, potentials).
+  "cube",
+  "cub"
 ]);
 var IMAGE_EXTENSIONS = /* @__PURE__ */ new Set([
   "png",
@@ -234,7 +237,7 @@ function buildMoleculePreviewSnapshot(file) {
   return {
     content: [file.content.endsWith("\n") ? file.content : `${file.content}
 `],
-    format: extension === "extxyz" ? "xyz" : extension,
+    format: extension === "extxyz" ? "xyz" : extension === "cub" ? "cube" : extension,
     name: file.name,
     uuid: file.path
   };
