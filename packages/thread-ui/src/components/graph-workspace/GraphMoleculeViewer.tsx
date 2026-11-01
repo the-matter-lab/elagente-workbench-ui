@@ -54,7 +54,20 @@ import type {
   RenderModel,
   RenderViewer,
 } from './GraphMoleculeViewerRenderTypes';
-import { load3Dmol, type GLViewer } from './load3Dmol';
+import { load3Dmol, type GLViewer, type ThreeDmolApi } from './load3Dmol';
+import { translate, useI18n } from '../../i18n';
+import {
+  CUBE_NEGATIVE_COLOR,
+  CUBE_POSITIVE_COLOR,
+  CubeFormatError,
+  DEFAULT_CUBE_ISOVALUE,
+  DEFAULT_CUBE_OPACITY,
+  assertCubeDrawable,
+  assertCubeValues,
+  cubeAtomSection,
+  parseCubeHeader,
+  type CubeHeader,
+} from './GraphMoleculeCube';
 import { Button } from '../graph-ui/Button';
 import {
   readGraphMoleculeViewerData,
@@ -170,8 +183,11 @@ export function GraphMoleculeViewer({
   loading = false,
   followControl = false,
 }: GraphMoleculeViewerProps) {
+  // Re-render translated cube labels when the language changes.
+  useI18n();
   const viewerHostRef = useRef<HTMLDivElement | null>(null);
   const viewerRef = useRef<RenderViewer | null>(null);
+  const apiRef = useRef<ThreeDmolApi | null>(null);
   const modelRef = useRef<RenderModel | null>(null);
   const [viewerReady, setViewerReady] = useState(false);
   const loadingRef = useRef(loading);
@@ -261,6 +277,13 @@ export function GraphMoleculeViewer({
     [],
   );
   const [atomCount, setAtomCount] = useState(0);
+  const [isovalue, setIsovalue] = useState(DEFAULT_CUBE_ISOVALUE);
+  const [isoOpacity, setIsoOpacity] = useState(DEFAULT_CUBE_OPACITY);
+  // Isosurface shapes of the rendered cube, and the parsed grid they share.
+  const isoShapesRef = useRef<object[]>([]);
+  const isoDrawRef = useRef('');
+  const modelGenerationRef = useRef(0);
+  const volumeRef = useRef<{ content: string; volume: unknown } | null>(null);
 
   const viewerData = useMemo(
     () => readGraphMoleculeViewerData(source),
@@ -275,6 +298,15 @@ export function GraphMoleculeViewer({
     ? Math.max(0, xyzArray.length - 1)
     : Math.min(requestedIndex, Math.max(0, xyzArray.length - 1));
   const xyzContent = xyzArray[currentIndex] ?? null;
+  const isCube = xyzFormat === 'cube';
+  const cube = useMemo((): { header?: CubeHeader; error?: unknown } => {
+    if (!isCube || !xyzContent) return {};
+    try {
+      return { header: parseCubeHeader(xyzContent) };
+    } catch (error) {
+      return { error };
+    }
+  }, [isCube, xyzContent]);
   const snapshot = typeof source === 'object' && source ? source : undefined;
   const target = frameTarget(snapshot, currentIndex, xyzArray.length);
   const currentFrameRef = useRef('');
@@ -392,6 +424,43 @@ export function GraphMoleculeViewer({
       viewer.addUnitCell(model, {
         box: { color: dark ? '#a7b0b7' : '#5b6269' },
       });
+  }
+  /** Draws the +/- isosurfaces of the rendered cube; false when unchanged. */
+  function drawIsosurfaces() {
+    const viewer = viewerRef.current;
+    if (!viewer || !isCube || !xyzContent || !modelRef.current) return false;
+    const key = JSON.stringify([
+      modelGenerationRef.current,
+      isovalue,
+      isoOpacity,
+    ]);
+    if (isoDrawRef.current === key) return false;
+    isoShapesRef.current.forEach((shape) => viewer.removeShape(shape));
+    isoShapesRef.current = [];
+    isoDrawRef.current = '';
+    const VolumeData = apiRef.current?.VolumeData;
+    if (!VolumeData || !viewer.addIsosurface)
+      throw new Error(translate('files.cubeRuntimeUnavailable'));
+    if (volumeRef.current?.content !== xyzContent)
+      volumeRef.current = {
+        content: xyzContent,
+        volume: new VolumeData(xyzContent, 'cube'),
+      };
+    const volume = volumeRef.current.volume;
+    isoShapesRef.current = [
+      viewer.addIsosurface(volume, {
+        isoval: isovalue,
+        color: CUBE_POSITIVE_COLOR,
+        opacity: isoOpacity,
+      }),
+      viewer.addIsosurface(volume, {
+        isoval: -isovalue,
+        color: CUBE_NEGATIVE_COLOR,
+        opacity: isoOpacity,
+      }),
+    ];
+    isoDrawRef.current = key;
+    return true;
   }
   function applyStyle(next: ViewerStyle, indices = selectedSerials) {
     const viewer = viewerRef.current,
@@ -708,6 +777,8 @@ export function GraphMoleculeViewer({
       setMeasureTool(null);
       setSelectedSerials([]);
       setStyle(snapshot?.metadata?.render?.style ?? 'ball-stick');
+      setIsovalue(DEFAULT_CUBE_ISOVALUE);
+      setIsoOpacity(DEFAULT_CUBE_OPACITY);
     }
   }, [activeObject]);
   const stagedAtoms = Object.values(stagedSelections).reduce(
@@ -785,6 +856,7 @@ export function GraphMoleculeViewer({
         try {
           const managed = createMoleculeRenderViewer($3Dmol, host);
           const viewer = managed.viewer;
+          apiRef.current = $3Dmol;
           // Trackpad pinch is scaled here, not by 3Dmol's wheel-notch handler.
           const unbindPinch = bindPinchZoom(host, (factor) => viewer.zoom(factor));
           release = () => {
@@ -815,6 +887,9 @@ export function GraphMoleculeViewer({
       release?.();
       viewerRef.current = null;
       modelRef.current = null;
+      volumeRef.current = null;
+      isoShapesRef.current = [];
+      isoDrawRef.current = '';
       renderedReadyRef.current = false;
       commandState.current.ready = false;
       readyHandleRef.current = null;
@@ -835,7 +910,12 @@ export function GraphMoleculeViewer({
       // handle below without rebuilding or drawing the unchanged model.
       if (renderedModelKeyRef.current !== modelDataKey) {
         viewer.removeAllModels();
+        // Also removes the previous cube's isosurfaces.
         viewer.removeAllShapes();
+        modelGenerationRef.current++;
+        isoShapesRef.current = [];
+        isoDrawRef.current = '';
+        if (volumeRef.current?.content !== xyzContent) volumeRef.current = null;
         styledRef.current = '';
         decoratedRef.current = '';
         measurementShapes.current = [];
@@ -846,7 +926,14 @@ export function GraphMoleculeViewer({
         }
 
         setViewerInitError(null);
-        const renderFrame = structureRenderFrame(xyzContent, xyzFormat);
+        if (isCube) {
+          if (cube.error) throw cube.error;
+          assertCubeDrawable(cube.header!);
+          assertCubeValues(xyzContent, cube.header!);
+        }
+        const renderFrame = isCube
+          ? { content: cubeAtomSection(xyzContent, cube.header!), format: 'cube' }
+          : structureRenderFrame(xyzContent, xyzFormat);
         const model = viewer.addModel(renderFrame.content, renderFrame.format, {
           keepH: true,
           doAssembly: false,
@@ -900,13 +987,16 @@ export function GraphMoleculeViewer({
         modelRef.current = model;
         applyStyle(style, remapped);
 
-        const crystalData = model.getCrystData();
+        // 3Dmol reports a cube's grid as crystal data; it is not a unit cell.
+        const crystalData = isCube ? null : model.getCrystData();
         const hasUnitCell = Boolean(
           cellRef.current ||
           (crystalData &&
             typeof crystalData === 'object' &&
             Object.keys(crystalData).length),
         );
+        // Before the initial fit, so the camera frames the lobes too.
+        drawIsosurfaces();
         commandState.current.cellAvailable = hasUnitCell;
         setUnitCellAvailable(hasUnitCell);
         setUnitCellVisible(hasUnitCell ? unitCellPreferenceRef.current : false);
@@ -1063,7 +1153,13 @@ export function GraphMoleculeViewer({
       renderedReadyRef.current = false;
       commandState.current.ready = false;
       console.error('Failed to render molecule:', error);
-      setViewerInitError('Unable to render this molecular structure.');
+      setViewerInitError(
+        error instanceof CubeFormatError
+          ? translate('files.cubeUnreadable', { reason: error.message })
+          : isCube && error instanceof Error
+            ? error.message
+            : 'Unable to render this molecular structure.',
+      );
     }
   }, [
     xyzContent,
@@ -1075,6 +1171,22 @@ export function GraphMoleculeViewer({
     activeObject,
     loading,
   ]);
+
+  useEffect(() => {
+    if (!viewerReady || !isCube) return;
+    // Coalesce slider input: meshing a large grid takes a while.
+    const frame = window.requestAnimationFrame(() => {
+      if (!renderedReadyRef.current) return;
+      try {
+        if (drawIsosurfaces()) viewerRef.current?.render();
+      } catch (error) {
+        setViewerInitError(
+          error instanceof Error ? error.message : String(error),
+        );
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [isovalue, isoOpacity, viewerReady, isCube]);
 
   useEffect(() => {
     if (!viewerReady) return;
@@ -1806,6 +1918,19 @@ export function GraphMoleculeViewer({
                   </span>
                 ))}
                 {atomCount ? ` · ${atomCount} atoms` : ''}
+                {cube.header
+                  ? ` · ${translate('files.cubeGrid', {
+                      grid: cube.header.axes
+                        .map((axis) => axis.points)
+                        .join('×'),
+                    })}${
+                      cube.header.orbitalIndices[0] !== undefined
+                        ? ` · ${translate('files.cubeOrbital', {
+                            index: String(cube.header.orbitalIndices[0]),
+                          })}`
+                        : ''
+                    }`
+                  : ''}
                 {xyzArray.length > 1
                   ? ` · Frame ${currentIndex + 1} / ${xyzArray.length}`
                   : ''}
@@ -2021,7 +2146,11 @@ export function GraphMoleculeViewer({
               </div>
             ) : null}
 
-            <details className="molecule-scientific-actions">
+            {/* Open for cubes: the isosurface controls are the main ones. */}
+            <details
+              className="molecule-scientific-actions"
+              open={isCube || undefined}
+            >
               <summary>
                 Scientific actions
                 {selectedSerials.length
@@ -2098,6 +2227,17 @@ export function GraphMoleculeViewer({
                   stagedMolecules={stagedMolecules}
                   unitCellAvailable={unitCellAvailable}
                   unitCellVisible={unitCellVisible}
+                  isosurface={
+                    isCube && !viewerInitError
+                      ? {
+                          isovalue,
+                          opacity: isoOpacity,
+                          disabled: loading || !viewerReady,
+                          onIsovalueChange: setIsovalue,
+                          onOpacityChange: setIsoOpacity,
+                        }
+                      : undefined
+                  }
                 />
               </div>
             </details>

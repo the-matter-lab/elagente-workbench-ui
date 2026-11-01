@@ -30,6 +30,8 @@ export type RenderViewer = Omit<
   addLine(spec: Record<string, unknown>): object;
   removeShape(shape: object): void;
   removeAllSurfaces(): void;
+  /** 3Dmol 2.x: draws one isosurface of a parsed VolumeData as a shape. */
+  addIsosurface?(data: unknown, spec: Record<string, unknown>): object;
   addSurface(
     type: string,
     style: Record<string, unknown>,

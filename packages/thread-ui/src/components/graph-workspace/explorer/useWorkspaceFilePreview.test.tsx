@@ -6,7 +6,13 @@ import type {
   ThreadWorkspaceAdapter,
   ThreadWorkspaceFilePreview,
 } from '../../../adapters';
-import { useWorkspaceFilePreview } from './useWorkspaceFilePreview';
+import {
+  MAX_CUBE_PREVIEW_BYTES,
+  MAX_MOLECULAR_PREVIEW_BYTES,
+  useWorkspaceFilePreview,
+} from './useWorkspaceFilePreview';
+import { syntheticCube } from '../GraphMoleculeCubeFixtures';
+import { buildMoleculePreviewSnapshot } from '../workspaceTree';
 
 function preview(
   path = 'notes.txt',
@@ -130,5 +136,70 @@ describe('workspace preview recovery', () => {
     expect(onError).toHaveBeenLastCalledWith(
       expect.stringContaining('made no progress'),
     );
+  });
+});
+
+describe('cube previews', () => {
+  // Serves `text` in the requested ranges, reporting `size` as the file size.
+  function serve(text: string, size = text.length) {
+    return vi.fn(async ({ path, offset = 0, limit = 24_000 }: { path: string; offset?: number; limit?: number }) => {
+      const end = Math.min(text.length, offset + limit);
+      return preview(path, {
+        content: text.slice(offset, end),
+        language: 'cube',
+        size,
+        truncated: end < size,
+        nextOffset: end,
+      });
+    });
+  }
+
+  it('reads a whole cube in 2 MiB chunks and opens it in the molecule viewer', async () => {
+    const cube = syntheticCube({ points: 20 });
+    // Pad to a size between the molecular and cube caps.
+    const padded = cube + ' '.repeat(MAX_MOLECULAR_PREVIEW_BYTES + 1024 - cube.length);
+    adapter.readFile = serve(padded);
+    await render('one', 'orbitals/homo.cub');
+    expect(result.downloadOnly).toBe(false);
+    expect(result.previewFile?.content).toBe(padded);
+    const limits = vi.mocked(adapter.readFile).mock.calls.map(([request]) => request.limit);
+    expect(limits[0]).toBe(24_000);
+    expect(limits.slice(1, -1).every((limit) => limit === 2 * 1024 * 1024)).toBe(true);
+    expect(limits).toHaveLength(1 + Math.ceil((padded.length - 24_000) / (2 * 1024 * 1024)));
+    expect(buildMoleculePreviewSnapshot(result.previewFile)).toMatchObject({
+      format: 'cube',
+      uuid: 'orbitals/homo.cub',
+    });
+  });
+
+  it('offers a cube above 20 MiB as a download with the reason', async () => {
+    const cube = syntheticCube({ points: 20 });
+    adapter.readFile = serve(cube, MAX_CUBE_PREVIEW_BYTES + 1);
+    await render('one', 'homo.cube');
+    expect(result.downloadOnly).toBe(true);
+    expect(result.downloadReason).toBe('volumetricPreviewTooLarge');
+    expect(adapter.readFile).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the 10 MiB cap for other molecular formats', async () => {
+    adapter.readFile = serve('1\nH\nH 0 0 0\n', MAX_MOLECULAR_PREVIEW_BYTES + 1);
+    await render('one', 'big.xyz');
+    expect(result.downloadOnly).toBe(true);
+    expect(result.downloadReason).toBe('moleculePreviewTooLarge');
+  });
+
+  it('rejects a grid above 200³ points from the first chunk, before reading the rest', async () => {
+    const huge = syntheticCube({ points: 2 }).replace(/^( {4})2/gm, '  201');
+    adapter.readFile = serve(huge, 15 * 1024 * 1024);
+    await render('one', 'huge.cube');
+    expect(result.downloadOnly).toBe(true);
+    expect(result.downloadReason).toBe('volumetricGridTooLarge');
+    expect(adapter.readFile).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a multi-orbital cube from the first chunk', async () => {
+    adapter.readFile = serve(syntheticCube({ points: 4, orbitals: [5, 6] }));
+    await render('one', 'orbitals.cube');
+    expect(result.downloadReason).toBe('volumetricMultipleOrbitals');
   });
 });

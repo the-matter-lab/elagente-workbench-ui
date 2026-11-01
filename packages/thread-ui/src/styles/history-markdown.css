@@ -503,6 +503,24 @@
   display: flex; justify-content: space-between; color: var(--theme-fg-muted); font-size: 0.625rem; font-variant-numeric: tabular-nums;
 }
 
+.thread-ui-shell .thread-graph-molecule-isosurface {
+  display: grid; gap: 0.25rem; border: 1px solid var(--theme-border); border-radius: 0.5rem; padding: 0.5rem 0.625rem;
+  font-size: 0.75rem;
+}
+.thread-ui-shell .thread-graph-molecule-isosurface > label {
+  display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) 4rem; align-items: center; gap: 0.5rem;
+  color: var(--theme-fg-muted);
+}
+.thread-ui-shell .thread-graph-molecule-isosurface .thread-graph-molecule-scrubber { margin: 0; }
+.thread-ui-shell .thread-graph-molecule-isosurface output {
+  color: var(--theme-fg); font-variant-numeric: tabular-nums; text-align: right;
+}
+.thread-ui-shell .thread-graph-molecule-isosurface-legend {
+  display: flex; gap: 0.75rem; color: var(--theme-fg-muted); font-size: 0.6875rem; font-variant-numeric: tabular-nums;
+}
+.thread-ui-shell .thread-graph-molecule-isosurface-legend span { display: inline-flex; align-items: center; gap: 0.25rem; }
+.thread-ui-shell .thread-graph-molecule-isosurface-legend i { width: 0.625rem; height: 0.625rem; border-radius: 50%; }
+
 .thread-ui-shell .thread-graph-molecule-camera {
   margin-top: 0.75rem;
   border: 1px solid var(--theme-border);

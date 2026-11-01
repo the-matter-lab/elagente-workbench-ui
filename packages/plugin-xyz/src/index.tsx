@@ -30,7 +30,7 @@ export interface InlineStructureSource {
 export interface StructureAsset {
   url: string;
   checksum: string;
-  format: 'xyz' | 'extxyz' | 'cif' | 'pdb' | 'sdf' | 'mol';
+  format: 'xyz' | 'extxyz' | 'cif' | 'pdb' | 'sdf' | 'mol' | 'cube' | 'cub';
   name: string;
   artifactId?: string;
   metadata?: ArtifactMetadata & { inlineSource?: InlineStructureSource };
@@ -498,7 +498,7 @@ export const xyzPlugin: FrontendPluginModule = {
         {
           type: 'chem.structure',
           title: 'Molecular structure',
-          fileExtensions: ['xyz', 'extxyz', 'cif', 'pdb', 'sdf', 'mol'],
+          fileExtensions: ['xyz', 'extxyz', 'cif', 'pdb', 'sdf', 'mol', 'cube', 'cub'],
         },
       ],
       timelineRenderers: ['chem.structure'],
