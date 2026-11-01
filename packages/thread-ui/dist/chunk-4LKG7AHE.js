@@ -6,8 +6,9 @@ import {
   cn
 } from "./chunk-R24MQJGW.js";
 import {
-  translate
-} from "./chunk-S2ZDXRUN.js";
+  translate,
+  useI18n
+} from "./chunk-4KSR34W7.js";
 
 // src/components/graph-workspace/GraphMoleculeViewer.tsx
 import {
@@ -334,6 +335,150 @@ import {
   Trash2
 } from "lucide-react";
 
+// src/components/graph-workspace/GraphMoleculeCube.ts
+var MAX_CUBE_GRID_POINTS = 200 ** 3;
+var DEFAULT_CUBE_ISOVALUE = 0.02;
+var DEFAULT_CUBE_OPACITY = 0.85;
+var CUBE_ISOVALUE_MIN = 1e-4;
+var CUBE_ISOVALUE_MAX = 1;
+var CUBE_POSITIVE_COLOR = "#2f6fd6";
+var CUBE_NEGATIVE_COLOR = "#d6453d";
+var CubeFormatError = class extends Error {
+  constructor(message, code = "invalid") {
+    super(message);
+    this.code = code;
+    this.name = "CubeFormatError";
+  }
+  code;
+};
+var INTEGER = /^[+-]?\d+$/;
+function numbers(line, count, what) {
+  const tokens = line.trim().split(/\s+/);
+  if (tokens.length < count)
+    throw new CubeFormatError(`Invalid cube ${what} line`);
+  const values = tokens.slice(0, count).map(Number);
+  if (values.some((value) => !Number.isFinite(value)))
+    throw new CubeFormatError(`Invalid cube ${what} line`);
+  return { tokens, values };
+}
+function integer(token, what) {
+  if (!token || !INTEGER.test(token))
+    throw new CubeFormatError(`Invalid cube ${what}`);
+  return Number(token);
+}
+function readCubeHeader(text) {
+  const pattern = /([^\r\n]*)(\r\n|\n|\r)/g;
+  const lines = [];
+  let offset = 0;
+  const next = () => {
+    const match = pattern.exec(text);
+    if (!match) return null;
+    offset = pattern.lastIndex;
+    lines.push(match[1]);
+    return match[1];
+  };
+  for (let index = 0; index < 6; index++) if (next() === null) return null;
+  const [count, ...originTokens] = lines[2].trim().split(/\s+/);
+  const signedAtoms = integer(count, "atom count");
+  if (signedAtoms === 0) throw new CubeFormatError("Cube has no atoms");
+  const atomCount = Math.abs(signedAtoms);
+  const origin = numbers(originTokens.join(" "), 3, "origin").values;
+  const axes = [3, 4, 5].map((line) => {
+    const { tokens, values } = numbers(lines[line], 4, "axis");
+    const points = integer(tokens[0], "axis point count");
+    if (points === 0) throw new CubeFormatError("Cube axis has no points");
+    return { points, step: values.slice(1, 4) };
+  });
+  for (let index = 0; index < atomCount; index++) {
+    const line = next();
+    if (line === null) return null;
+    numbers(line, 5, "atom");
+  }
+  let orbitalIndices = [];
+  if (signedAtoms < 0) {
+    const line = next();
+    if (line === null) return null;
+    const tokens = line.trim().split(/\s+/);
+    const orbitals = integer(tokens[0], "orbital count");
+    if (orbitals < 1) throw new CubeFormatError("Invalid cube orbital count");
+    orbitalIndices = tokens.slice(1, orbitals + 1).map((token) => integer(token, "orbital index"));
+    if (orbitalIndices.length !== orbitals)
+      throw new CubeFormatError(
+        orbitals > 1 ? "Cubes with more than one orbital are not supported" : "Invalid cube orbital line",
+        orbitals > 1 ? "multipleOrbitals" : "invalid"
+      );
+  }
+  const pointCount = axes.reduce((total, axis) => total * Math.abs(axis.points), 1);
+  return {
+    comments: [lines[0], lines[1]],
+    atomCount,
+    orbital: signedAtoms < 0,
+    orbitalIndices,
+    origin,
+    axes: axes.map((axis) => ({
+      points: Math.abs(axis.points),
+      step: axis.step
+    })),
+    unit: axes[0].points > 0 ? "bohr" : "angstrom",
+    pointCount,
+    headerLineCount: lines.length,
+    headerLength: offset
+  };
+}
+function parseCubeHeader(text) {
+  const header = readCubeHeader(text.endsWith("\n") || text.endsWith("\r") ? text : `${text}
+`);
+  if (!header) throw new CubeFormatError("Incomplete cube header", "incomplete");
+  return header;
+}
+function assertCubeDrawable(header) {
+  if (header.pointCount > MAX_CUBE_GRID_POINTS)
+    throw new CubeFormatError(
+      `Cube grid has ${header.axes.map((axis) => axis.points).join(" \xD7 ")} points, more than the 200\xB3 preview limit`,
+      "gridTooLarge"
+    );
+  if (header.orbitalIndices.length > 1)
+    throw new CubeFormatError(
+      "Cubes with more than one orbital are not supported",
+      "multipleOrbitals"
+    );
+}
+function cubeValueCount(text, header) {
+  let count = 0;
+  let inToken = false;
+  for (let index = header.headerLength; index < text.length; index++) {
+    const code = text.charCodeAt(index);
+    const space = code === 32 || code === 9 || code === 10 || code === 13;
+    if (!space && !inToken) count++;
+    inToken = !space;
+  }
+  return count;
+}
+function assertCubeValues(text, header) {
+  const expected = header.pointCount * Math.max(1, header.orbitalIndices.length);
+  const found = cubeValueCount(text, header);
+  if (found !== expected)
+    throw new CubeFormatError(
+      `Cube has ${found} grid values; its header declares ${expected}`,
+      "valueCount"
+    );
+}
+function cubeAtomSection(text, header) {
+  return text.slice(0, header.headerLength);
+}
+var CUBE_ISOVALUE_STEPS = 1e3;
+function isovalueFromSlider(position) {
+  const ratio = Math.min(1, Math.max(0, position / CUBE_ISOVALUE_STEPS));
+  const value = CUBE_ISOVALUE_MIN * (CUBE_ISOVALUE_MAX / CUBE_ISOVALUE_MIN) ** ratio;
+  return Number(value.toPrecision(3));
+}
+function sliderFromIsovalue(value) {
+  const clamped = Math.min(CUBE_ISOVALUE_MAX, Math.max(CUBE_ISOVALUE_MIN, value));
+  return Math.round(
+    Math.log(clamped / CUBE_ISOVALUE_MIN) / Math.log(CUBE_ISOVALUE_MAX / CUBE_ISOVALUE_MIN) * CUBE_ISOVALUE_STEPS
+  );
+}
+
 // src/components/graph-ui/ButtonGroup.tsx
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
@@ -461,6 +606,88 @@ function GraphMoleculeButtonGroup({
 
 // src/components/graph-workspace/GraphMoleculeViewerLowerButtonGroup.tsx
 import { Fragment, jsx as jsx4, jsxs as jsxs2 } from "react/jsx-runtime";
+function formatIsovalue(value) {
+  return value >= 1e-3 ? String(Number(value.toPrecision(3))) : value.toExponential(1);
+}
+function fill(fraction) {
+  return { backgroundSize: `${Math.min(1, Math.max(0, fraction)) * 100}% 6px` };
+}
+function IsosurfaceControls({
+  isovalue,
+  opacity,
+  disabled = false,
+  onIsovalueChange,
+  onOpacityChange
+}) {
+  const { t } = useI18n();
+  const value = formatIsovalue(isovalue);
+  return /* @__PURE__ */ jsxs2(
+    "div",
+    {
+      className: "thread-graph-molecule-isosurface",
+      role: "group",
+      "aria-label": t("files.isosurface"),
+      children: [
+        /* @__PURE__ */ jsxs2("label", { children: [
+          /* @__PURE__ */ jsx4("span", { children: t("files.isovalue") }),
+          /* @__PURE__ */ jsx4(
+            "input",
+            {
+              type: "range",
+              className: "thread-graph-molecule-scrubber",
+              "aria-label": t("files.isovalue"),
+              "aria-valuetext": `\xB1${value}`,
+              min: 0,
+              max: CUBE_ISOVALUE_STEPS,
+              step: 1,
+              value: sliderFromIsovalue(isovalue),
+              style: fill(sliderFromIsovalue(isovalue) / CUBE_ISOVALUE_STEPS),
+              disabled,
+              onChange: (event) => onIsovalueChange(isovalueFromSlider(Number(event.target.value)))
+            }
+          ),
+          /* @__PURE__ */ jsxs2("output", { children: [
+            "\xB1",
+            value
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs2("label", { children: [
+          /* @__PURE__ */ jsx4("span", { children: t("files.isosurfaceOpacity") }),
+          /* @__PURE__ */ jsx4(
+            "input",
+            {
+              type: "range",
+              className: "thread-graph-molecule-scrubber",
+              "aria-label": t("files.isosurfaceOpacity"),
+              "aria-valuetext": `${Math.round(opacity * 100)}%`,
+              min: 10,
+              max: 100,
+              step: 5,
+              value: Math.round(opacity * 100),
+              style: fill((opacity * 100 - 10) / 90),
+              disabled,
+              onChange: (event) => onOpacityChange(Number(event.target.value) / 100)
+            }
+          ),
+          /* @__PURE__ */ jsxs2("output", { children: [
+            Math.round(opacity * 100),
+            "%"
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs2("div", { className: "thread-graph-molecule-isosurface-legend", "aria-hidden": "true", children: [
+          /* @__PURE__ */ jsxs2("span", { children: [
+            /* @__PURE__ */ jsx4("i", { style: { background: CUBE_POSITIVE_COLOR } }),
+            t("files.isosurfacePositive", { value })
+          ] }),
+          /* @__PURE__ */ jsxs2("span", { children: [
+            /* @__PURE__ */ jsx4("i", { style: { background: CUBE_NEGATIVE_COLOR } }),
+            t("files.isosurfaceNegative", { value })
+          ] })
+        ] })
+      ]
+    }
+  );
+}
 function GraphMoleculeViewerLowerButtonGroup({
   cameraInfo,
   canSubmit = false,
@@ -475,11 +702,13 @@ function GraphMoleculeViewerLowerButtonGroup({
   stagedAtoms,
   stagedMolecules,
   unitCellAvailable,
-  unitCellVisible
+  unitCellVisible,
+  isosurface
 }) {
   const hasSelection = selectedSerials.length > 0;
   const hasStaged = stagedAtoms > 0;
   return /* @__PURE__ */ jsxs2(Fragment, { children: [
+    isosurface ? /* @__PURE__ */ jsx4(IsosurfaceControls, { ...isosurface }) : null,
     /* @__PURE__ */ jsx4("div", { className: "thread-graph-molecule-lower-toolbar flex w-full shrink-0 flex-wrap justify-between gap-2", children: /* @__PURE__ */ jsxs2(GraphMoleculeButtonGroup, { children: [
       /* @__PURE__ */ jsx4(
         GraphMoleculeIconButton,
@@ -1070,8 +1299,9 @@ function splitXyzTrajectory(content) {
 }
 function readGraphMoleculeViewerData(source) {
   if (!source) return { format: "xyz", frames: [], exportContent: "" };
-  const format = typeof source === "string" ? "xyz" : source.format?.trim().toLowerCase() || "xyz";
-  if (!["xyz", "extxyz", "cif", "pdb", "sdf", "mol"].includes(format))
+  const declared = typeof source === "string" ? "xyz" : source.format?.trim().toLowerCase() || "xyz";
+  const format = declared === "cub" ? "cube" : declared;
+  if (!["xyz", "extxyz", "cif", "pdb", "sdf", "mol", "cube"].includes(format))
     throw new Error(`Unsupported structure format: ${format}`);
   const content = typeof source === "string" ? [source] : source.content;
   const xyz = format === "xyz" || format === "extxyz";
@@ -1079,6 +1309,9 @@ function readGraphMoleculeViewerData(source) {
     return { frames: content, format, exportContent: content.join("") };
   const frames = xyz ? content.flatMap(splitXyzTrajectory) : format === "sdf" ? content.flatMap(
     (text) => text.match(/[\s\S]*?\$\$\$\$(?:\r\n|\n|\r|$)|[\s\S]+$/g)?.filter((text2) => text2.trim()) ?? []
+  ) : format === "cube" ? (
+    // One grid per file: the whole text is the single frame.
+    [content.join("")].filter((text) => text.trim())
   ) : content.filter((text) => text.trim());
   return { frames, format, exportContent: content.join("") };
 }
@@ -1225,8 +1458,10 @@ function GraphMoleculeViewer({
   loading = false,
   followControl = false
 }) {
+  useI18n();
   const viewerHostRef = useRef2(null);
   const viewerRef = useRef2(null);
+  const apiRef = useRef2(null);
   const modelRef = useRef2(null);
   const [viewerReady, setViewerReady] = useState2(false);
   const loadingRef = useRef2(loading);
@@ -1301,6 +1536,12 @@ function GraphMoleculeViewer({
     []
   );
   const [atomCount, setAtomCount] = useState2(0);
+  const [isovalue, setIsovalue] = useState2(DEFAULT_CUBE_ISOVALUE);
+  const [isoOpacity, setIsoOpacity] = useState2(DEFAULT_CUBE_OPACITY);
+  const isoShapesRef = useRef2([]);
+  const isoDrawRef = useRef2("");
+  const modelGenerationRef = useRef2(0);
+  const volumeRef = useRef2(null);
   const viewerData = useMemo(
     () => readGraphMoleculeViewerData(source),
     [source]
@@ -1309,6 +1550,15 @@ function GraphMoleculeViewer({
   const xyzFormat = viewerData.format;
   const currentIndex = live ? Math.max(0, xyzArray.length - 1) : Math.min(requestedIndex, Math.max(0, xyzArray.length - 1));
   const xyzContent = xyzArray[currentIndex] ?? null;
+  const isCube = xyzFormat === "cube";
+  const cube = useMemo(() => {
+    if (!isCube || !xyzContent) return {};
+    try {
+      return { header: parseCubeHeader(xyzContent) };
+    } catch (error) {
+      return { error };
+    }
+  }, [isCube, xyzContent]);
   const snapshot = typeof source === "object" && source ? source : void 0;
   const target = frameTarget(snapshot, currentIndex, xyzArray.length);
   const currentFrameRef = useRef2("");
@@ -1416,6 +1666,42 @@ function GraphMoleculeViewer({
       viewer.addUnitCell(model, {
         box: { color: dark ? "#a7b0b7" : "#5b6269" }
       });
+  }
+  function drawIsosurfaces() {
+    const viewer = viewerRef.current;
+    if (!viewer || !isCube || !xyzContent || !modelRef.current) return false;
+    const key = JSON.stringify([
+      modelGenerationRef.current,
+      isovalue,
+      isoOpacity
+    ]);
+    if (isoDrawRef.current === key) return false;
+    isoShapesRef.current.forEach((shape) => viewer.removeShape(shape));
+    isoShapesRef.current = [];
+    isoDrawRef.current = "";
+    const VolumeData = apiRef.current?.VolumeData;
+    if (!VolumeData || !viewer.addIsosurface)
+      throw new Error(translate("files.cubeRuntimeUnavailable"));
+    if (volumeRef.current?.content !== xyzContent)
+      volumeRef.current = {
+        content: xyzContent,
+        volume: new VolumeData(xyzContent, "cube")
+      };
+    const volume = volumeRef.current.volume;
+    isoShapesRef.current = [
+      viewer.addIsosurface(volume, {
+        isoval: isovalue,
+        color: CUBE_POSITIVE_COLOR,
+        opacity: isoOpacity
+      }),
+      viewer.addIsosurface(volume, {
+        isoval: -isovalue,
+        color: CUBE_NEGATIVE_COLOR,
+        opacity: isoOpacity
+      })
+    ];
+    isoDrawRef.current = key;
+    return true;
   }
   function applyStyle(next, indices = selectedSerials) {
     const viewer = viewerRef.current, model = modelRef.current;
@@ -1683,6 +1969,8 @@ function GraphMoleculeViewer({
       setMeasureTool(null);
       setSelectedSerials([]);
       setStyle(snapshot?.metadata?.render?.style ?? "ball-stick");
+      setIsovalue(DEFAULT_CUBE_ISOVALUE);
+      setIsoOpacity(DEFAULT_CUBE_OPACITY);
     }
   }, [activeObject]);
   const stagedAtoms = Object.values(stagedSelections).reduce(
@@ -1745,6 +2033,7 @@ function GraphMoleculeViewer({
       try {
         const managed = createMoleculeRenderViewer($3Dmol, host);
         const viewer = managed.viewer;
+        apiRef.current = $3Dmol;
         const unbindPinch = bindPinchZoom(host, (factor) => viewer.zoom(factor));
         release = () => {
           unbindPinch();
@@ -1769,6 +2058,9 @@ function GraphMoleculeViewer({
       release?.();
       viewerRef.current = null;
       modelRef.current = null;
+      volumeRef.current = null;
+      isoShapesRef.current = [];
+      isoDrawRef.current = "";
       renderedReadyRef.current = false;
       commandState.current.ready = false;
       readyHandleRef.current = null;
@@ -1785,6 +2077,10 @@ function GraphMoleculeViewer({
       if (renderedModelKeyRef.current !== modelDataKey) {
         viewer.removeAllModels();
         viewer.removeAllShapes();
+        modelGenerationRef.current++;
+        isoShapesRef.current = [];
+        isoDrawRef.current = "";
+        if (volumeRef.current?.content !== xyzContent) volumeRef.current = null;
         styledRef.current = "";
         decoratedRef.current = "";
         measurementShapes.current = [];
@@ -1794,7 +2090,12 @@ function GraphMoleculeViewer({
           labelsActiveRef.current = false;
         }
         setViewerInitError(null);
-        const renderFrame = structureRenderFrame(xyzContent, xyzFormat);
+        if (isCube) {
+          if (cube.error) throw cube.error;
+          assertCubeDrawable(cube.header);
+          assertCubeValues(xyzContent, cube.header);
+        }
+        const renderFrame = isCube ? { content: cubeAtomSection(xyzContent, cube.header), format: "cube" } : structureRenderFrame(xyzContent, xyzFormat);
         const model = viewer.addModel(renderFrame.content, renderFrame.format, {
           keepH: true,
           doAssembly: false,
@@ -1829,10 +2130,11 @@ function GraphMoleculeViewer({
         cellShapesRef.current = [];
         modelRef.current = model;
         applyStyle(style, remapped);
-        const crystalData = model.getCrystData();
+        const crystalData = isCube ? null : model.getCrystData();
         const hasUnitCell = Boolean(
           cellRef.current || crystalData && typeof crystalData === "object" && Object.keys(crystalData).length
         );
+        drawIsosurfaces();
         commandState.current.cellAvailable = hasUnitCell;
         setUnitCellAvailable(hasUnitCell);
         setUnitCellVisible(hasUnitCell ? unitCellPreferenceRef.current : false);
@@ -1952,7 +2254,9 @@ function GraphMoleculeViewer({
       renderedReadyRef.current = false;
       commandState.current.ready = false;
       console.error("Failed to render molecule:", error);
-      setViewerInitError("Unable to render this molecular structure.");
+      setViewerInitError(
+        error instanceof CubeFormatError ? translate("files.cubeUnreadable", { reason: error.message }) : isCube && error instanceof Error ? error.message : "Unable to render this molecular structure."
+      );
     }
   }, [
     xyzContent,
@@ -1964,6 +2268,20 @@ function GraphMoleculeViewer({
     activeObject,
     loading
   ]);
+  useEffect(() => {
+    if (!viewerReady || !isCube) return;
+    const frame = window.requestAnimationFrame(() => {
+      if (!renderedReadyRef.current) return;
+      try {
+        if (drawIsosurfaces()) viewerRef.current?.render();
+      } catch (error) {
+        setViewerInitError(
+          error instanceof Error ? error.message : String(error)
+        );
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [isovalue, isoOpacity, viewerReady, isCube]);
   useEffect(() => {
     if (!viewerReady) return;
     const visible = unitCellVisible && unitCellAvailable;
@@ -2633,6 +2951,11 @@ function GraphMoleculeViewer({
                       count > 1 && /* @__PURE__ */ jsx7("sub", { children: count })
                     ] }, element)),
                     atomCount ? ` \xB7 ${atomCount} atoms` : "",
+                    cube.header ? ` \xB7 ${translate("files.cubeGrid", {
+                      grid: cube.header.axes.map((axis) => axis.points).join("\xD7")
+                    })}${cube.header.orbitalIndices[0] !== void 0 ? ` \xB7 ${translate("files.cubeOrbital", {
+                      index: String(cube.header.orbitalIndices[0])
+                    })}` : ""}` : "",
                     xyzArray.length > 1 ? ` \xB7 Frame ${currentIndex + 1} / ${xyzArray.length}` : ""
                   ] })
                 ] }),
@@ -2848,67 +3171,81 @@ function GraphMoleculeViewer({
                     ]
                   }
                 ) : null,
-                /* @__PURE__ */ jsxs5("details", { className: "molecule-scientific-actions", children: [
-                  /* @__PURE__ */ jsxs5("summary", { children: [
-                    "Scientific actions",
-                    selectedSerials.length ? ` \xB7 ${selectedSerials.length} selected` : ""
-                  ] }),
-                  /* @__PURE__ */ jsxs5("div", { children: [
-                    /* @__PURE__ */ jsx7(
-                      "div",
-                      {
-                        role: "group",
-                        "aria-label": "Viewer contributions",
-                        inert: loading,
-                        style: { visibility: loading ? "hidden" : void 0 },
-                        children: !viewerInitError && toolbar?.({ target, selectedIds })
-                      }
-                    ),
-                    rendererSlot?.({ target, selectedIds }),
-                    followControl ? null : liveButton,
-                    onScreenshot && /* @__PURE__ */ jsx7(
-                      Button,
-                      {
-                        type: "button",
-                        disabled: loading || busy || !viewerReady || !target || !renderedReadyRef.current || Boolean(viewerInitError),
-                        onClick: () => void runOperation(
-                          () => onScreenshot(capture()),
-                          "PNG submitted."
+                /* @__PURE__ */ jsxs5(
+                  "details",
+                  {
+                    className: "molecule-scientific-actions",
+                    open: isCube || void 0,
+                    children: [
+                      /* @__PURE__ */ jsxs5("summary", { children: [
+                        "Scientific actions",
+                        selectedSerials.length ? ` \xB7 ${selectedSerials.length} selected` : ""
+                      ] }),
+                      /* @__PURE__ */ jsxs5("div", { children: [
+                        /* @__PURE__ */ jsx7(
+                          "div",
+                          {
+                            role: "group",
+                            "aria-label": "Viewer contributions",
+                            inert: loading,
+                            style: { visibility: loading ? "hidden" : void 0 },
+                            children: !viewerInitError && toolbar?.({ target, selectedIds })
+                          }
                         ),
-                        children: "Send screenshot"
-                      }
-                    ),
-                    status && /* @__PURE__ */ jsx7("p", { role: "status", children: status }),
-                    /* @__PURE__ */ jsx7(
-                      GraphMoleculeViewerLowerButtonGroup,
-                      {
-                        cameraInfo,
-                        onClearSelection: () => setSelectedSerials([]),
-                        onClearStaged: () => setStagedSelections({}),
-                        canSubmit: Boolean(onSelectionSubmit && target) && !loading && !busy && !viewerInitError && renderedReadyRef.current,
-                        onSendSelection: () => void runOperation(async () => {
-                          const entries = [selection()];
-                          assertSubmissionTargets(entries);
-                          await onSelectionSubmit?.({ selections: entries });
-                        }, "Selection submitted."),
-                        onSendStaged: () => void runOperation(async () => {
-                          const entries = Object.values(stagedSelections);
-                          assertSubmissionTargets(entries);
-                          await onSelectionSubmit?.({ selections: entries });
-                          setStagedSelections({});
-                        }, "Staged selections submitted."),
-                        onStageSelection: handleStageSelection,
-                        onToggleUnitCell: handleToggleUnitCell,
-                        selectedAtomLabels,
-                        selectedSerials,
-                        stagedAtoms,
-                        stagedMolecules,
-                        unitCellAvailable,
-                        unitCellVisible
-                      }
-                    )
-                  ] })
-                ] })
+                        rendererSlot?.({ target, selectedIds }),
+                        followControl ? null : liveButton,
+                        onScreenshot && /* @__PURE__ */ jsx7(
+                          Button,
+                          {
+                            type: "button",
+                            disabled: loading || busy || !viewerReady || !target || !renderedReadyRef.current || Boolean(viewerInitError),
+                            onClick: () => void runOperation(
+                              () => onScreenshot(capture()),
+                              "PNG submitted."
+                            ),
+                            children: "Send screenshot"
+                          }
+                        ),
+                        status && /* @__PURE__ */ jsx7("p", { role: "status", children: status }),
+                        /* @__PURE__ */ jsx7(
+                          GraphMoleculeViewerLowerButtonGroup,
+                          {
+                            cameraInfo,
+                            onClearSelection: () => setSelectedSerials([]),
+                            onClearStaged: () => setStagedSelections({}),
+                            canSubmit: Boolean(onSelectionSubmit && target) && !loading && !busy && !viewerInitError && renderedReadyRef.current,
+                            onSendSelection: () => void runOperation(async () => {
+                              const entries = [selection()];
+                              assertSubmissionTargets(entries);
+                              await onSelectionSubmit?.({ selections: entries });
+                            }, "Selection submitted."),
+                            onSendStaged: () => void runOperation(async () => {
+                              const entries = Object.values(stagedSelections);
+                              assertSubmissionTargets(entries);
+                              await onSelectionSubmit?.({ selections: entries });
+                              setStagedSelections({});
+                            }, "Staged selections submitted."),
+                            onStageSelection: handleStageSelection,
+                            onToggleUnitCell: handleToggleUnitCell,
+                            selectedAtomLabels,
+                            selectedSerials,
+                            stagedAtoms,
+                            stagedMolecules,
+                            unitCellAvailable,
+                            unitCellVisible,
+                            isosurface: isCube && !viewerInitError ? {
+                              isovalue,
+                              opacity: isoOpacity,
+                              disabled: loading || !viewerReady,
+                              onIsovalueChange: setIsovalue,
+                              onOpacityChange: setIsoOpacity
+                            } : void 0
+                          }
+                        )
+                      ] })
+                    ]
+                  }
+                )
               ] })
             ] })
           ]
@@ -2922,6 +3259,9 @@ export {
   sameScientificTarget,
   validateViewerCommands,
   createViewerCommandExecutor,
+  MAX_CUBE_GRID_POINTS,
+  CubeFormatError,
+  readCubeHeader,
   readGraphMoleculeViewerData,
   GraphMoleculeViewer
 };

@@ -3,6 +3,8 @@ import { GLViewer } from '3dmol';
 
 type ThreeDmolApi = {
     createViewer(element: HTMLElement, options?: Record<string, unknown>): GLViewer;
+    /** Parses volumetric text (here Gaussian cube) once for several isosurfaces. */
+    VolumeData?: new (data: string, format: string) => unknown;
 };
 declare global {
     interface Window {

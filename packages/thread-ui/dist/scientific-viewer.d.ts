@@ -2,8 +2,8 @@ import * as react from 'react';
 import { ReactNode } from 'react';
 import { ScientificTarget, ViewerRequest, ViewerAcknowledgement, ExtensionDiscovery } from '@remote-codex/shared';
 import { E as ExtensionHostAdapter } from './plugin-types-C1Ip6feU.js';
-import { G as GraphMoleculeViewerSource } from './GraphMoleculeViewerData-D1qUReJc.js';
-export { r as readGraphMoleculeViewerData } from './GraphMoleculeViewerData-D1qUReJc.js';
+import { G as GraphMoleculeViewerSource } from './GraphMoleculeViewerData-DHnrXMbl.js';
+export { r as readGraphMoleculeViewerData } from './GraphMoleculeViewerData-DHnrXMbl.js';
 import '3dmol';
 
 type GraphMoleculeScreenshot = {
