@@ -4,6 +4,7 @@ import { StructureView, xyzPlugin } from '@elagente/plugin-xyz';
 import { artifactUrl, fileUrl, rpc, subscribe, upload, workspace } from './api';
 import { capabilities, project, projectThread, type Agent, type Interaction, type NativeThread, type Snapshot } from './projection';
 import { useTheme } from './theme';
+import { defaultThreadTitle } from './thread-title';
 
 const plugins = [xyzPlugin];
 type Draft = {prompt: string; attachments: PromptAttachmentUpload[]};
@@ -138,7 +139,7 @@ export function App() {
     setBusy(true); setError(null);
     try {
       const agent = agents.find(value => value.id === agentId);
-      const value = await rpc<NativeThread>('thread/start', {agentId, operationId: crypto.randomUUID(), title: title.trim() || `${agent?.name ?? agentId} · ${new Date().toLocaleTimeString()}`});
+      const value = await rpc<NativeThread>('thread/start', {agentId, operationId: crypto.randomUUID(), title: title.trim() || defaultThreadTitle(agent?.name ?? agentId)});
       setThreads(previous => [value, ...previous]); openThread(value.id, agentId);
     } catch (reason) { setError(String(reason)); } finally { setBusy(false); }
   }, [agentId, agents, openThread]);
