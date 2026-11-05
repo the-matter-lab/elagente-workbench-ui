@@ -29,6 +29,8 @@ import { WorkbenchContext } from './WorkbenchContext';
 import { homeRelativePath, isCopyableWorkspacePath } from './WorkbenchPath';
 import { PathChip } from './copy/PathChip';
 import { ThreadToolsMenu } from './workbench/ThreadToolsMenu';
+import { ThreadHeader } from './workbench/ThreadHeader';
+import { createPortal } from 'react-dom';
 import { StatusMark } from './StatusMark';
 import { GroupedThreadTabs, groupThreads, threadGroupActivity } from './GroupedThreadTabs';
 import { useThemeFeature } from './themeHooks';
@@ -121,6 +123,21 @@ export interface MatterWorkbenchOptions {
   sidebarFooter?: ReactNode;
   renderNavigationHeader?: (input: { collapsed: boolean; closeNavigation: () => void }) => ReactNode;
   panels?: WorkbenchPanelsOptions;
+  /** Opt-in thread toolbar below the tabs. Lifecycle belongs to the host. */
+  threadHeader?: {
+    status: string;
+    tone: 'running' | 'stopped' | 'failed' | 'pending';
+    /** Defaults to disabled unless running; controls remain visible. */
+    toolsDisabled?: boolean;
+    /** Opens the host's existing Tool Usage panel. */
+    onOpenToolUsage?: () => void;
+    /** Opens the existing conversation export dialog directly. When omitted,
+        Save & export opens the existing host action menu. */
+    onSaveExport?: () => void;
+  };
+  /** Move the existing settings control/dialog to this global host rail slot.
+      Only the visible workbench should receive a target. */
+  settingsPortalTargetId?: string;
   statusActions?: ReactNode;
   /** Subscription usage windows (5-hour, weekly); the phone dock shows them in its status bar. */
   subscriptionUsage?: AgentSubscriptionUsageDto | null;
@@ -201,6 +218,24 @@ export function MatterWorkbench({
   children: ReactNode;
 }) {
   useI18n();
+  const [settingsTarget, setSettingsTarget] = useState<{ id: string; element: HTMLElement } | null>(null);
+  useLayoutEffect(() => {
+    const id = o.settingsPortalTargetId;
+    if (!id) { setSettingsTarget(null); return; }
+    const find = () => {
+      const element = document.getElementById(id);
+      if (!element) return false;
+      setSettingsTarget(current => current?.id === id && current.element === element ? current : { id, element });
+      return true;
+    };
+    // Layout effects run after all siblings commit, including a host slot that
+    // follows this workbench in JSX. Also support a slot mounted asynchronously.
+    if (find()) return;
+    const observer = new MutationObserver(() => { if (find()) observer.disconnect(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [o.settingsPortalTargetId]);
+  const localSettings = o.settingsPortalTargetId || o.threadHeader ? null : settings;
   const brandName = o.brandName ?? 'Pockymoe';
   const showSearch = o.showSearch !== false;
   const searchLabel = o.searchLabel ?? translate("workbench.searchConversation");
@@ -604,7 +639,8 @@ export function MatterWorkbench({
     // The host's view change toggles the terminal.
     if ((next === 'shell') !== (o.activeView === 'shell')) o.onViewChange('shell');
   };
-  const currentThread = o.threads.find(thread => thread.key === o.currentKey) ?? tabs.find(thread => thread.key === o.currentKey);
+  const currentThread = o.threads.find(thread => thread.key === o.currentKey) ?? tabs.find(thread => thread.key === o.currentKey)
+    ?? o.openTabs?.find(thread => thread.key === o.currentKey);
   const knownThreads = [...o.threads, ...tabs.filter(tab => !o.threads.some(thread => thread.key === tab.key))];
   // The account's running threads, then finished ones not read yet: what the
   // running count in the status bar counts and opens.
@@ -829,10 +865,10 @@ export function MatterWorkbench({
           <button key={panel.id} aria-label={panel.label} title={panel.label}
             aria-pressed={panel.active} onClick={panel.onToggle}>{panel.icon}</button>
         ))}
-        <button aria-label={translate("workbench.toggleExplorer")} aria-pressed={explorerOpen} aria-expanded={explorerOpen}
-          title={translate("workbench.explorer")} onClick={() => setExplorerOpen(open => !open)}><FolderOpen data-icon="explorer" /></button>
+        {!o.threadHeader && <button aria-label={translate("workbench.toggleExplorer")} aria-pressed={explorerOpen} aria-expanded={explorerOpen}
+          title={translate("workbench.explorer")} onClick={() => setExplorerOpen(open => !open)}><FolderOpen data-icon="explorer" /></button>}
         {openThreadMap && <button aria-label={translate('workbench.threadMap')} title={translate('workbench.threadMap')} onClick={openThreadMap}><LayoutDashboard data-icon="thread-map" /></button>}
-        <div className="matter-rail-bottom">{deviceMonitor}{settings}</div>
+        <div className="matter-rail-bottom">{deviceMonitor}{localSettings}</div>
       </nav>}
       {dock ? <header className={`matter-topbar is-status-only ${o.searchOpen ? 'is-search-open' : ''} ${statusEmpty ? 'is-empty' : ''}`}>
         <div className="matter-topbar-status">{deviceMonitor}</div>
@@ -893,8 +929,8 @@ export function MatterWorkbench({
               o.onViewChange('shell');
             }}><Terminal data-icon="terminal" /></button>}
             {o.toolPanels?.map(panel => <button key={panel.id} aria-label={panel.label} title={panel.label} aria-pressed={panel.active} onClick={panel.onToggle}>{panel.icon}</button>)}
-            <button aria-label={translate("workbench.toggleExplorer")} aria-pressed={explorerOpen} aria-expanded={explorerOpen} title={translate("workbench.explorer")} onClick={() => setExplorerOpen(open => !open)}><FolderOpen data-icon="explorer" /></button>
-            {settings}
+            {!o.threadHeader && <button aria-label={translate("workbench.toggleExplorer")} aria-pressed={explorerOpen} aria-expanded={explorerOpen} title={translate("workbench.explorer")} onClick={() => setExplorerOpen(open => !open)}><FolderOpen data-icon="explorer" /></button>}
+            {localSettings}
           </>}
           <div className="matter-connection">{connection}</div>
           {bell}
@@ -1055,24 +1091,27 @@ export function MatterWorkbench({
         </div>
         {/* New thread stays in reach however many tabs there are. */}
         <div className="matter-tab-add">{newThread}</div>
-        {!o.emptyWorkspace && hasThreadTools && <button ref={toolbarToggleRef} className="matter-toolbar-toggle" aria-label={translate("workbench.threadTools")} aria-haspopup="menu" aria-expanded={toolbarOpen} aria-controls="matter-thread-tools" onClick={() => setToolbarOpen(open => !open)} title={toolbarOpen ? translate("workbench.hideThreadTools") : translate("workbench.showThreadTools")}><SlidersHorizontal data-icon="thread-tools" /></button>}
-        <ThreadToolsMenu id="matter-thread-tools" open={toolbarOpen && !o.emptyWorkspace} anchorRef={toolbarToggleRef} panels={o.statusActions}
+        {!o.threadHeader && !o.emptyWorkspace && hasThreadTools && <button ref={toolbarToggleRef} className="matter-toolbar-toggle" aria-label={translate("workbench.threadTools")} aria-haspopup="menu" aria-expanded={toolbarOpen} aria-controls="matter-thread-tools" onClick={() => setToolbarOpen(open => !open)} title={toolbarOpen ? translate("workbench.hideThreadTools") : translate("workbench.showThreadTools")}><SlidersHorizontal data-icon="thread-tools" /></button>}
+        {!o.threadHeader && <ThreadToolsMenu id="matter-thread-tools" open={toolbarOpen && !o.emptyWorkspace} anchorRef={toolbarToggleRef} panels={o.statusActions}
           path={o.workspacePath} title={title} favorite={o.favorite} favoriteBusy={o.favoriteBusy} onToggleFavorite={o.showShortcuts === false ? undefined : o.onToggleFavorite}
           onClose={(restore) => { setToolbarOpen(false); if (restore) toolbarToggleRef.current?.focus(); }}>
           {actions}
           {threadMenu}
-        </ThreadToolsMenu>
+        </ThreadToolsMenu>}
         </div>
         {!mobile && <div className="matter-tabs-end">
-          {o.hideRail && <button aria-label={translate("workbench.toggleExplorer")} aria-pressed={explorerOpen} aria-expanded={explorerOpen}
+          {o.hideRail && !o.threadHeader && <button aria-label={translate("workbench.toggleExplorer")} aria-pressed={explorerOpen} aria-expanded={explorerOpen}
             title={translate("workbench.explorer")} onClick={() => setExplorerOpen(open => !open)}><FolderOpen data-icon="explorer" /></button>}
           <div className="matter-connection">{connection}</div>
           {bell}
           {/* The rail's thread map, beside its explorer toggle and settings (same markup). */}
-          {o.hideRail && openThreadMap && <button aria-label={translate('workbench.threadMap')} title={translate('workbench.threadMap')} onClick={openThreadMap}><LayoutDashboard data-icon="thread-map" /></button>}
-          {o.hideRail && settings}
+          {o.hideRail && !o.threadHeader && openThreadMap && <button aria-label={translate('workbench.threadMap')} title={translate('workbench.threadMap')} onClick={openThreadMap}><LayoutDashboard data-icon="thread-map" /></button>}
+          {o.hideRail && !o.threadHeader && localSettings}
         </div>}
         </div>}
+        {o.threadHeader && <ThreadHeader header={o.threadHeader} title={title || currentThread?.title || ''} threadKey={o.currentKey}
+          explorerOpen={explorerOpen} onToggleExplorer={() => setExplorerOpen(open => !open)} options={o}
+          actions={<>{actions}{threadMenu}</>} />}
         <PhoneDockContext.Provider value={dock}>
         {o.panels ? <WorkbenchContext.Provider value={true}><WorkbenchPanels options={dock ? { ...o.panels, onPaneSwitchChange: setPaneSwitch } : o.panels} explorer={explorer} revealExplorer={revealExplorer} toolPanel={toolPanel}>{children}</WorkbenchPanels></WorkbenchContext.Provider> : (
         <div ref={contentRef} style={{ '--explorer-width': `${explorerWidth}px` } as CSSProperties} className={`matter-content ${explorerOpen ? 'has-explorer' : ''}`}>
@@ -1090,14 +1129,14 @@ export function MatterWorkbench({
                 onLostPointerCapture={() => { resizeOrigin.current = null; }}
                 onKeyDown={e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); resizeExplorer(explorerWidth + (e.key === 'ArrowLeft' ? 24 : -24)); } }}
               />}
-              <div className="matter-explorer-heading">
+              {!o.threadHeader && <div className="matter-explorer-heading">
                 {translate("workbench.explorer")}<button
                   aria-label={translate("workbench.closeExplorer")}
                   onClick={() => setExplorerOpen(false)}
                 >
                   <X data-icon="close" />
                 </button>
-              </div>
+              </div>}
               {explorer}
             </aside>
           )}
@@ -1107,6 +1146,7 @@ export function MatterWorkbench({
       </main>
       {dock && <>
         <PhoneDock title={title} thread={currentThread} paneSwitch={paneSwitch} pane={pane}
+          filesDisabled={o.threadHeader ? o.threadHeader.toolsDisabled ?? o.threadHeader.tone !== 'running' : false}
           terminalEnabled={o.terminalEnabled} onPane={choosePane}
           onOpenThreads={() => { setMoreOpen(false); setThreadsOpen(true); }} onOpenMore={() => { setThreadsOpen(false); setMoreOpen(true); }}
           threadsOpen={threadsOpen} moreOpen={moreOpen} />
@@ -1148,7 +1188,7 @@ export function MatterWorkbench({
             <button type="button" aria-label={translate('workbench.workspaceAndShortcuts')} onClick={() => { setMoreOpen(false); setSidebarOpen(true); }}><PanelLeft data-icon="sidebar" /><span>{translate('workbench.drawerShort')}</span></button>
             {homeHref && <a href={homeHref} aria-label={translate('workbench.backToWorkspaces')} onClick={goHome}><Home data-icon="home" /><span>{translate('workbench.homeShort')}</span></a>}
             <button type="button" onClick={() => history.back()}><ArrowLeft data-icon="back" /><span>{translate('workbench.goBack')}</span></button>
-            <div className="matter-phone-sheet-settings">{settings}<span>{translate('workbench.settings')}</span></div>
+            {localSettings && <div className="matter-phone-sheet-settings">{localSettings}<span>{translate('workbench.settings')}</span></div>}
           </nav>}>
           {/* Copying the path keeps the sheet open, so its check mark shows. */}
           <div className="matter-phone-sheet-head" data-sheet-keep="">
@@ -1160,10 +1200,12 @@ export function MatterWorkbench({
             {!o.emptyWorkspace && o.showShortcuts !== false && <button type="button" aria-pressed={o.favorite} disabled={o.favoriteBusy} onClick={o.onToggleFavorite}><Star data-icon="shortcut" fill={o.favorite ? 'currentColor' : 'none'} /><span>{o.favorite ? translate('workbench.removeShortcut') : translate('workbench.addShortcut')}</span></button>}
             {o.toolPanels?.map(panel => <button type="button" key={panel.id} aria-pressed={panel.active} onClick={panel.onToggle}>{panel.icon}<span>{panel.label}</span></button>)}
             {shellNav?.setPhoneHand && <button type="button" aria-pressed={leftHanded} onClick={() => shellNav.setPhoneHand?.(leftHanded ? 'right' : 'left')}><Hand className="matter-phone-hand-icon" /><span>{translate('workbench.leftHanded')}</span></button>}
-            <div className="matter-phone-sheet-host">{actions}{threadMenu}{o.statusActions}</div>
+            {!o.threadHeader && <div className="matter-phone-sheet-host">{actions}{threadMenu}{o.statusActions}</div>}
           </div>
         </PhoneSheet>
       </>}
+      {o.settingsPortalTargetId && settingsTarget?.id === o.settingsPortalTargetId
+        ? createPortal(settings, settingsTarget.element) : null}
       {contextMenu && o.renderThreadMenu && <Fragment key={contextMenu.id}>{o.renderThreadMenu(contextMenu.thread, {
         x: contextMenu.x, y: contextMenu.y, returnFocus: contextMenu.returnFocus,
         onClose: () => setContextMenu(current => current?.id === contextMenu.id ? null : current),

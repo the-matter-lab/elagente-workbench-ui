@@ -50,6 +50,27 @@ function render(onDelete = vi.fn(), actions?: ReactNode, options: Partial<Matter
 }
 
 describe('ThreadWorkspaceLayout host adaptations', () => {
+  it('portals the existing SettingsDialog into a sibling host rail slot on initial mount', async () => {
+    container = document.createElement('div'); document.body.append(container); root = createRoot(container);
+    act(() => root!.render(<>
+      <ThreadWorkspaceLayout workbench={{ ...workbench, emptyWorkspace: true,
+        threadHeader: { status: 'Stopped', tone: 'stopped', toolsDisabled: true },
+        settingsPortalTargetId: 'chat-appearance-settings',
+      }} threads={[thread]} currentThreadId="t1" currentThreadLabel="Selected Benzene"
+        settingsSections={[{ id: 'preferences', label: 'Preferences', content: <p>Existing appearance preferences</p> }]}>
+        <p>Start the Agent to continue</p>
+      </ThreadWorkspaceLayout>
+      <div id="chat-appearance-settings" />
+    </>));
+    expect(container.querySelector('.matter-thread-header-title')?.textContent).toBe('Selected Benzene');
+    expect(container.querySelectorAll('[aria-label="Open settings"]')).toHaveLength(1);
+    const trigger = container.querySelector<HTMLButtonElement>('#chat-appearance-settings [aria-label="Open settings"]');
+    expect(trigger).not.toBeNull();
+    await act(async () => trigger!.click());
+    expect(document.querySelector('[data-testid="settings-dialog"]')?.getAttribute('role')).toBe('dialog');
+    expect(document.querySelector('[data-testid="settings-dialog"]')?.textContent).toContain('Existing appearance preferences');
+  });
+
   it('drops its own rail for the host rail and keeps upstream tabs, tools and settings', () => {
     const view = render();
     expect(view.querySelector('.matter-workbench.has-host-rail')).toBeTruthy();

@@ -810,6 +810,10 @@ declare const en: {
         readonly other: "running {{count}} min";
     };
     readonly "workbench.runningForHours": "running {{hours}} h {{minutes}} min";
+    readonly 'workbench.selectedThread': "Selected thread";
+    readonly 'workbench.files': "Files";
+    readonly 'workbench.saveExport': "Save & export";
+    readonly 'workbench.toolUsage': "Tool Usage";
     readonly "sharing.open": "Open";
     readonly "sharing.supervisorOfflineReconnectTheDeviceToOpen": "Supervisor offline — reconnect the device to open";
     readonly "sharing.supervisorStatusUnavailable": "Supervisor status unavailable";
@@ -4933,6 +4937,10 @@ declare const zhCN: {
         readonly other: "已运行 {{count}} 分钟";
     };
     "workbench.runningForHours": "已运行 {{hours}} 小时 {{minutes}} 分钟";
+    'workbench.selectedThread': "当前线程";
+    'workbench.files': "文件";
+    'workbench.saveExport': "保存和导出";
+    'workbench.toolUsage': "工具用量";
     "sharing.open": "打开";
     "sharing.supervisorOfflineReconnectTheDeviceToOpen": "Supervisor 离线，请重新连接设备后打开";
     "sharing.supervisorStatusUnavailable": "Supervisor 状态不可用";
@@ -9078,6 +9086,10 @@ declare const resources: {
             readonly other: "running {{count}} min";
         };
         readonly "workbench.runningForHours": "running {{hours}} h {{minutes}} min";
+        readonly 'workbench.selectedThread': "Selected thread";
+        readonly 'workbench.files': "Files";
+        readonly 'workbench.saveExport': "Save & export";
+        readonly 'workbench.toolUsage': "Tool Usage";
         readonly "sharing.open": "Open";
         readonly "sharing.supervisorOfflineReconnectTheDeviceToOpen": "Supervisor offline — reconnect the device to open";
         readonly "sharing.supervisorStatusUnavailable": "Supervisor status unavailable";
@@ -13200,6 +13212,10 @@ declare const resources: {
             readonly other: "已运行 {{count}} 分钟";
         };
         "workbench.runningForHours": "已运行 {{hours}} 小时 {{minutes}} 分钟";
+        'workbench.selectedThread': "当前线程";
+        'workbench.files': "文件";
+        'workbench.saveExport': "保存和导出";
+        'workbench.toolUsage': "工具用量";
         "sharing.open": "打开";
         "sharing.supervisorOfflineReconnectTheDeviceToOpen": "Supervisor 离线，请重新连接设备后打开";
         "sharing.supervisorStatusUnavailable": "Supervisor 状态不可用";

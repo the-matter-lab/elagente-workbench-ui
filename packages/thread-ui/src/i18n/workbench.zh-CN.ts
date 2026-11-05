@@ -620,4 +620,8 @@ export const workbenchZhCN = {
   "workbench.runningJustNow": "刚开始运行",
   "workbench.runningForMinutes": { one: "已运行 {{count}} 分钟", other: "已运行 {{count}} 分钟" },
   "workbench.runningForHours": "已运行 {{hours}} 小时 {{minutes}} 分钟",
+  'workbench.selectedThread': '当前线程',
+  'workbench.files': '文件',
+  'workbench.saveExport': '保存和导出',
+  'workbench.toolUsage': '工具用量',
 } as const;

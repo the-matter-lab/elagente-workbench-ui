@@ -615,6 +615,21 @@ interface MatterWorkbenchOptions {
         closeNavigation: () => void;
     }) => ReactNode;
     panels?: WorkbenchPanelsOptions;
+    /** Opt-in thread toolbar below the tabs. Lifecycle belongs to the host. */
+    threadHeader?: {
+        status: string;
+        tone: 'running' | 'stopped' | 'failed' | 'pending';
+        /** Defaults to disabled unless running; controls remain visible. */
+        toolsDisabled?: boolean;
+        /** Opens the host's existing Tool Usage panel. */
+        onOpenToolUsage?: () => void;
+        /** Opens the existing conversation export dialog directly. When omitted,
+            Save & export opens the existing host action menu. */
+        onSaveExport?: () => void;
+    };
+    /** Move the existing settings control/dialog to this global host rail slot.
+        Only the visible workbench should receive a target. */
+    settingsPortalTargetId?: string;
     statusActions?: ReactNode;
     /** Subscription usage windows (5-hour, weekly); the phone dock shows them in its status bar. */
     subscriptionUsage?: AgentSubscriptionUsageDto | null;
