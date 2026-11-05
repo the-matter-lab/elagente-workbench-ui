@@ -20,6 +20,7 @@ import {
   Plus,
   Rows3,
   Settings,
+  SlidersHorizontal,
   Sun,
   Trash2,
   X,
@@ -825,7 +826,9 @@ export function ThreadWorkspaceLayout({
         sections={sections}
         trigger={<button type="button" aria-label={translate("files.openSettings")} title={translate("files.settings")}
           className="thread-icon-button inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full">
-          <Settings data-icon="settings" className="h-4 w-4" />
+          {workbench?.threadHeader
+            ? <SlidersHorizontal data-icon="settings" className="h-4 w-4" />
+            : <Settings data-icon="settings" className="h-4 w-4" />}
         </button>}
         extraContent={canUpdateThemeMode && !settingsSections ? (
             <div className="thread-graph-settings-card rounded-lg border p-3">
