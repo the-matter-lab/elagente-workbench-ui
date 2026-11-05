@@ -128,6 +128,13 @@ describe('opt-in selected thread header', () => {
   });
 
   it('toggles the existing explorer and uses the existing split presentation callback', () => {
+    render();
+    act(() => header().querySelector<HTMLButtonElement>('[aria-label="Files"]')!.click());
+    expect(host.querySelector('.matter-explorer')).not.toBeNull();
+    expect(host.querySelector('.matter-explorer-heading')).toBeNull();
+    expect(host.querySelector('[aria-label="Close Explorer"]')).toBeNull();
+    act(() => header().querySelector<HTMLButtonElement>('[aria-label="Files"]')!.click());
+    expect(host.querySelector('.matter-explorer')).toBeNull();
     const onPresentationChange = vi.fn();
     options = { ...options, panels: {
       deviceLabel: '', workspaceLabel: '', primaryTitle: 'Thread a', primaryStatus: 'idle', primaryHarness: '',

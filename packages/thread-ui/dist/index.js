@@ -12393,7 +12393,7 @@ ${thread.subtitle} \xB7 ${activity.label}`,
                   }
                 }
               ),
-              /* @__PURE__ */ jsxs44("div", { className: "matter-explorer-heading", children: [
+              !o.threadHeader && /* @__PURE__ */ jsxs44("div", { className: "matter-explorer-heading", children: [
                 translate("workbench.explorer"),
                 /* @__PURE__ */ jsx50(
                   "button",

@@ -1129,14 +1129,14 @@ export function MatterWorkbench({
                 onLostPointerCapture={() => { resizeOrigin.current = null; }}
                 onKeyDown={e => { if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') { e.preventDefault(); resizeExplorer(explorerWidth + (e.key === 'ArrowLeft' ? 24 : -24)); } }}
               />}
-              <div className="matter-explorer-heading">
+              {!o.threadHeader && <div className="matter-explorer-heading">
                 {translate("workbench.explorer")}<button
                   aria-label={translate("workbench.closeExplorer")}
                   onClick={() => setExplorerOpen(false)}
                 >
                   <X data-icon="close" />
                 </button>
-              </div>
+              </div>}
               {explorer}
             </aside>
           )}
