@@ -16,7 +16,7 @@ import { homeRelativePath, isCopyableWorkspacePath } from '../WorkbenchPath';
     It stays mounted and only hides when closed: a control in it keeps the
     window it opened (those live in portals) and its state, like the phone's
     More sheet. */
-export function ThreadToolsMenu({ id, open, anchorRef, path, title, favorite, favoriteBusy, onToggleFavorite, onClose, children, panels }: {
+export function ThreadToolsMenu({ id, open, anchorRef, path, title, favorite, favoriteBusy, onToggleFavorite, onClose, children, panels, showHeader = true, label }: {
   id: string;
   open: boolean;
   anchorRef: RefObject<HTMLElement | null>;
@@ -29,6 +29,9 @@ export function ThreadToolsMenu({ id, open, anchorRef, path, title, favorite, fa
   onClose: (restoreFocus: boolean) => void;
   children: ReactNode;
   panels?: ReactNode;
+  /** Compact entry menu; the existing host action menu keeps its heading. */
+  showHeader?: boolean;
+  label?: string;
 }) {
   useI18n();
   const menuRef = useRef<HTMLDivElement>(null);
@@ -76,7 +79,7 @@ export function ThreadToolsMenu({ id, open, anchorRef, path, title, favorite, fa
   if (!host) return null;
   const shown = open && place !== null;
   return createPortal(
-    <div ref={menuRef} id={id} role="menu" aria-label={translate('workbench.threadTools')} className="matter-thread-tools-menu"
+    <div ref={menuRef} id={id} role="menu" aria-label={label ?? translate('workbench.threadTools')} className={`matter-thread-tools-menu${showHeader ? '' : ' is-compact'}`}
       data-open={shown || undefined} aria-hidden={!shown} inert={!shown}
       style={{ top: place?.top ?? 0, left: place?.left ?? 0 }}
       onClick={(event) => {
@@ -84,7 +87,7 @@ export function ThreadToolsMenu({ id, open, anchorRef, path, title, favorite, fa
         const target = event.target instanceof Element ? event.target : null;
         if (target?.closest('.matter-thread-tools-items, .matter-thread-tools-panels') && target.closest('button, a')) window.setTimeout(() => close.current(false), 0);
       }}>
-      <div className="matter-thread-tools-head">
+      {showHeader && <div className="matter-thread-tools-head">
         {/* ElAgente: a host without a filesystem path (a scientific Agent's sandbox) shows no path chip. */}
         {isCopyableWorkspacePath(path) ? <div className="matter-thread-tools-path" title={path}>
           <Folder aria-hidden="true" />
@@ -100,7 +103,7 @@ export function ThreadToolsMenu({ id, open, anchorRef, path, title, favorite, fa
           <Star data-icon="shortcut" fill={favorite ? 'currentColor' : 'none'} />
         </button> : null}
         <div className="matter-thread-tools-title" title={title}>{title}</div>
-      </div>
+      </div>}
       <div className="matter-thread-tools-items">{children}</div>
       {panels ? <div className="matter-thread-tools-panels">{panels}</div> : null}
     </div>,

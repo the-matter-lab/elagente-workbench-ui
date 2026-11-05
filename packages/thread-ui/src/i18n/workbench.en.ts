@@ -620,4 +620,8 @@ export const workbenchEn = {
   "workbench.runningJustNow": "just started",
   "workbench.runningForMinutes": { one: "running {{count}} min", other: "running {{count}} min" },
   "workbench.runningForHours": "running {{hours}} h {{minutes}} min",
+  'workbench.selectedThread': 'Selected thread',
+  'workbench.files': 'Files',
+  'workbench.saveExport': 'Save & export',
+  'workbench.toolUsage': 'Tool Usage',
 } as const;

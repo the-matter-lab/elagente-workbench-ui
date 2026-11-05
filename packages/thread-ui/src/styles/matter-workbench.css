@@ -610,6 +610,33 @@
 }
 .matter-toolbar-toggle svg { width: 16px; height: 16px; }
 .matter-toolbar-toggle:active { background: var(--theme-hover); }
+.matter-thread-header {
+  display: flex; flex: none; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 8px 12px; min-width: 0; padding: 9px 16px;
+  border-bottom: 1px solid var(--theme-border); background: var(--theme-panel); color: var(--theme-fg);
+}
+.matter-thread-header-summary { display: flex; flex: 1; align-items: center; gap: 10px; min-width: 0; }
+.matter-thread-header-title { min-width: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 1.5; font-weight: 600; }
+.matter-thread-lifecycle { display: inline-flex; flex: none; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; background: var(--theme-surface); color: var(--theme-fg-soft); font-size: 11px; line-height: 1.4; }
+.matter-thread-lifecycle::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.matter-thread-lifecycle[data-tone='running'] { color: var(--status-success-fg, #247849); background: color-mix(in srgb, var(--status-success-fg, #247849) 10%, var(--theme-panel)); }
+.thread-ui-shell[data-theme-effective='dark'] .matter-thread-lifecycle[data-tone='running'] { color: var(--status-success-fg, #70cfa3); background: color-mix(in srgb, var(--status-success-fg, #70cfa3) 10%, var(--theme-panel)); }
+.matter-thread-lifecycle[data-tone='failed'] { color: var(--theme-status-error); background: color-mix(in srgb, var(--theme-status-error) 10%, var(--theme-panel)); }
+.matter-thread-lifecycle[data-tone='pending'] { color: var(--theme-status-warning); }
+.matter-thread-header-actions { display: flex; flex: none; align-items: center; gap: 8px; margin-left: auto; }
+.thread-ui-shell .matter-workbench .matter-thread-header-actions > button {
+  display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 6px; min-width: 30px; height: 30px; padding: 0 9px;
+  border: 1px solid var(--theme-border); border-radius: 7px; background: var(--theme-surface); color: var(--theme-fg); font-size: 12px;
+}
+.matter-thread-header-actions > button svg { width: 14px; height: 14px; }
+.thread-ui-shell .matter-workbench .matter-thread-header-actions > button:disabled { opacity: .45; cursor: default; }
+.thread-ui-shell .matter-workbench .matter-thread-header-actions > button:is(:hover, [aria-expanded='true']):not(:disabled) { background: var(--theme-hover); }
+.thread-ui-shell .matter-workbench .matter-thread-header-actions > button:focus-visible { outline: 2px solid var(--theme-focus-ring, var(--theme-fg)); outline-offset: 2px; }
+@media (max-width: 639px) {
+  .matter-thread-header { padding: 6px 10px; gap: 6px; }
+  .matter-thread-header-summary { gap: 6px; }
+  .thread-ui-shell .matter-workbench .matter-thread-header-actions > button { min-width: 40px; height: 40px; }
+}
 .matter-thread-tabs {
   flex: 1;
   min-width: 0;
@@ -1634,6 +1661,14 @@
 }
 /* Closed, it stays mounted for the windows its controls opened, unseen. */
 .thread-ui-shell .matter-thread-tools-menu:not([data-open]) { visibility: hidden; pointer-events: none; }
+.thread-ui-shell .matter-thread-tools-menu.is-compact { width: 220px; }
+.thread-ui-shell .matter-thread-tools-menu.is-compact [role='menuitem'] {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 36px; padding: 6px 10px;
+  border: 0; border-radius: 7px; background: transparent; color: var(--theme-fg); text-align: left; font: inherit;
+}
+.thread-ui-shell .matter-thread-tools-menu.is-compact [role='menuitem'] svg { width: 16px; height: 16px; }
+.thread-ui-shell .matter-thread-tools-menu.is-compact [role='menuitem']:is(:hover, :focus-visible):not(:disabled) { background: var(--theme-hover); outline: none; }
+.thread-ui-shell .matter-thread-tools-menu.is-compact [role='menuitem']:disabled { opacity: .45; }
 .thread-ui-shell .matter-thread-tools-menu[data-open] { animation: matter-thread-tools-in 140ms ease-out; }
 @keyframes matter-thread-tools-in { from { opacity: 0; transform: translateY(-4px) scale(.98); } }
 @media (prefers-reduced-motion: reduce) { .thread-ui-shell .matter-thread-tools-menu[data-open] { animation: none; } }

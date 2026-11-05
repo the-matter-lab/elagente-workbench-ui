@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { ChevronsUpDown, Ellipsis, FolderOpen, MessageSquare, Terminal } from 'lucide-react';
 import { translate, useI18n } from '../../i18n';
 import type { WorkbenchThread } from '../MatterWorkbench';
@@ -13,7 +13,7 @@ export type PhonePane = 'chat' | 'shell' | 'files';
     the panel, for the thread sheet), the chat / terminal / files views and a
     More sheet for everything the top bar used to hold. */
 export function PhoneDock({
-  title, thread, paneSwitch = null, pane, terminalEnabled, onPane, onOpenThreads, onOpenMore, moreOpen, threadsOpen,
+  title, thread, paneSwitch = null, pane, terminalEnabled, onPane, onOpenThreads, onOpenMore, moreOpen, threadsOpen, filesDisabled = false,
 }: {
   title: string;
   thread: WorkbenchThread | undefined;
@@ -21,6 +21,7 @@ export function PhoneDock({
   paneSwitch?: WorkbenchPaneSwitch | null;
   pane: PhonePane;
   terminalEnabled: boolean;
+  filesDisabled?: boolean;
   onPane: (pane: PhonePane) => void;
   onOpenThreads: () => void;
   onOpenMore: () => void;
@@ -45,7 +46,7 @@ export function PhoneDock({
       </button>}
       <div className="matter-phone-panes" role="group" aria-label={translate('workbench.phoneDockPanes')}>
         <button type="button" aria-label={translate('workbench.chat')} aria-pressed={pane === 'chat'} onClick={() => onPane('chat')}><MessageSquare data-icon="chat" /></button>
-        <button type="button" aria-label={translate('workbench.toggleExplorer')} aria-pressed={pane === 'files'} onClick={() => onPane('files')}><FolderOpen data-icon="explorer" /></button>
+        <button type="button" aria-label={translate('workbench.toggleExplorer')} aria-pressed={pane === 'files'} disabled={filesDisabled} onClick={() => onPane('files')}><FolderOpen data-icon="explorer" /></button>
         {terminalEnabled && <button type="button" aria-label={translate('workbench.terminal')} aria-pressed={pane === 'shell'} onClick={() => onPane('shell')}><Terminal data-icon="terminal" /></button>}
       </div>
       <button type="button" className="matter-phone-more" aria-label={translate('workbench.moreActions')} aria-haspopup="dialog" aria-expanded={moreOpen} onClick={onOpenMore}><Ellipsis data-icon="more" /></button>

@@ -4053,7 +4053,11 @@ var workbenchEn = {
   "workbench.allThreads": "All threads",
   "workbench.runningJustNow": "just started",
   "workbench.runningForMinutes": { one: "running {{count}} min", other: "running {{count}} min" },
-  "workbench.runningForHours": "running {{hours}} h {{minutes}} min"
+  "workbench.runningForHours": "running {{hours}} h {{minutes}} min",
+  "workbench.selectedThread": "Selected thread",
+  "workbench.files": "Files",
+  "workbench.saveExport": "Save & export",
+  "workbench.toolUsage": "Tool Usage"
 };
 
 // src/i18n/en.ts
@@ -8124,7 +8128,11 @@ var workbenchZhCN = {
   "workbench.allThreads": "\u6240\u6709\u7EBF\u7A0B",
   "workbench.runningJustNow": "\u521A\u5F00\u59CB\u8FD0\u884C",
   "workbench.runningForMinutes": { one: "\u5DF2\u8FD0\u884C {{count}} \u5206\u949F", other: "\u5DF2\u8FD0\u884C {{count}} \u5206\u949F" },
-  "workbench.runningForHours": "\u5DF2\u8FD0\u884C {{hours}} \u5C0F\u65F6 {{minutes}} \u5206\u949F"
+  "workbench.runningForHours": "\u5DF2\u8FD0\u884C {{hours}} \u5C0F\u65F6 {{minutes}} \u5206\u949F",
+  "workbench.selectedThread": "\u5F53\u524D\u7EBF\u7A0B",
+  "workbench.files": "\u6587\u4EF6",
+  "workbench.saveExport": "\u4FDD\u5B58\u548C\u5BFC\u51FA",
+  "workbench.toolUsage": "\u5DE5\u5177\u7528\u91CF"
 };
 
 // src/i18n/zh-CN.ts
