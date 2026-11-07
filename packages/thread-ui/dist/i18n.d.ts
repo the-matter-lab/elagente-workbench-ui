@@ -2056,7 +2056,7 @@ declare const en: {
     readonly "files.inLoadedFolders": " in loaded folders";
     readonly "files.loadingWorkspaceFiles": "Loading workspace files";
     readonly "files.noMatchesInLoadedFolders": "No matches in loaded folders.";
-    readonly "files.thisWorkspaceIsEmptyAgentToolRuns": "This workspace is empty. Agent tool runs execute inside the thread workspace, so files should appear here as the session works.";
+    readonly "files.thisWorkspaceIsEmptyAgentToolRuns": "Files that agents create or edit in this thread will show up here automatically as the session runs.";
     readonly "files.retry_f4914f": "{{value1}}. Retry {{value2}}";
     readonly "files.retryLoading": "Retry loading {{value1}}";
     readonly "files.workspaceFiles": "Workspace files";
@@ -10332,7 +10332,7 @@ declare const resources: {
         readonly "files.inLoadedFolders": " in loaded folders";
         readonly "files.loadingWorkspaceFiles": "Loading workspace files";
         readonly "files.noMatchesInLoadedFolders": "No matches in loaded folders.";
-        readonly "files.thisWorkspaceIsEmptyAgentToolRuns": "This workspace is empty. Agent tool runs execute inside the thread workspace, so files should appear here as the session works.";
+        readonly "files.thisWorkspaceIsEmptyAgentToolRuns": "Files that agents create or edit in this thread will show up here automatically as the session runs.";
         readonly "files.retry_f4914f": "{{value1}}. Retry {{value2}}";
         readonly "files.retryLoading": "Retry loading {{value1}}";
         readonly "files.workspaceFiles": "Workspace files";

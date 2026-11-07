@@ -502,7 +502,7 @@ export const filesEn = {
   "files.inLoadedFolders": " in loaded folders",
   "files.loadingWorkspaceFiles": "Loading workspace files",
   "files.noMatchesInLoadedFolders": "No matches in loaded folders.",
-  "files.thisWorkspaceIsEmptyAgentToolRuns": "This workspace is empty. Agent tool runs execute inside the thread workspace, so files should appear here as the session works.",
+  "files.thisWorkspaceIsEmptyAgentToolRuns": "Files that agents create or edit in this thread will show up here automatically as the session runs.",
   "files.retry_f4914f": "{{value1}}. Retry {{value2}}",
   "files.retryLoading": "Retry loading {{value1}}",
   "files.workspaceFiles": "Workspace files",
