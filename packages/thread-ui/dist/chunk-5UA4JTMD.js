@@ -8,7 +8,7 @@ import {
 import {
   translate,
   useI18n
-} from "./chunk-FASCGK3O.js";
+} from "./chunk-W355VD7T.js";
 
 // src/components/graph-workspace/GraphMoleculeViewer.tsx
 import {
