@@ -38,7 +38,7 @@ import {
   useMenuKeyboard,
   useModalFocus,
   useTabScrollEdges
-} from "./chunk-5ACHHVM5.js";
+} from "./chunk-PBO4HIC4.js";
 import {
   Button,
   Tooltip,
@@ -57,7 +57,7 @@ import {
   shellThemeProps,
   useDocumentThemeRevision,
   useThemeFeature
-} from "./chunk-F65JBLOS.js";
+} from "./chunk-RZJR24UV.js";
 import {
   DEFAULT_LOCALE,
   I18nProvider,
@@ -65,6 +65,7 @@ import {
   LOCALE_STORAGE_KEY,
   LanguageSwitcher,
   SUPPORTED_LOCALES,
+  __export,
   detectLocale,
   formatDate,
   formatNumber,
@@ -75,7 +76,7 @@ import {
   t,
   translate,
   useI18n
-} from "./chunk-V4KJ3AYQ.js";
+} from "./chunk-DTT7Q47S.js";
 
 // #style-inject:#style-inject
 function styleInject(css, { insertAt } = {}) {
@@ -174,15 +175,15 @@ function fileExtension(name) {
 }
 function fileFamily(name, kind, mime) {
   if (kind === "photo" || mime?.startsWith("image/")) return "image";
-  const extension = fileExtension(name);
-  return extension && families.find(([, pattern]) => pattern.test(extension))?.[0] || "other";
+  const extension2 = fileExtension(name);
+  return extension2 && families.find(([, pattern]) => pattern.test(extension2))?.[0] || "other";
 }
 function fileBadge(name) {
-  const extension = fileExtension(name);
-  return extension && extension.length <= 5 ? extension.toUpperCase() : null;
+  const extension2 = fileExtension(name);
+  return extension2 && extension2.length <= 5 ? extension2.toUpperCase() : null;
 }
 var charWidth = (char) => /[\u1100-\u115f\u2e80-\ua4cf\uac00-\ud7a3\uf900-\ufaff\ufe30-\ufe4f\uff00-\uff60\uffe0-\uffe6]/u.test(char) ? 2 : 1;
-var textWidth = (text) => [...text].reduce((sum, char) => sum + charWidth(char), 0);
+var textWidth = (text3) => [...text3].reduce((sum, char) => sum + charWidth(char), 0);
 var takeWidth = (chars, budget) => {
   const kept = [];
   for (const char of chars) {
@@ -194,8 +195,8 @@ var takeWidth = (chars, budget) => {
 };
 function shortFileName(name, max = 11) {
   if (textWidth(name) <= max) return name;
-  const extension = fileExtension(name);
-  const tail = extension && extension.length <= 5 ? `.${extension}` : "";
+  const extension2 = fileExtension(name);
+  const tail = extension2 && extension2.length <= 5 ? `.${extension2}` : "";
   const stem = [...name.slice(0, name.length - tail.length)];
   const room = Math.max(2, max - tail.length - 1);
   const end = takeWidth([...stem].reverse(), Math.min(3, Math.floor(room / 3))).reverse();
@@ -336,9 +337,9 @@ function liveStructureCell(row, key) {
   if (key === "id") return row.id;
   if (key === "status") return row.status;
   const summary = row.summary ?? {};
-  const text = formatLiveStructureValue(summary[key]);
-  if (key === "energy" && text && typeof summary.unit === "string" && summary.unit) return `${text} ${summary.unit}`;
-  return text;
+  const text3 = formatLiveStructureValue(summary[key]);
+  if (key === "energy" && text3 && typeof summary.unit === "string" && summary.unit) return `${text3} ${summary.unit}`;
+  return text3;
 }
 function toggleLiveStructure(selected, key, max = LIVE_STRUCTURES_MAX_SELECTED) {
   if (selected.some((value) => sameLiveStructure(value, key))) return selected.filter((value) => !sameLiveStructure(value, key));
@@ -362,7 +363,7 @@ function liveStructureTrajectoryPath(row) {
 // src/components/live-structures/LiveStructureFrameViewer.tsx
 import { jsx as jsx3 } from "react/jsx-runtime";
 var GraphMoleculeViewer = lazy(
-  () => import("./GraphMoleculeViewer-L3WPXM2G.js").then((module) => ({ default: module.GraphMoleculeViewer }))
+  () => import("./GraphMoleculeViewer-3O4QVWYQ.js").then((module) => ({ default: module.GraphMoleculeViewer }))
 );
 function LiveStructureFrameViewer({ frame }) {
   const { t: t2 } = useI18n();
@@ -471,7 +472,7 @@ function LiveStructuresPanel({
   const last = Math.min(total, page * pageSize + shownRows.length);
   const totalsNode = /* @__PURE__ */ jsx4("ul", { className: "live-structures-totals", "aria-label": t2("chat.liveStructures"), children: [null, "running", "done", "failed"].map((filter) => {
     const value = filter ? totals[filter] : totals.streams;
-    const text = filter === null ? t2("chat.liveStructuresStreams", { count: value, value: number(value) }) : t2(filter === "running" ? "chat.liveStructuresRunningCount" : filter === "done" ? "chat.liveStructuresDoneCount" : "chat.liveStructuresFailedCount", { value: number(value) });
+    const text3 = filter === null ? t2("chat.liveStructuresStreams", { count: value, value: number(value) }) : t2(filter === "running" ? "chat.liveStructuresRunningCount" : filter === "done" ? "chat.liveStructuresDoneCount" : "chat.liveStructuresFailedCount", { value: number(value) });
     const tone = filter === "failed" && value > 0 ? " is-danger" : filter === "done" && value > 0 ? " is-success" : "";
     return /* @__PURE__ */ jsx4("li", { children: onStatusFilterChange ? /* @__PURE__ */ jsx4(
       "button",
@@ -481,9 +482,9 @@ function LiveStructuresPanel({
         "aria-pressed": statusFilter === filter,
         title: t2("chat.liveStructuresFilter"),
         onClick: () => onStatusFilterChange(filter),
-        children: text
+        children: text3
       }
-    ) : /* @__PURE__ */ jsx4("span", { className: `live-structures-total plugin-report-tag${tone}`, children: text }) }, filter ?? "all");
+    ) : /* @__PURE__ */ jsx4("span", { className: `live-structures-total plugin-report-tag${tone}`, children: text3 }) }, filter ?? "all");
   }) });
   const producersNode = producers.length > 0 ? /* @__PURE__ */ jsxs2("p", { className: "live-structures-producers plugin-report-meta", children: [
     /* @__PURE__ */ jsxs2("span", { children: [
@@ -491,8 +492,8 @@ function LiveStructuresPanel({
       ":"
     ] }),
     " ",
-    producers.slice(0, VISIBLE_PRODUCERS).map((producer, index) => /* @__PURE__ */ jsxs2("span", { className: "live-structures-producer", children: [
-      index > 0 ? " \xB7 " : "",
+    producers.slice(0, VISIBLE_PRODUCERS).map((producer, index2) => /* @__PURE__ */ jsxs2("span", { className: "live-structures-producer", children: [
+      index2 > 0 ? " \xB7 " : "",
       /* @__PURE__ */ jsx4("code", { children: producer.id }),
       " ",
       number(producer.streams)
@@ -545,13 +546,13 @@ function LiveStructuresPanel({
         columns.map((column) => /* @__PURE__ */ jsx4("th", { scope: "col", className: column.numeric ? "is-numeric" : void 0, children: column.label }, column.key)),
         onOpenTrajectory ? /* @__PURE__ */ jsx4("th", { scope: "col", className: "live-structures-open-cell", children: t2("chat.liveStructuresColumnTrajectory") }) : null
       ] }) }),
-      /* @__PURE__ */ jsx4("tbody", { children: shownRows.map((row, index) => {
+      /* @__PURE__ */ jsx4("tbody", { children: shownRows.map((row, index2) => {
         const checked = isSelected(row);
         const disabled = !checked && full;
         return /* @__PURE__ */ jsxs2(
           "tr",
           {
-            "aria-rowindex": page * pageSize + index + 2,
+            "aria-rowindex": page * pageSize + index2 + 2,
             "aria-selected": checked,
             "data-status": row.status,
             className: checked ? "is-selected" : void 0,
@@ -653,7 +654,7 @@ import { FileText, X as X2 } from "lucide-react";
 import { lazy as lazy2, Suspense as Suspense2, useEffect, useMemo as useMemo3, useRef, useState as useState2 } from "react";
 import { Fragment as Fragment2, jsx as jsx5, jsxs as jsxs3 } from "react/jsx-runtime";
 var GraphMoleculeViewer2 = lazy2(
-  () => import("./GraphMoleculeViewer-L3WPXM2G.js").then((module) => ({ default: module.GraphMoleculeViewer }))
+  () => import("./GraphMoleculeViewer-3O4QVWYQ.js").then((module) => ({ default: module.GraphMoleculeViewer }))
 );
 var LIVE_TRAJECTORY_UPDATE_MS = 1e3;
 var STATUS_LABEL2 = {
@@ -846,12 +847,12 @@ function tokenizePrompt(prompt, attachments) {
         nextTokenIndex = candidateIndex;
       }
     }
-    const text = prompt.slice(cursor, nextTokenIndex);
-    if (text) {
+    const text3 = prompt.slice(cursor, nextTokenIndex);
+    if (text3) {
       segments.push({
         type: "text",
         key: `text-${textIndex}`,
-        text
+        text: text3
       });
       textIndex += 1;
     }
@@ -964,17 +965,17 @@ function buildComposerSubmitInput({
 function derivePromptPasteAction({
   files,
   plainText,
-  htmlText,
+  htmlText: htmlText2,
   htmlToText
 }) {
   if (files.length > 0) {
     return { type: "append-files", preventDefault: true, files };
   }
-  const text = plainText || htmlToText(htmlText);
-  if (!text && !htmlText) {
+  const text3 = plainText || htmlToText(htmlText2);
+  if (!text3 && !htmlText2) {
     return { type: "ignore", preventDefault: false };
   }
-  return { type: "insert-text", preventDefault: true, text };
+  return { type: "insert-text", preventDefault: true, text: text3 };
 }
 function derivePromptFileDragAction(hasFiles) {
   return hasFiles ? {
@@ -1092,23 +1093,23 @@ function upsertMcpServerBlock(configContent, serverName, blockContent) {
   const nestedPrefix = `[mcp_servers.${serverName}.`;
   let start = -1;
   let end = lines.length;
-  for (let index = 0; index < lines.length; index += 1) {
-    const trimmed = lines[index]?.trim() ?? "";
+  for (let index2 = 0; index2 < lines.length; index2 += 1) {
+    const trimmed = lines[index2]?.trim() ?? "";
     if (trimmed === exactHeader) {
-      start = index;
+      start = index2;
       break;
     }
   }
   if (start >= 0) {
-    for (let index = start + 1; index < lines.length; index += 1) {
-      const trimmed = lines[index]?.trim() ?? "";
+    for (let index2 = start + 1; index2 < lines.length; index2 += 1) {
+      const trimmed = lines[index2]?.trim() ?? "";
       if (!trimmed.startsWith("[")) {
         continue;
       }
       if (trimmed === exactHeader || trimmed.startsWith(nestedPrefix)) {
         continue;
       }
-      end = index;
+      end = index2;
       break;
     }
     const before = lines.slice(0, start).join("\n").trimEnd();
@@ -1205,9 +1206,9 @@ function attachmentDisplayLabel(attachment) {
 }
 var REASONING_EFFORT_ORDER = ["none", "minimal", "low", "medium", "high", "xhigh", "max", "ultra"];
 var REASONING_EFFORT_COLORS = ["#3d8bff", "#2f7cf6", "#0fb5c8", "#16b364", "#f5b000", "#ff7a1a", "#f43f7a", "#9b5cff"];
-function reasoningEffortColor(effort, index = 0, count = 1) {
+function reasoningEffortColor(effort, index2 = 0, count = 1) {
   const known2 = REASONING_EFFORT_ORDER.indexOf(effort ?? "");
-  const at = known2 >= 0 ? known2 : Math.round(index / Math.max(1, count - 1) * (REASONING_EFFORT_COLORS.length - 1));
+  const at = known2 >= 0 ? known2 : Math.round(index2 / Math.max(1, count - 1) * (REASONING_EFFORT_COLORS.length - 1));
   return REASONING_EFFORT_COLORS[at];
 }
 
@@ -1677,35 +1678,35 @@ function textFromClipboardHtml(value) {
   return serializePromptContent(container, false);
 }
 var BLOCK_PROMPT_TAGS = /* @__PURE__ */ new Set(["DIV", "LI", "P"]);
-function serializePromptNode(node, currentText) {
-  if (node.nodeType === Node.TEXT_NODE) {
-    return currentText + (node.textContent ?? "");
+function serializePromptNode(node2, currentText) {
+  if (node2.nodeType === Node.TEXT_NODE) {
+    return currentText + (node2.textContent ?? "");
   }
-  if (!(node instanceof HTMLElement)) {
+  if (!(node2 instanceof HTMLElement)) {
     return currentText;
   }
-  if (node.dataset.segmentType === "attachment" && node.dataset.placeholder) {
-    return currentText + node.dataset.placeholder;
+  if (node2.dataset.segmentType === "attachment" && node2.dataset.placeholder) {
+    return currentText + node2.dataset.placeholder;
   }
-  if (node.tagName === "BR") {
+  if (node2.tagName === "BR") {
     return `${currentText}
 `;
   }
   let nextText = currentText;
-  if (BLOCK_PROMPT_TAGS.has(node.tagName) && nextText.length > 0 && !nextText.endsWith("\n")) {
+  if (BLOCK_PROMPT_TAGS.has(node2.tagName) && nextText.length > 0 && !nextText.endsWith("\n")) {
     nextText += "\n";
   }
-  for (const child of Array.from(node.childNodes)) {
+  for (const child of Array.from(node2.childNodes)) {
     nextText = serializePromptNode(child, nextText);
   }
   return nextText;
 }
 function serializePromptContent(root, normalizeNbsp = true) {
-  let text = "";
+  let text3 = "";
   for (const child of Array.from(root.childNodes)) {
-    text = serializePromptNode(child, text);
+    text3 = serializePromptNode(child, text3);
   }
-  return normalizeNbsp ? text.replace(/\u00a0/g, " ") : text;
+  return normalizeNbsp ? text3.replace(/\u00a0/g, " ") : text3;
 }
 function serializeEditorPrompt(editor) {
   return serializePromptContent(editor);
@@ -1742,33 +1743,33 @@ function snapshotEditorSelection(editor) {
 }
 function resolveOffsetToDomPosition(root, targetOffset) {
   const target = Math.max(0, targetOffset);
-  let text = "";
+  let text3 = "";
   function visit(parent) {
     const children = Array.from(parent.childNodes);
-    for (const [index, child] of children.entries()) {
+    for (const [index2, child] of children.entries()) {
       if (child.nodeType === Node.TEXT_NODE) {
-        const end = text.length + (child.textContent?.length ?? 0);
-        if (target <= end) return { node: child, offset: target - text.length };
-        text += child.textContent ?? "";
+        const end = text3.length + (child.textContent?.length ?? 0);
+        if (target <= end) return { node: child, offset: target - text3.length };
+        text3 += child.textContent ?? "";
       } else if (child instanceof HTMLElement) {
         if (child.dataset.segmentType === "attachment" && child.dataset.placeholder) {
-          if (target === text.length) return { node: parent, offset: index };
-          text += child.dataset.placeholder;
-          if (target <= text.length) {
-            const next = children[index + 1];
-            return target === text.length && next?.nodeType === Node.TEXT_NODE ? { node: next, offset: 0 } : { node: parent, offset: index + 1 };
+          if (target === text3.length) return { node: parent, offset: index2 };
+          text3 += child.dataset.placeholder;
+          if (target <= text3.length) {
+            const next = children[index2 + 1];
+            return target === text3.length && next?.nodeType === Node.TEXT_NODE ? { node: next, offset: 0 } : { node: parent, offset: index2 + 1 };
           }
         } else if (child.tagName === "BR") {
-          if (target === text.length) return { node: parent, offset: index };
-          text += "\n";
-          if (target === text.length) return { node: parent, offset: index + 1 };
+          if (target === text3.length) return { node: parent, offset: index2 };
+          text3 += "\n";
+          if (target === text3.length) return { node: parent, offset: index2 + 1 };
         } else {
-          if (BLOCK_PROMPT_TAGS.has(child.tagName) && text.length > 0 && !text.endsWith("\n")) {
-            text += "\n";
-            if (target <= text.length) return { node: child, offset: 0 };
+          if (BLOCK_PROMPT_TAGS.has(child.tagName) && text3.length > 0 && !text3.endsWith("\n")) {
+            text3 += "\n";
+            if (target <= text3.length) return { node: child, offset: 0 };
           }
-          const position = visit(child);
-          if (position) return position;
+          const position2 = visit(child);
+          if (position2) return position2;
         }
       }
     }
@@ -1832,10 +1833,10 @@ import {
   useState as useState3
 } from "react";
 function promptExceedsCompactLine(editor, group, toolbar) {
-  const text = serializeEditorPrompt(editor);
-  if (!text.trim() && !editor.querySelector('[data-segment-type="attachment"]'))
+  const text3 = serializeEditorPrompt(editor);
+  if (!text3.trim() && !editor.querySelector('[data-segment-type="attachment"]'))
     return false;
-  if (/[\r\n]/.test(text)) return true;
+  if (/[\r\n]/.test(text3)) return true;
   const groupStyle = getComputedStyle(group);
   const scale = group.offsetWidth ? group.getBoundingClientRect().width / group.offsetWidth : 1;
   const gap = Number.parseFloat(groupStyle.columnGap) || 0;
@@ -2883,12 +2884,12 @@ function ComposerReasoningSlider({
     setPreview(selection);
     setInteracting(false);
   }, [selection, effort, signature]);
-  const index = Math.min(preview, options.length - 1);
-  const option = index < 0 ? null : options[index];
+  const index2 = Math.min(preview, options.length - 1);
+  const option = index2 < 0 ? null : options[index2];
   if (!options.length || !option && !uncommitted) return null;
-  const color = option ? reasoningEffortColor(option.reasoningEffort, index, options.length) : void 0;
+  const color = option ? reasoningEffortColor(option.reasoningEffort, index2, options.length) : void 0;
   const label = !option ? translate("chat.chooseEffort") : formatReasoningEffortLabel(
-    interacting || index !== selection ? option.reasoningEffort : effort
+    interacting || index2 !== selection ? option.reasoningEffort : effort
   );
   const choose = (next) => {
     const chosen = options[next];
@@ -2924,7 +2925,7 @@ function ComposerReasoningSlider({
             min: 0,
             max: Math.max(1, options.length - 1),
             step: 1,
-            value: [index],
+            value: [index2],
             disabled: disabled || options.length < 2,
             onValueChange: (value) => {
               setPreview(value[0] ?? 0);
@@ -2949,7 +2950,7 @@ function ComposerReasoningSlider({
                 "span",
                 {
                   "data-current": entry.reasoningEffort === effort || void 0,
-                  "data-preview": stop === index || void 0,
+                  "data-preview": stop === index2 || void 0,
                   style: {
                     left: `calc(${stop / Math.max(1, options.length - 1) * 100}% + ${11 - 22 * stop / Math.max(1, options.length - 1)}px)`
                   },
@@ -4684,14 +4685,14 @@ function ComposerSlashToolboxMenu({
             }
           ) : null,
           shownItems.map(
-            (item, index) => item.action === "goal" ? (
+            (item, index2) => item.action === "goal" ? (
               // The row sets a goal like the others run their tool; the history
               // of earlier goals is the button at its end.
               /* @__PURE__ */ jsxs21(
                 "div",
                 {
                   "data-toolbox-action": item.action,
-                  className: `composer-toolbox-split mt-1 flex min-h-11 overflow-hidden rounded-xl ${index === 0 && !planShown ? "mt-0" : ""}`,
+                  className: `composer-toolbox-split mt-1 flex min-h-11 overflow-hidden rounded-xl ${index2 === 0 && !planShown ? "mt-0" : ""}`,
                   title: item.description ?? item.label,
                   children: [
                     /* @__PURE__ */ jsx25(
@@ -4736,7 +4737,7 @@ function ComposerSlashToolboxMenu({
                 "data-toolbox-action": item.action,
                 disabled: toolboxItemDisabled2(item),
                 onClick: (event) => onToolboxItemClick(item, event),
-                className: `${toolboxItemClassName2(item)} ${index === 0 && !planShown ? "mt-0" : ""}`,
+                className: `${toolboxItemClassName2(item)} ${index2 === 0 && !planShown ? "mt-0" : ""}`,
                 title: item.description ?? item.label,
                 children: /* @__PURE__ */ jsxs21("div", { className: "flex items-center justify-between gap-3", children: [
                   /* @__PURE__ */ jsx25(ToolboxLabel, { rich, action: item.action, command: item.command, description: item.description }),
@@ -5914,7 +5915,7 @@ function useComposerMenuLifecycle({
     function handleWindowPointerDown(event) {
       const eventPath = typeof event.composedPath === "function" ? event.composedPath() : [];
       const clickedInsideInteractiveMenu = eventPath.some(
-        (node) => node instanceof HTMLElement && (node.dataset.composerMenuSurface === "true" || node.dataset.composerMenuTrigger === "true")
+        (node2) => node2 instanceof HTMLElement && (node2.dataset.composerMenuSurface === "true" || node2.dataset.composerMenuTrigger === "true")
       );
       if (clickedInsideInteractiveMenu) {
         return;
@@ -6196,7 +6197,7 @@ function FloatingCard({ anchor, onClose, children }) {
   close.current = onClose;
   useLayoutEffect6(() => {
     let frame = 0;
-    const position = () => {
+    const position2 = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         if (!anchor.isConnected) {
@@ -6208,8 +6209,8 @@ function FloatingCard({ anchor, onClose, children }) {
           close.current();
           return;
         }
-        const own = card.current?.getBoundingClientRect();
-        const width = own?.width ?? 260, height = own?.height ?? 120;
+        const own3 = card.current?.getBoundingClientRect();
+        const width = own3?.width ?? 260, height = own3?.height ?? 120;
         const below = box.bottom + 6 + height <= window.innerHeight - 8;
         setPlace({
           left: Math.max(8, Math.min(box.left, window.innerWidth - width - 8)),
@@ -6217,17 +6218,17 @@ function FloatingCard({ anchor, onClose, children }) {
         });
       });
     };
-    position();
-    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(position);
+    position2();
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(position2);
     observer?.observe(document.body);
     if (card.current) observer?.observe(card.current);
-    window.addEventListener("scroll", position, true);
-    window.addEventListener("resize", position);
+    window.addEventListener("scroll", position2, true);
+    window.addEventListener("resize", position2);
     return () => {
       cancelAnimationFrame(frame);
       observer?.disconnect();
-      window.removeEventListener("scroll", position, true);
-      window.removeEventListener("resize", position);
+      window.removeEventListener("scroll", position2, true);
+      window.removeEventListener("resize", position2);
     };
   }, [anchor]);
   useEffect11(() => {
@@ -7381,24 +7382,24 @@ function ThreadComposer({
     const queued = pendingPrompts.find((entry) => entry.id === pendingPromptId);
     if (!queued || !onCancelPendingPrompt) return;
     await onCancelPendingPrompt(pendingPromptId);
-    const text = normalizePromptText(queued.prompt);
+    const text3 = normalizePromptText(queued.prompt);
     updateDraft((current) => ({
-      prompt: current.prompt.trim() ? `${text}
-${current.prompt}` : text,
+      prompt: current.prompt.trim() ? `${text3}
+${current.prompt}` : text3,
       attachments: current.attachments
     }));
-    pendingSelectionRef.current = { start: text.length, end: text.length };
-    selectionSnapshotRef.current = { start: text.length, end: text.length };
+    pendingSelectionRef.current = { start: text3.length, end: text3.length };
+    selectionSnapshotRef.current = { start: text3.length, end: text3.length };
     promptRef.current?.focus();
   }
-  function insertPlainTextIntoPrompt(text) {
-    if (!text) {
+  function insertPlainTextIntoPrompt(text3) {
+    if (!text3) {
       return;
     }
     const selection = snapshotSelection() ?? selectionSnapshotRef.current;
     const start = selection?.start ?? prompt.length;
     const end = selection?.end ?? start;
-    const normalizedText = normalizePromptText(text);
+    const normalizedText = normalizePromptText(text3);
     const nextPrompt = `${prompt.slice(0, start)}${normalizedText}${prompt.slice(end)}`;
     updateDraft((current) => ({
       prompt: nextPrompt,
@@ -7610,7 +7611,7 @@ ${current.prompt}` : text,
       const count = slashCommands(slashQuery).length;
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault();
-        if (count) setSlashActive((index) => (index + (event.key === "ArrowDown" ? 1 : count - 1)) % count);
+        if (count) setSlashActive((index2) => (index2 + (event.key === "ArrowDown" ? 1 : count - 1)) % count);
         return;
       }
       if (event.key === "Escape") {
@@ -7985,11 +7986,11 @@ function latestUsage(items, scope, scopeId) {
 }
 function mergeTimelineItem(current, incoming, merge) {
   const merged = merge(current, incoming);
-  const previous = progressEvidence(current).data;
+  const previous2 = progressEvidence(current).data;
   const next = progressEvidence(incoming).data;
-  if (!previous || !next || previous.callId !== next.callId) return merged;
+  if (!previous2 || !next || previous2.callId !== next.callId) return merged;
   const terminal = (status) => ["completed", "failed", "interrupted"].includes(status);
-  const progress = terminal(previous.status) && !terminal(next.status) ? previous : { ...previous, ...next };
+  const progress = terminal(previous2.status) && !terminal(next.status) ? previous2 : { ...previous2, ...next };
   return { ...merged, progress };
 }
 function scopeUsageItems(turn) {
@@ -8027,8 +8028,8 @@ function countTurnSteps(turn, items, summaryItems = items) {
 function decodeXmlEntities(value) {
   return value.replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&");
 }
-function parseHookPromptText(text) {
-  const match = text.trim().match(
+function parseHookPromptText(text3) {
+  const match = text3.trim().match(
     /^<hook_prompt(?:\s+hook_run_id="([^"]+)")?>([\s\S]*)<\/hook_prompt>$/
   );
   if (!match) {
@@ -8075,7 +8076,7 @@ function prepareTurnItemsForRendering(items, active) {
     return prepared;
   }
   let seenPrimaryUserMessage = false;
-  return prepared.map((item, index) => {
+  return prepared.map((item, index2) => {
     if (item.kind !== "userMessage") {
       return item;
     }
@@ -8083,7 +8084,7 @@ function prepareTurnItemsForRendering(items, active) {
       seenPrimaryUserMessage = true;
       return item;
     }
-    const hasConsumptionAfter = prepared.slice(index + 1).some((nextItem) => isSteerConsumptionHistoryItem(nextItem.kind));
+    const hasConsumptionAfter = prepared.slice(index2 + 1).some((nextItem) => isSteerConsumptionHistoryItem(nextItem.kind));
     if (hasConsumptionAfter) {
       return item;
     }
@@ -8102,12 +8103,12 @@ function historyItemSequence(item) {
 function sortTurnItemsByRecordedSequence(items) {
   const renderableItems = renderableHistoryItems(items);
   const leadingItems = [];
-  let index = 0;
-  while (index < renderableItems.length && renderableItems[index]?.kind === "userMessage" && !hasHistoryItemSequence(renderableItems[index])) {
-    leadingItems.push(renderableItems[index]);
-    index += 1;
+  let index2 = 0;
+  while (index2 < renderableItems.length && renderableItems[index2]?.kind === "userMessage" && !hasHistoryItemSequence(renderableItems[index2])) {
+    leadingItems.push(renderableItems[index2]);
+    index2 += 1;
   }
-  const trailingItems = renderableItems.slice(index);
+  const trailingItems = renderableItems.slice(index2);
   if (!trailingItems.some(hasHistoryItemSequence)) {
     return renderableItems;
   }
@@ -8207,7 +8208,7 @@ function getLiveOutputTailForTurn(liveOutput, items) {
   }
   const materializedAgentTexts = renderableHistoryItems(items).filter(
     (item) => item.kind === "agentMessage"
-  ).map((item) => item.text).filter((text) => text.length > 0);
+  ).map((item) => item.text).filter((text3) => text3.length > 0);
   const lastMaterializedAgentText = materializedAgentTexts.at(-1) ?? "";
   if (lastMaterializedAgentText) {
     const anchorIndex = liveOutput.lastIndexOf(lastMaterializedAgentText);
@@ -8256,9 +8257,9 @@ function groupTimelineHistoryItems(items) {
 }
 function groupConsecutiveTimelineHistoryItems(items) {
   const entries = [];
-  let index = 0;
-  while (index < items.length) {
-    const current = items[index];
+  let index2 = 0;
+  while (index2 < items.length) {
+    const current = items[index2];
     if (!current) {
       break;
     }
@@ -8268,13 +8269,13 @@ function groupConsecutiveTimelineHistoryItems(items) {
         key: current.id,
         item: current
       });
-      index += 1;
+      index2 += 1;
       continue;
     }
     const groupedItems = [];
-    while (index < items.length && items[index]?.kind === current.kind && items[index]?.progress === void 0 && items[index]?.extension?.type !== "elagente.progress") {
-      groupedItems.push(items[index]);
-      index += 1;
+    while (index2 < items.length && items[index2]?.kind === current.kind && items[index2]?.progress === void 0 && items[index2]?.extension?.type !== "elagente.progress") {
+      groupedItems.push(items[index2]);
+      index2 += 1;
     }
     if (groupedItems.length === 1) {
       entries.push({
@@ -8363,18 +8364,18 @@ function entryItemCount(entry) {
 }
 function groupAgentActivitySequences(entries) {
   const grouped = [];
-  let index = 0;
-  while (index < entries.length) {
-    if (!isAgentActivityEntry(entries[index])) {
-      grouped.push(entries[index]);
-      index += 1;
+  let index2 = 0;
+  while (index2 < entries.length) {
+    if (!isAgentActivityEntry(entries[index2])) {
+      grouped.push(entries[index2]);
+      index2 += 1;
       continue;
     }
-    const start = index;
-    while (index < entries.length && isAgentActivityEntry(entries[index])) {
-      index += 1;
+    const start = index2;
+    while (index2 < entries.length && isAgentActivityEntry(entries[index2])) {
+      index2 += 1;
     }
-    const activityEntries = entries.slice(start, index);
+    const activityEntries = entries.slice(start, index2);
     const itemCount = activityEntries.reduce(
       (total, entry) => total + entryItemCount(entry),
       0
@@ -9241,13 +9242,13 @@ function RunningDots({
 }) {
   const { locale: i18nLocale } = useI18n();
   const dotClassName = tone === "sky" ? "bg-sky-300/90" : "bg-amber-200/90";
-  return /* @__PURE__ */ jsx39("span", { className: "ml-1.5 inline-flex items-center gap-1", "aria-hidden": "true", children: [0, 1, 2].map((index) => /* @__PURE__ */ jsx39(
+  return /* @__PURE__ */ jsx39("span", { className: "ml-1.5 inline-flex items-center gap-1", "aria-hidden": "true", children: [0, 1, 2].map((index2) => /* @__PURE__ */ jsx39(
     "span",
     {
       className: `h-1.5 w-1.5 rounded-full animate-pulse ${dotClassName}`,
-      style: { animationDelay: `${index * 180}ms`, backgroundColor: color, transition: "background-color 300ms ease" }
+      style: { animationDelay: `${index2 * 180}ms`, backgroundColor: color, transition: "background-color 300ms ease" }
     },
-    index
+    index2
   )) });
 }
 function ProgressIndicator({ age, at }) {
@@ -9497,7 +9498,7 @@ function SettingsPanels({ sections, initialId, selected: selectedId, onSelect, s
   const active = sections.find((section) => section.id === selected) ?? sections[0];
   if (!active) return null;
   return /* @__PURE__ */ jsxs34("div", { className: "settings-workspace", children: [
-    /* @__PURE__ */ jsx40("nav", { className: "settings-navigation", role: "tablist", "aria-label": translate("settings.settingsCategories"), children: sections.map((section, index) => /* @__PURE__ */ jsxs34(
+    /* @__PURE__ */ jsx40("nav", { className: "settings-navigation", role: "tablist", "aria-label": translate("settings.settingsCategories"), children: sections.map((section, index2) => /* @__PURE__ */ jsxs34(
       "button",
       {
         type: "button",
@@ -9508,9 +9509,9 @@ function SettingsPanels({ sections, initialId, selected: selectedId, onSelect, s
         tabIndex: active.id === section.id ? 0 : -1,
         onClick: () => setSelected(section.id),
         onKeyDown: (event) => {
-          let next = index;
-          if (["ArrowRight", "ArrowDown"].includes(event.key)) next = (index + 1) % sections.length;
-          else if (["ArrowLeft", "ArrowUp"].includes(event.key)) next = (index + sections.length - 1) % sections.length;
+          let next = index2;
+          if (["ArrowRight", "ArrowDown"].includes(event.key)) next = (index2 + 1) % sections.length;
+          else if (["ArrowLeft", "ArrowUp"].includes(event.key)) next = (index2 + sections.length - 1) % sections.length;
           else if (event.key === "Home") next = 0;
           else if (event.key === "End") next = sections.length - 1;
           else return;
@@ -9593,30 +9594,30 @@ function WorkbenchThreadMenu({ thread, context, copyIdLabel, onNavigate, onRenam
     const area = menuArea(portalHost(), 260);
     return { left: clamp(context ? box.left : box.right - 260, area.left + 8, area.right - 268), top: clamp(box.bottom + (context ? 0 : 6), area.top + 8, area.bottom - 340) };
   };
-  const [position, setPosition] = useState23(() => anchor.current ? place(anchor.current) : null);
+  const [position2, setPosition] = useState23(() => anchor.current ? place(anchor.current) : null);
   const [copied, setCopied] = useState23(null);
   const menu = useRef18(null);
   const fitted = useRef18(false);
   useLayoutEffect9(() => {
-    const node = menu.current;
-    if (!position || !node) {
+    const node2 = menu.current;
+    if (!position2 || !node2) {
       fitted.current = false;
       return;
     }
     if (fitted.current || !anchor.current) return;
     fitted.current = true;
-    const box = node.getBoundingClientRect();
-    const area = menuArea(node.parentElement ?? document.body, box.width);
+    const box = node2.getBoundingClientRect();
+    const area = menuArea(node2.parentElement ?? document.body, box.width);
     const at = anchor.current, gap = context ? 0 : 6;
     let top = at.bottom + gap;
     if (top + box.height > area.bottom - 8 && at.top - gap - box.height >= area.top + 8) top = at.top - gap - box.height;
     const left = clamp(context ? at.left : at.right - box.width, area.left + 8, area.right - 8 - box.width);
     top = clamp(top, area.top + 8, area.bottom - 8 - box.height);
     const dx = left - box.left, dy = top - box.top;
-    if (Math.abs(dx) >= 1 || Math.abs(dy) >= 1) setPosition({ left: position.left + dx, top: position.top + dy });
-  }, [position]);
+    if (Math.abs(dx) >= 1 || Math.abs(dy) >= 1) setPosition({ left: position2.left + dx, top: position2.top + dy });
+  }, [position2]);
   useEffect16(() => {
-    if (!position) return;
+    if (!position2) return;
     setCopied(null);
     const close = (event) => {
       if (event.type === "keydown" && event.key !== "Escape") return;
@@ -9638,21 +9639,21 @@ function WorkbenchThreadMenu({ thread, context, copyIdLabel, onNavigate, onRenam
       window.removeEventListener("resize", close);
       window.removeEventListener("scroll", scroll, true);
     };
-  }, [position]);
-  useMenuKeyboard(menu, Boolean(position), (restore) => {
+  }, [position2]);
+  useMenuKeyboard(menu, Boolean(position2), (restore) => {
     setPosition(null);
     if (restore) (trigger.current ?? context?.returnFocus)?.focus();
   }, "button:not([disabled])");
   const dismiss = useRef18(context?.onClose);
   dismiss.current = context?.onClose;
   useEffect16(() => {
-    if (context && !position) dismiss.current?.();
-  }, [Boolean(context), position]);
-  const copyItem = (key, label, text) => {
+    if (context && !position2) dismiss.current?.();
+  }, [Boolean(context), position2]);
+  const copyItem = (key, label, text3) => {
     const state = copied?.key === key ? copied.state : null;
-    return /* @__PURE__ */ jsxs36("button", { "data-copy-state": state ?? void 0, disabled: !text, onClick: async () => {
-      if (!text) return;
-      const ok = await copyText(text);
+    return /* @__PURE__ */ jsxs36("button", { "data-copy-state": state ?? void 0, disabled: !text3, onClick: async () => {
+      if (!text3) return;
+      const ok = await copyText(text3);
       setCopied({ key, state: ok ? "copied" : "failed" });
       if (ok) window.setTimeout(() => {
         setCopied(null);
@@ -9664,8 +9665,8 @@ function WorkbenchThreadMenu({ thread, context, copyIdLabel, onNavigate, onRenam
     ] });
   };
   return /* @__PURE__ */ jsxs36(Fragment13, { children: [
-    !context && /* @__PURE__ */ jsx42("button", { ref: trigger, className: "recent-thread-actions", "aria-label": translate("workbench.actionsFor", { value1: thread.title }), "aria-expanded": !!position, "aria-haspopup": "dialog", onClick: () => {
-      if (position) {
+    !context && /* @__PURE__ */ jsx42("button", { ref: trigger, className: "recent-thread-actions", "aria-label": translate("workbench.actionsFor", { value1: thread.title }), "aria-expanded": !!position2, "aria-haspopup": "dialog", onClick: () => {
+      if (position2) {
         setPosition(null);
         return;
       }
@@ -9673,7 +9674,7 @@ function WorkbenchThreadMenu({ thread, context, copyIdLabel, onNavigate, onRenam
       anchor.current = { left: box.left, top: box.top, right: box.right, bottom: box.bottom };
       setPosition(place(anchor.current));
     }, children: /* @__PURE__ */ jsx42(MoreHorizontal, { "data-icon": "more", size: 16 }) }),
-    position && createPortal2(/* @__PURE__ */ jsxs36("div", { ref: menu, role: "dialog", "aria-label": translate("workbench.threadActions", { value1: thread.title }), className: "recent-thread-menu", style: position, children: [
+    position2 && createPortal2(/* @__PURE__ */ jsxs36("div", { ref: menu, role: "dialog", "aria-label": translate("workbench.threadActions", { value1: thread.title }), className: "recent-thread-menu", style: position2, children: [
       /* @__PURE__ */ jsx42("p", { className: "recent-thread-menu-title", children: thread.title }),
       /* @__PURE__ */ jsxs36("button", { onClick: () => {
         setPosition(null);
@@ -9762,8 +9763,8 @@ import { useEffect as useEffect17, useState as useState24 } from "react";
 function useTerminalKeyboardInset(root, enabled) {
   const [inset2, setInset] = useState24(0);
   useEffect17(() => {
-    const node = root.current;
-    if (!enabled || !node) {
+    const node2 = root.current;
+    if (!enabled || !node2) {
       setInset(0);
       return;
     }
@@ -9774,18 +9775,18 @@ function useTerminalKeyboardInset(root, enabled) {
       frame = requestAnimationFrame(() => {
         const active = document.activeElement;
         if (active?.matches('input, textarea, [contenteditable="true"]')) {
-          ownsKeyboard = node.contains(active) && Boolean(active.closest('[data-testid="workbench-bottom-panel"]'));
+          ownsKeyboard = node2.contains(active) && Boolean(active.closest('[data-testid="workbench-bottom-panel"]'));
         }
         const viewport = window.visualViewport;
         const keyboardOpen = viewport && window.innerHeight - viewport.height > 80 && viewport.scale === 1;
         if (!keyboardOpen) ownsKeyboard = false;
-        const rect = node.getBoundingClientRect();
+        const rect = node2.getBoundingClientRect();
         const bottom = viewport ? viewport.height + viewport.offsetTop : window.innerHeight;
         setInset(ownsKeyboard && keyboardOpen ? Math.round(Math.min(rect.height, Math.max(0, rect.bottom - bottom))) : 0);
       });
     };
     const observer = new ResizeObserver(update);
-    observer.observe(node);
+    observer.observe(node2);
     window.visualViewport?.addEventListener("resize", update);
     window.visualViewport?.addEventListener("scroll", update);
     window.addEventListener("resize", update);
@@ -10712,8 +10713,8 @@ function GroupedThreadTabs({ threads, currentKey, onNavigate, onClose, onThreadM
       return /* @__PURE__ */ jsxs41(
         "div",
         {
-          ref: (node) => {
-            if (node) groupNodes.current.set(root.key, node);
+          ref: (node2) => {
+            if (node2) groupNodes.current.set(root.key, node2);
             else groupNodes.current.delete(root.key);
           },
           className: "matter-thread-group",
@@ -10920,14 +10921,14 @@ function PhoneSheet({ open, label, onClose, children, footer }) {
     sheet.current?.querySelector("[data-sheet-autofocus], button, a")?.focus({ preventScroll: true });
   }, [open]);
   useEffect21(() => {
-    const node = sheet.current;
+    const node2 = sheet.current;
     if (!open) {
-      if (node) node.style.height = "";
+      if (node2) node2.style.height = "";
       return;
     }
-    if (!node) return;
-    node.style.transform = "";
-    const body = node.querySelector(".matter-phone-sheet-body");
+    if (!node2) return;
+    node2.style.transform = "";
+    const body = node2.querySelector(".matter-phone-sheet-body");
     let start = null;
     let offset = 0;
     const begin = (event) => {
@@ -10940,43 +10941,43 @@ function PhoneSheet({ open, label, onClose, children, footer }) {
     };
     const move = (event) => {
       if (!start) return;
-      if (!node.hasAttribute("data-dragging") && node.querySelector("[data-reordering], [data-pressing]")) {
+      if (!node2.hasAttribute("data-dragging") && node2.querySelector("[data-reordering], [data-pressing]")) {
         start = null;
         return;
       }
       const dx = event.touches[0].clientX - start.x, dy = event.touches[0].clientY - start.y;
-      if (!node.hasAttribute("data-dragging")) {
+      if (!node2.hasAttribute("data-dragging")) {
         if (Math.abs(dx) > 10 || dy < -10) {
           start = null;
           return;
         }
         if (dy < 10 || dy < Math.abs(dx) * 1.2 || body && body.scrollTop > 0) return;
-        node.setAttribute("data-dragging", "");
+        node2.setAttribute("data-dragging", "");
       }
       event.preventDefault();
       offset = Math.max(0, dy);
-      node.style.transform = `translateY(${offset}px)`;
+      node2.style.transform = `translateY(${offset}px)`;
     };
     const end = (event) => {
       const from = start;
       start = null;
-      if (!from || !node.hasAttribute("data-dragging")) return;
-      node.removeAttribute("data-dragging");
+      if (!from || !node2.hasAttribute("data-dragging")) return;
+      node2.removeAttribute("data-dragging");
       const fast = offset / Math.max(1, event.timeStamp - from.time) > 0.6;
-      if (offset > Math.min(100, node.offsetHeight * 0.2) || fast && offset > 24) {
-        node.style.transform = "translateY(105%)";
+      if (offset > Math.min(100, node2.offsetHeight * 0.2) || fast && offset > 24) {
+        node2.style.transform = "translateY(105%)";
         close.current();
-      } else node.style.transform = "";
+      } else node2.style.transform = "";
     };
-    node.addEventListener("touchstart", begin, { passive: true });
-    node.addEventListener("touchmove", move, { passive: false });
-    node.addEventListener("touchend", end);
-    node.addEventListener("touchcancel", end);
+    node2.addEventListener("touchstart", begin, { passive: true });
+    node2.addEventListener("touchmove", move, { passive: false });
+    node2.addEventListener("touchend", end);
+    node2.addEventListener("touchcancel", end);
     return () => {
-      node.removeEventListener("touchstart", begin);
-      node.removeEventListener("touchmove", move);
-      node.removeEventListener("touchend", end);
-      node.removeEventListener("touchcancel", end);
+      node2.removeEventListener("touchstart", begin);
+      node2.removeEventListener("touchmove", move);
+      node2.removeEventListener("touchend", end);
+      node2.removeEventListener("touchcancel", end);
     };
   }, [open]);
   useModalFocus(sheet, open, onClose);
@@ -11016,8 +11017,8 @@ import { useEffect as useEffect22, useRef as useRef25, useState as useState31 } 
 var REORDER_LONG_PRESS_MS = 700;
 function inOrder(items, keyOf, order) {
   if (!order?.length) return items;
-  const rank = new Map(order.map((key, index) => [key, index]));
-  return items.map((item, index) => ({ item, index, rank: rank.get(keyOf(item)) })).sort((a, b) => {
+  const rank = new Map(order.map((key, index2) => [key, index2]));
+  return items.map((item, index2) => ({ item, index: index2, rank: rank.get(keyOf(item)) })).sort((a, b) => {
     if (a.rank !== void 0 && b.rank !== void 0) return a.rank - b.rank;
     if (a.rank !== void 0) return -1;
     if (b.rank !== void 0) return 1;
@@ -11037,26 +11038,26 @@ function useDragReorder(listRef, { axis, itemSelector, enabled, onCommit, scroll
   const commit = useRef25(onCommit);
   commit.current = onCommit;
   useEffect22(() => {
-    const list = listRef.current;
-    if (!list || !enabled) return;
+    const list2 = listRef.current;
+    if (!list2 || !enabled) return;
     const horizontal = axis === "x";
-    const scroller = () => scrollRef?.current ?? list;
+    const scroller = () => scrollRef?.current ?? list2;
     const scrollOf = () => horizontal ? scroller().scrollLeft : scroller().scrollTop;
     const along = (x, y) => horizontal ? x : y;
     let drag = null;
     let swallowClick = false;
     let frame = 0;
-    const itemsOf = () => [...list.querySelectorAll(itemSelector)].filter((item) => item.dataset.reorderKey);
+    const itemsOf = () => [...list2.querySelectorAll(itemSelector)].filter((item) => item.dataset.reorderKey);
     const begin = (x, y, item, touch) => {
       const items = itemsOf();
-      const index = items.indexOf(item);
-      if (index < 0 || items.length < 2) return;
+      const index2 = items.indexOf(item);
+      if (index2 < 0 || items.length < 2) return;
       const scroll = scrollOf();
       const rects = items.map((entry) => entry.getBoundingClientRect());
       const starts = rects.map((rect) => (horizontal ? rect.left : rect.top) + scroll);
       const sizes = rects.map((rect) => horizontal ? rect.width : rect.height);
       const gap = items.length > 1 ? Math.max(0, (starts[1] ?? 0) - (starts[0] ?? 0) - (sizes[0] ?? 0)) : 0;
-      drag = { key: item.dataset.reorderKey, index, items, starts, sizes, gap, origin: along(x, y) + scroll, startX: x, startY: y, target: index, active: false, touch, timer: 0, last: along(x, y) };
+      drag = { key: item.dataset.reorderKey, index: index2, items, starts, sizes, gap, origin: along(x, y) + scroll, startX: x, startY: y, target: index2, active: false, touch, timer: 0, last: along(x, y) };
       if (touch) {
         item.setAttribute("data-pressing", "");
         drag.timer = window.setTimeout(activate, REORDER_LONG_PRESS_MS);
@@ -11065,7 +11066,7 @@ function useDragReorder(listRef, { axis, itemSelector, enabled, onCommit, scroll
     const activate = () => {
       if (!drag) return;
       drag.active = true;
-      list.setAttribute("data-reordering", "");
+      list2.setAttribute("data-reordering", "");
       const item = drag.items[drag.index];
       item?.removeAttribute("data-pressing");
       item?.setAttribute("data-dragging", "");
@@ -11073,24 +11074,24 @@ function useDragReorder(listRef, { axis, itemSelector, enabled, onCommit, scroll
     };
     const layout = () => {
       if (!drag) return;
-      const { items, starts, sizes, gap, index } = drag;
+      const { items, starts, sizes, gap, index: index2 } = drag;
       const pointer = drag.last + scrollOf();
       const offset = pointer - drag.origin;
-      const centre = (starts[index] ?? 0) + offset + (sizes[index] ?? 0) / 2;
-      let target = index;
+      const centre = (starts[index2] ?? 0) + offset + (sizes[index2] ?? 0) / 2;
+      let target = index2;
       for (let other = 0; other < items.length; other += 1) {
-        if (other === index) continue;
+        if (other === index2) continue;
         const middle = (starts[other] ?? 0) + (sizes[other] ?? 0) / 2;
-        if (other < index && centre < middle) target = Math.min(target, other);
-        if (other > index && centre > middle) target = Math.max(target, other);
+        if (other < index2 && centre < middle) target = Math.min(target, other);
+        if (other > index2 && centre > middle) target = Math.max(target, other);
       }
       drag.target = target;
-      const shift = (sizes[index] ?? 0) + gap;
+      const shift = (sizes[index2] ?? 0) + gap;
       const translate2 = (value) => horizontal ? `translateX(${value}px)` : `translateY(${value}px)`;
       items.forEach((item, other) => {
-        if (other === index) item.style.transform = translate2(offset);
-        else if (other > index && other <= target) item.style.transform = translate2(-shift);
-        else if (other < index && other >= target) item.style.transform = translate2(shift);
+        if (other === index2) item.style.transform = translate2(offset);
+        else if (other > index2 && other <= target) item.style.transform = translate2(-shift);
+        else if (other < index2 && other >= target) item.style.transform = translate2(shift);
         else item.style.transform = "";
       });
     };
@@ -11128,7 +11129,7 @@ function useDragReorder(listRef, { axis, itemSelector, enabled, onCommit, scroll
       if (!frame) frame = window.requestAnimationFrame(autoScroll);
     };
     const reset = () => {
-      list.removeAttribute("data-reordering");
+      list2.removeAttribute("data-reordering");
       if (frame) window.cancelAnimationFrame(frame);
       frame = 0;
       for (const item of itemsOf()) {
@@ -11145,7 +11146,7 @@ function useDragReorder(listRef, { axis, itemSelector, enabled, onCommit, scroll
     const finish = () => {
       if (!drag) return;
       window.clearTimeout(drag.timer);
-      const { active, index, target, key, items } = drag;
+      const { active, index: index2, target, key, items } = drag;
       drag = null;
       reset();
       if (!active) return;
@@ -11153,9 +11154,9 @@ function useDragReorder(listRef, { axis, itemSelector, enabled, onCommit, scroll
       window.setTimeout(() => {
         swallowClick = false;
       }, 0);
-      if (target === index) return;
+      if (target === index2) return;
       const keys = items.map((item) => item.dataset.reorderKey);
-      keys.splice(index, 1);
+      keys.splice(index2, 1);
       keys.splice(target, 0, key);
       commit.current(keys, key);
     };
@@ -11193,28 +11194,28 @@ function useDragReorder(listRef, { axis, itemSelector, enabled, onCommit, scroll
     const nativeDrag = (event) => {
       if (itemFor(event.target)) event.preventDefault();
     };
-    list.addEventListener("pointerdown", mouseDown);
+    list2.addEventListener("pointerdown", mouseDown);
     window.addEventListener("pointermove", mouseMove);
     window.addEventListener("pointerup", mouseUp);
-    list.addEventListener("touchstart", touchStart, { passive: true });
-    list.addEventListener("touchmove", touchMove, { passive: false });
-    list.addEventListener("touchend", finish);
-    list.addEventListener("touchcancel", cancel);
-    list.addEventListener("click", click, true);
-    list.addEventListener("contextmenu", contextMenu);
-    list.addEventListener("dragstart", nativeDrag);
+    list2.addEventListener("touchstart", touchStart, { passive: true });
+    list2.addEventListener("touchmove", touchMove, { passive: false });
+    list2.addEventListener("touchend", finish);
+    list2.addEventListener("touchcancel", cancel);
+    list2.addEventListener("click", click, true);
+    list2.addEventListener("contextmenu", contextMenu);
+    list2.addEventListener("dragstart", nativeDrag);
     return () => {
       cancel();
-      list.removeEventListener("pointerdown", mouseDown);
+      list2.removeEventListener("pointerdown", mouseDown);
       window.removeEventListener("pointermove", mouseMove);
       window.removeEventListener("pointerup", mouseUp);
-      list.removeEventListener("touchstart", touchStart);
-      list.removeEventListener("touchmove", touchMove);
-      list.removeEventListener("touchend", finish);
-      list.removeEventListener("touchcancel", cancel);
-      list.removeEventListener("click", click, true);
-      list.removeEventListener("contextmenu", contextMenu);
-      list.removeEventListener("dragstart", nativeDrag);
+      list2.removeEventListener("touchstart", touchStart);
+      list2.removeEventListener("touchmove", touchMove);
+      list2.removeEventListener("touchend", finish);
+      list2.removeEventListener("touchcancel", cancel);
+      list2.removeEventListener("click", click, true);
+      list2.removeEventListener("contextmenu", contextMenu);
+      list2.removeEventListener("dragstart", nativeDrag);
     };
   }, [listRef, scrollRef, axis, itemSelector, enabled]);
 }
@@ -11222,7 +11223,7 @@ function useDragReorder(listRef, { axis, itemSelector, enabled, onCommit, scroll
 // src/components/workbench/ShortcutList.tsx
 import { jsx as jsx49, jsxs as jsxs43 } from "react/jsx-runtime";
 function orderShortcuts(threads) {
-  return threads.map((thread, index) => ({ thread, index })).sort((a, b) => {
+  return threads.map((thread, index2) => ({ thread, index: index2 })).sort((a, b) => {
     const left = a.thread.shortcutOrder, right = b.thread.shortcutOrder;
     if (left !== void 0 && right !== void 0) return left - right || a.index - b.index;
     if (left !== void 0) return -1;
@@ -11235,7 +11236,7 @@ function ShortcutList({ threads, renderRow, onReorder }) {
   const ordered = orderShortcuts(threads);
   const [shownKeys, setPending] = usePendingOrder(ordered.map((thread) => thread.key));
   const shown = shownKeys.map((key) => ordered.find((thread) => thread.key === key)).filter(Boolean);
-  const list = useRef26(null);
+  const list2 = useRef26(null);
   const [announcement, setAnnouncement] = useState32("");
   const onReorderRef = useRef26(onReorder);
   onReorderRef.current = onReorder;
@@ -11246,9 +11247,9 @@ function ShortcutList({ threads, renderRow, onReorder }) {
     const title = shown.find((thread) => thread.key === moved)?.title ?? "";
     setAnnouncement(translate("workbench.shortcutMoved", { title, position: keys.indexOf(moved) + 1, count: keys.length }));
   };
-  useDragReorder(list, { axis: "y", itemSelector: ":scope > [data-shortcut]", enabled: Boolean(onReorder), onCommit: commit });
-  return /* @__PURE__ */ jsxs43("div", { ref: list, className: "matter-shortcut-list", children: [
-    shown.map((thread, index) => /* @__PURE__ */ jsx49(
+  useDragReorder(list2, { axis: "y", itemSelector: ":scope > [data-shortcut]", enabled: Boolean(onReorder), onCommit: commit });
+  return /* @__PURE__ */ jsxs43("div", { ref: list2, className: "matter-shortcut-list", children: [
+    shown.map((thread, index2) => /* @__PURE__ */ jsx49(
       "div",
       {
         "data-shortcut": thread.key,
@@ -11257,10 +11258,10 @@ function ShortcutList({ threads, renderRow, onReorder }) {
         onKeyDown: (event) => {
           if (!onReorder || !event.altKey || event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
           event.preventDefault();
-          const target = index + (event.key === "ArrowUp" ? -1 : 1);
+          const target = index2 + (event.key === "ArrowUp" ? -1 : 1);
           if (target < 0 || target >= shown.length) return;
           const keys = shown.map((item) => item.key);
-          keys.splice(index, 1);
+          keys.splice(index2, 1);
           keys.splice(target, 0, thread.key);
           commit(keys, thread.key);
           const focused = document.activeElement;
@@ -11489,8 +11490,8 @@ function MatterWorkbench({
       } else {
         if (x > window.innerWidth * 0.4 || !target.closest(".matter-main")) return;
         if (target.closest('.thread-graph-composer-host, .file-ask-bar, .matter-phone-dock, .xterm, .terminal-panel, input, textarea, [contenteditable="true"], [contenteditable="plaintext-only"], [role="dialog"], [data-no-swipe]')) return;
-        for (let node = target; node && node !== root; node = node.parentElement) {
-          if (node.scrollLeft > 0 && node.scrollWidth > node.clientWidth) return;
+        for (let node2 = target; node2 && node2 !== root; node2 = node2.parentElement) {
+          if (node2.scrollLeft > 0 && node2.scrollWidth > node2.clientWidth) return;
         }
       }
       start = { x, y: event.touches[0].clientY, time: event.timeStamp };
@@ -11761,14 +11762,14 @@ function MatterWorkbench({
   const accountThreads = [...knownThreads, ...(o.activeThreads ?? []).filter((thread) => !knownThreads.some((known2) => known2.key === thread.key))];
   const runningThreads = accountThreads.filter((thread) => thread.status === "running");
   const threadByKey = new Map(accountThreads.map((thread) => [thread.key, thread]));
-  const inConversations = (list) => {
+  const inConversations = (list2) => {
     const shown = [];
     const add = (thread) => {
       if (!shown.some((item) => item.key === thread.key)) shown.push(thread);
     };
-    for (const thread of list) {
+    for (const thread of list2) {
       const root = thread.rootKey && thread.rootKey !== thread.key ? threadByKey.get(thread.rootKey) : void 0;
-      if (root) add(list.find((item) => item.key === root.key) ?? root);
+      if (root) add(list2.find((item) => item.key === root.key) ?? root);
       add(thread);
     }
     return shown;
@@ -11780,7 +11781,7 @@ function MatterWorkbench({
   const favorites = o.threads.filter((thread) => thread.favorite);
   const workspaceThreads = o.workspaceThreads ? tabs : [];
   const recentThreads = o.threads.filter((thread) => !workspaceThreads.some((tab) => tab.key === thread.key));
-  const attention = (thread) => thread.status === "running" ? 0 : thread.status === "unread" || thread.status === "failed" ? 1 : 2;
+  const attention2 = (thread) => thread.status === "running" ? 0 : thread.status === "unread" || thread.status === "failed" ? 1 : 2;
   const currentRootKey = tabs.find((thread) => thread.key === o.currentKey)?.rootKey ?? o.currentKey;
   const inCurrentGroup = (thread) => thread.key === o.currentKey || thread.key === currentRootKey || thread.rootKey === currentRootKey;
   const navStrip = /* @__PURE__ */ jsxs44("div", { className: "matter-nav-strip", role: "group", "aria-label": translate("workbench.pageNavigation"), children: [
@@ -12444,7 +12445,7 @@ ${thread.subtitle} \xB7 ${activity.label}`,
                   /* @__PURE__ */ jsx50("span", { children: o.workspaceSectionLabel ?? translate("workbench.thisWorkspace") }),
                   /* @__PURE__ */ jsx50("span", { className: "matter-section-count", children: groupThreads(tabs).length })
                 ] }),
-                workspaceOpen && /* @__PURE__ */ jsx50("div", { ref: sheetListRef, className: "matter-thread-section", "data-testid": "sheet-workspace-threads", children: renderThreadGroups(reorderable ? tabs : [...tabs].sort((a, b) => Number(inCurrentGroup(b)) - Number(inCurrentGroup(a)) || attention(a) - attention(b)), reorderable) }),
+                workspaceOpen && /* @__PURE__ */ jsx50("div", { ref: sheetListRef, className: "matter-thread-section", "data-testid": "sheet-workspace-threads", children: renderThreadGroups(reorderable ? tabs : [...tabs].sort((a, b) => Number(inCurrentGroup(b)) - Number(inCurrentGroup(a)) || attention2(a) - attention2(b)), reorderable) }),
                 o.threads.some((thread) => !tabs.some((tab) => tab.key === thread.key)) && /* @__PURE__ */ jsxs44(Fragment17, { children: [
                   /* @__PURE__ */ jsxs44("button", { type: "button", className: "matter-section-heading matter-sheet-section-heading", "aria-expanded": sheetRecentsOpen, onClick: () => setSheetRecentsOpen(!sheetRecentsOpen), children: [
                     sheetRecentsOpen ? /* @__PURE__ */ jsx50(ChevronDown4, {}) : /* @__PURE__ */ jsx50(ChevronRight3, {}),
@@ -13161,7 +13162,7 @@ function ThreadWorkspaceLayout({
     }
   }
   function renderNewThreadDialogButton(className, compact = false) {
-    const content = compact ? /* @__PURE__ */ jsxs45(Fragment18, { children: [
+    const content3 = compact ? /* @__PURE__ */ jsxs45(Fragment18, { children: [
       /* @__PURE__ */ jsx52(Plus, { "data-icon": "new-thread", className: "h-4 w-4" }),
       /* @__PURE__ */ jsx52("span", { className: "sr-only", children: newThreadLabel })
     ] }) : /* @__PURE__ */ jsxs45(Fragment18, { children: [
@@ -13185,7 +13186,7 @@ function ThreadWorkspaceLayout({
               "aria-label": compact ? newThreadLabel : void 0,
               title: newThreadLabel,
               className,
-              children: content
+              children: content3
             }
           ) }),
           /* @__PURE__ */ jsx52(
@@ -13839,7 +13840,7 @@ import { X as X11 } from "lucide-react";
 // src/components/DiffDetail.tsx
 import { useEffect as useEffect25, useMemo as useMemo10, useState as useState35 } from "react";
 import { jsx as jsx53, jsxs as jsxs47 } from "react/jsx-runtime";
-function DiffDetail({ text, compact = false, formatPath }) {
+function DiffDetail({ text: text3, compact = false, formatPath }) {
   useI18n();
   const [highlighter, setHighlighter] = useState35(null);
   const theme = useAppShellNav()?.effectiveTheme ?? (document.documentElement.dataset.themeEffective === "light" ? "light" : "dark");
@@ -13855,14 +13856,14 @@ function DiffDetail({ text, compact = false, formatPath }) {
   }, []);
   const rows = useMemo10(() => {
     let oldLine = 0, newLine = 0, path = "", inHunk = false;
-    const lines = text.split("\n");
-    const header = (index) => {
-      const line = lines[index];
-      return line.startsWith("diff ") || line.startsWith("index ") || line.startsWith("--- ") && lines[index + 1]?.startsWith("+++ ") || line.startsWith("+++ ") && lines[index - 1]?.startsWith("--- ");
+    const lines = text3.split("\n");
+    const header = (index2) => {
+      const line = lines[index2];
+      return line.startsWith("diff ") || line.startsWith("index ") || line.startsWith("--- ") && lines[index2 + 1]?.startsWith("+++ ") || line.startsWith("+++ ") && lines[index2 - 1]?.startsWith("--- ");
     };
-    const files = new Set(lines.filter((line, index) => line.startsWith("+++ ") && header(index)));
-    return lines.flatMap((line, index) => {
-      if (header(index)) {
+    const files = new Set(lines.filter((line, index2) => line.startsWith("+++ ") && header(index2)));
+    return lines.flatMap((line, index2) => {
+      if (header(index2)) {
         inHunk = false;
         if (line.startsWith("+++ ")) path = line.slice(4).replace(/^b\//, "");
         if (compact) {
@@ -13884,14 +13885,14 @@ function DiffDetail({ text, compact = false, formatPath }) {
       const tokens = kind !== "meta" ? highlighter?.codeToTokens(code, { lang, theme: theme === "light" ? "github-light-default" : "ayu-dark" }).tokens[0] : void 0;
       return [{ line, kind, code, oldNumber, newNumber, tokens }];
     });
-  }, [text, highlighter, theme, compact, formatPath]);
+  }, [text3, highlighter, theme, compact, formatPath]);
   const oldColumn = rows.some((row) => row.oldNumber !== null);
-  return /* @__PURE__ */ jsx53("pre", { className: "thread-diff", "aria-label": translate("files.fileChanges"), "data-highlighted": Boolean(highlighter), children: rows.map((row, index) => /* @__PURE__ */ jsxs47("div", { className: `thread-diff-line is-${row.kind}`, children: [
+  return /* @__PURE__ */ jsx53("pre", { className: "thread-diff", "aria-label": translate("files.fileChanges"), "data-highlighted": Boolean(highlighter), children: rows.map((row, index2) => /* @__PURE__ */ jsxs47("div", { className: `thread-diff-line is-${row.kind}`, children: [
     oldColumn ? /* @__PURE__ */ jsx53("span", { className: "thread-diff-number", children: row.oldNumber }) : null,
     /* @__PURE__ */ jsx53("span", { className: "thread-diff-number", children: row.newNumber }),
     /* @__PURE__ */ jsx53("span", { className: "thread-diff-sign", children: row.kind === "add" ? "+" : row.kind === "remove" ? "\u2212" : " " }),
     /* @__PURE__ */ jsx53("code", { children: row.tokens?.map((token, i) => /* @__PURE__ */ jsx53("span", { style: { color: theme === "light" && token.color ? `color-mix(in oklch, ${token.color} 65%, var(--theme-fg))` : token.color }, children: token.content }, i)) ?? row.code })
-  ] }, index)) });
+  ] }, index2)) });
 }
 
 // src/components/graph-chat/GraphChatMessageContent.tsx
@@ -13912,10 +13913,10 @@ import remarkCjkFriendly from "remark-cjk-friendly";
 import remarkMath from "remark-math";
 
 // src/components/graph-chat/remarkLatex.ts
-function tokenizer(flow) {
+function tokenizer(flow3) {
   return function(effects, ok, nok) {
     const self = this;
-    const tokenType = flow ? "latexMathFlow" : "latexMath";
+    const tokenType = flow3 ? "latexMathFlow" : "latexMath";
     let closing;
     const start = (code) => {
       effects.enter(tokenType);
@@ -13924,13 +13925,13 @@ function tokenizer(flow) {
     };
     const open = (code) => {
       if (code !== 40 && code !== 91) return nok(code);
-      if (flow && code !== 91) return nok(code);
+      if (flow3 && code !== 91) return nok(code);
       closing = code === 40 ? 41 : 93;
       effects.consume(code);
       return body;
     };
     const body = (code) => {
-      if (code === null || flow && self.parser.lazy[self.now().line])
+      if (code === null || flow3 && self.parser.lazy[self.now().line])
         return nok(code);
       if (code === -5 || code === -4 || code === -3) {
         effects.enter("lineEnding");
@@ -13954,7 +13955,7 @@ function tokenizer(flow) {
       if (code === closing) {
         effects.consume(code);
         effects.exit("latexMathData");
-        return flow ? afterClose : finish;
+        return flow3 ? afterClose : finish;
       }
       if (code === null) return nok(code);
       if (code === 92) {
@@ -14067,11 +14068,11 @@ function createWorkspacePathResolver(adapter, identity, workspaceRoot) {
       const result = run(async () => {
         if (relative === null) {
           if (!adapter.statLinkedFile) return /* @__PURE__ */ new Set();
-          const node = await adapter.statLinkedFile({ threadId: identity.threadId, path });
-          return /* @__PURE__ */ new Set([node.path]);
+          const node2 = await adapter.statLinkedFile({ threadId: identity.threadId, path });
+          return /* @__PURE__ */ new Set([node2.path]);
         }
         const tree = await adapter.listTree({ ...identity, path: parent, ...adapter.hiddenFiles ? { showHidden: true } : {} });
-        return new Set((tree.children ?? []).map((node) => relativeWorkspacePath(node.path, workspaceRoot) ?? node.path));
+        return new Set((tree.children ?? []).map((node2) => relativeWorkspacePath(node2.path, workspaceRoot) ?? node2.path));
       }).catch(() => /* @__PURE__ */ new Set());
       entry = { expires: Date.now() + 15e3, result };
       if (cache.size >= 64) cache.delete(cache.keys().next().value);
@@ -14092,12 +14093,12 @@ function parseWorkspacePathText(value, root) {
   return path ? { path, ...match ? { line: Number(match[1]) } : {} } : null;
 }
 var pathPattern = /(?<![\p{L}\p{N}_:/.-])(?:[a-zA-Z]:[\\/]|\.{1,2}\/|\/)?[\p{L}\p{N}_.-]+(?:[\\/][\p{L}\p{N}_.-]+)+(?:[\\/])?(?:(?:#L|:)\d+(?::\d+)?)?/gu;
-var hasWorkspacePathSyntax = (text) => new RegExp(pathPattern).test(text);
+var hasWorkspacePathSyntax = (text3) => new RegExp(pathPattern).test(text3);
 function remarkWorkspacePaths() {
   return (tree) => {
-    const visit = (node) => {
-      if (!node.children || ["link", "linkReference", "code", "inlineCode", "html", "math", "inlineMath"].includes(node.type)) return;
-      node.children = node.children.flatMap((child) => {
+    const visit = (node2) => {
+      if (!node2.children || ["link", "linkReference", "code", "inlineCode", "html", "math", "inlineMath"].includes(node2.type)) return;
+      node2.children = node2.children.flatMap((child) => {
         if (child.type !== "text" || !child.value) {
           visit(child);
           return [child];
@@ -14450,7 +14451,7 @@ function GraphChatToolCall({
             /* @__PURE__ */ jsxs49("div", { className: "thread-graph-tool-json", children: [
               "{",
               /* @__PURE__ */ jsx56("br", {}),
-              parameterEntries.length > 0 ? parameterEntries.map(([key, value], index) => /* @__PURE__ */ jsxs49("div", { children: [
+              parameterEntries.length > 0 ? parameterEntries.map(([key, value], index2) => /* @__PURE__ */ jsxs49("div", { children: [
                 /* @__PURE__ */ jsxs49("span", { className: "thread-graph-tool-key", children: [
                   '"',
                   key,
@@ -14458,7 +14459,7 @@ function GraphChatToolCall({
                 ] }),
                 /* @__PURE__ */ jsx56("span", { className: "thread-graph-tool-punctuation", children: ": " }),
                 formatPrimitiveValue(value),
-                index < parameterEntries.length - 1 ? /* @__PURE__ */ jsx56("span", { className: "thread-graph-tool-punctuation", children: "," }) : null
+                index2 < parameterEntries.length - 1 ? /* @__PURE__ */ jsx56("span", { className: "thread-graph-tool-punctuation", children: "," }) : null
               ] }, key)) : /* @__PURE__ */ jsx56("div", { children: /* @__PURE__ */ jsx56("span", { className: "thread-graph-tool-null", children: translate("chat.empty_ad8710") }) }),
               "}"
             ] })
@@ -14468,7 +14469,7 @@ function GraphChatToolCall({
             /* @__PURE__ */ jsxs49("div", { className: "thread-graph-tool-json", children: [
               "{",
               /* @__PURE__ */ jsx56("br", {}),
-              resultEntries.map(([key, value], index) => /* @__PURE__ */ jsxs49("div", { children: [
+              resultEntries.map(([key, value], index2) => /* @__PURE__ */ jsxs49("div", { children: [
                 /* @__PURE__ */ jsxs49("span", { className: "thread-graph-tool-key", children: [
                   '"',
                   key,
@@ -14476,7 +14477,7 @@ function GraphChatToolCall({
                 ] }),
                 /* @__PURE__ */ jsx56("span", { className: "thread-graph-tool-punctuation", children: ": " }),
                 renderResultValue(key, value),
-                index < resultEntries.length - 1 ? /* @__PURE__ */ jsx56("span", { className: "thread-graph-tool-punctuation", children: "," }) : null
+                index2 < resultEntries.length - 1 ? /* @__PURE__ */ jsx56("span", { className: "thread-graph-tool-punctuation", children: "," }) : null
               ] }, key)),
               "}"
             ] })
@@ -14676,10 +14677,10 @@ function getGraphChatToolUiStatus(result) {
   }
   return "completed";
 }
-function preprocessGraphChatToolBlocks(content) {
+function preprocessGraphChatToolBlocks(content3) {
   const resultMap = /* @__PURE__ */ new Map();
   const resultRegex = /```tool-result\s*([\s\S]*?)\s*```/g;
-  const contentWithoutOrphanedResults = content.replace(
+  const contentWithoutOrphanedResults = content3.replace(
     resultRegex,
     (fullMatch, jsonContent) => {
       try {
@@ -14761,16 +14762,16 @@ function textFromReactNode(children) {
   }
   return String(children ?? "");
 }
-function readMarkdownNodeLineRange(node) {
-  if (!node || typeof node !== "object" || !("position" in node)) {
+function readMarkdownNodeLineRange(node2) {
+  if (!node2 || typeof node2 !== "object" || !("position" in node2)) {
     return { startLine: void 0, endLine: void 0 };
   }
-  const position = node.position;
-  if (!position || typeof position !== "object") {
+  const position2 = node2.position;
+  if (!position2 || typeof position2 !== "object") {
     return { startLine: void 0, endLine: void 0 };
   }
-  const start = position.start;
-  const end = position.end;
+  const start = position2.start;
+  const end = position2.end;
   const startLine = start && typeof start === "object" ? start.line : void 0;
   const endLine = end && typeof end === "object" ? end.line : void 0;
   return {
@@ -14817,7 +14818,7 @@ function isToolCodeElement(value) {
 }
 var GraphChatMessageContent = memo2(function GraphChatMessageContent2({
   className = "thread-graph-markdown",
-  content,
+  content: content3,
   readOnly = false,
   streaming = false,
   onOpenWorkspaceFile,
@@ -14833,8 +14834,8 @@ var GraphChatMessageContent = memo2(function GraphChatMessageContent2({
   const [dark, setDark] = useState39(false);
   const cssSyntaxPalette = useThemeFeature("code.cssSyntaxPalette");
   const { processedContent, resultMap } = useMemo12(
-    () => readOnly ? { processedContent: content, resultMap: /* @__PURE__ */ new Map() } : preprocessGraphChatToolBlocks(content),
-    [content, readOnly]
+    () => readOnly ? { processedContent: content3, resultMap: /* @__PURE__ */ new Map() } : preprocessGraphChatToolBlocks(content3),
+    [content3, readOnly]
   );
   useEffect29(() => {
     let alive = true;
@@ -14871,7 +14872,7 @@ var GraphChatMessageContent = memo2(function GraphChatMessageContent2({
     children,
     className: codeClassName,
     inline,
-    node,
+    node: node2,
     insideMarkdownLink,
     ...props
   }) => {
@@ -14879,7 +14880,7 @@ var GraphChatMessageContent = memo2(function GraphChatMessageContent2({
     const match = /language-(\w+(?:-\w+)*)/.exec(codeClassName || "");
     const language = match ? match[1] ?? "" : "";
     const textContent = textFromReactNode(children).replace(/\n$/, "");
-    const { startLine, endLine } = readMarkdownNodeLineRange(node);
+    const { startLine, endLine } = readMarkdownNodeLineRange(node2);
     const isFencedOrBlockCode = inline === false || Boolean(codeClassName) || textContent.includes("\n") || startLine !== endLine;
     if (isFencedOrBlockCode && isMermaidCode(language, textContent)) {
       return /* @__PURE__ */ jsx58(
@@ -15064,7 +15065,7 @@ import { jsx as jsx59, jsxs as jsxs52 } from "react/jsx-runtime";
 function LongTextDialog({
   open,
   title,
-  text,
+  text: text3,
   kind,
   error,
   onRetry,
@@ -15086,7 +15087,7 @@ function LongTextDialog({
       children: [
         /* @__PURE__ */ jsxs52("div", { className: "flex items-center justify-between gap-2 border-b border-[var(--theme-border)] px-4 py-3 sm:px-5", children: [
           /* @__PURE__ */ jsx59(DialogTitle, { className: "min-w-0 flex-1 truncate text-sm font-medium", children: title }),
-          /* @__PURE__ */ jsx59(CopyButton, { value: text, label: translate("chat.copyAll"), className: "h-9 w-9" }),
+          /* @__PURE__ */ jsx59(CopyButton, { value: text3, label: translate("chat.copyAll"), className: "h-9 w-9" }),
           /* @__PURE__ */ jsx59(
             DialogClose,
             {
@@ -15101,7 +15102,7 @@ function LongTextDialog({
             /* @__PURE__ */ jsx59("p", { children: error }),
             onRetry && /* @__PURE__ */ jsx59("button", { type: "button", onClick: onRetry, children: translate("workbench.retry") })
           ] }) : null,
-          error ? null : kind === "fileChange" && /^@@ /m.test(text) ? /* @__PURE__ */ jsx59(DiffDetail, { text }) : ["toolCall", "agentToolCall", "skillToolCall"].includes(kind ?? "") ? /* @__PURE__ */ jsx59(GraphChatMessageContent, { content: text, readOnly: true, onOpenWorkspaceFile, workspaceRootPath, resolveHref }) : /* @__PURE__ */ jsx59("pre", { className: "whitespace-pre-wrap break-words text-sm leading-6", children: text })
+          error ? null : kind === "fileChange" && /^@@ /m.test(text3) ? /* @__PURE__ */ jsx59(DiffDetail, { text: text3 }) : ["toolCall", "agentToolCall", "skillToolCall"].includes(kind ?? "") ? /* @__PURE__ */ jsx59(GraphChatMessageContent, { content: text3, readOnly: true, onOpenWorkspaceFile, workspaceRootPath, resolveHref }) : /* @__PURE__ */ jsx59("pre", { className: "whitespace-pre-wrap break-words text-sm leading-6", children: text3 })
         ] })
       ]
     }
@@ -15124,6 +15125,6947 @@ import {
   useState as useState41
 } from "react";
 
+// ../../node_modules/.pnpm/mdast-util-to-string@4.0.0/node_modules/mdast-util-to-string/lib/index.js
+var emptyOptions = {};
+function toString(value, options) {
+  const settings = options || emptyOptions;
+  const includeImageAlt = typeof settings.includeImageAlt === "boolean" ? settings.includeImageAlt : true;
+  const includeHtml = typeof settings.includeHtml === "boolean" ? settings.includeHtml : true;
+  return one(value, includeImageAlt, includeHtml);
+}
+function one(value, includeImageAlt, includeHtml) {
+  if (node(value)) {
+    if ("value" in value) {
+      return value.type === "html" && !includeHtml ? "" : value.value;
+    }
+    if (includeImageAlt && "alt" in value && value.alt) {
+      return value.alt;
+    }
+    if ("children" in value) {
+      return all(value.children, includeImageAlt, includeHtml);
+    }
+  }
+  if (Array.isArray(value)) {
+    return all(value, includeImageAlt, includeHtml);
+  }
+  return "";
+}
+function all(values, includeImageAlt, includeHtml) {
+  const result = [];
+  let index2 = -1;
+  while (++index2 < values.length) {
+    result[index2] = one(values[index2], includeImageAlt, includeHtml);
+  }
+  return result.join("");
+}
+function node(value) {
+  return Boolean(value && typeof value === "object");
+}
+
+// ../../node_modules/.pnpm/character-entities@2.0.2/node_modules/character-entities/index.js
+var characterEntities = {
+  AElig: "\xC6",
+  AMP: "&",
+  Aacute: "\xC1",
+  Abreve: "\u0102",
+  Acirc: "\xC2",
+  Acy: "\u0410",
+  Afr: "\u{1D504}",
+  Agrave: "\xC0",
+  Alpha: "\u0391",
+  Amacr: "\u0100",
+  And: "\u2A53",
+  Aogon: "\u0104",
+  Aopf: "\u{1D538}",
+  ApplyFunction: "\u2061",
+  Aring: "\xC5",
+  Ascr: "\u{1D49C}",
+  Assign: "\u2254",
+  Atilde: "\xC3",
+  Auml: "\xC4",
+  Backslash: "\u2216",
+  Barv: "\u2AE7",
+  Barwed: "\u2306",
+  Bcy: "\u0411",
+  Because: "\u2235",
+  Bernoullis: "\u212C",
+  Beta: "\u0392",
+  Bfr: "\u{1D505}",
+  Bopf: "\u{1D539}",
+  Breve: "\u02D8",
+  Bscr: "\u212C",
+  Bumpeq: "\u224E",
+  CHcy: "\u0427",
+  COPY: "\xA9",
+  Cacute: "\u0106",
+  Cap: "\u22D2",
+  CapitalDifferentialD: "\u2145",
+  Cayleys: "\u212D",
+  Ccaron: "\u010C",
+  Ccedil: "\xC7",
+  Ccirc: "\u0108",
+  Cconint: "\u2230",
+  Cdot: "\u010A",
+  Cedilla: "\xB8",
+  CenterDot: "\xB7",
+  Cfr: "\u212D",
+  Chi: "\u03A7",
+  CircleDot: "\u2299",
+  CircleMinus: "\u2296",
+  CirclePlus: "\u2295",
+  CircleTimes: "\u2297",
+  ClockwiseContourIntegral: "\u2232",
+  CloseCurlyDoubleQuote: "\u201D",
+  CloseCurlyQuote: "\u2019",
+  Colon: "\u2237",
+  Colone: "\u2A74",
+  Congruent: "\u2261",
+  Conint: "\u222F",
+  ContourIntegral: "\u222E",
+  Copf: "\u2102",
+  Coproduct: "\u2210",
+  CounterClockwiseContourIntegral: "\u2233",
+  Cross: "\u2A2F",
+  Cscr: "\u{1D49E}",
+  Cup: "\u22D3",
+  CupCap: "\u224D",
+  DD: "\u2145",
+  DDotrahd: "\u2911",
+  DJcy: "\u0402",
+  DScy: "\u0405",
+  DZcy: "\u040F",
+  Dagger: "\u2021",
+  Darr: "\u21A1",
+  Dashv: "\u2AE4",
+  Dcaron: "\u010E",
+  Dcy: "\u0414",
+  Del: "\u2207",
+  Delta: "\u0394",
+  Dfr: "\u{1D507}",
+  DiacriticalAcute: "\xB4",
+  DiacriticalDot: "\u02D9",
+  DiacriticalDoubleAcute: "\u02DD",
+  DiacriticalGrave: "`",
+  DiacriticalTilde: "\u02DC",
+  Diamond: "\u22C4",
+  DifferentialD: "\u2146",
+  Dopf: "\u{1D53B}",
+  Dot: "\xA8",
+  DotDot: "\u20DC",
+  DotEqual: "\u2250",
+  DoubleContourIntegral: "\u222F",
+  DoubleDot: "\xA8",
+  DoubleDownArrow: "\u21D3",
+  DoubleLeftArrow: "\u21D0",
+  DoubleLeftRightArrow: "\u21D4",
+  DoubleLeftTee: "\u2AE4",
+  DoubleLongLeftArrow: "\u27F8",
+  DoubleLongLeftRightArrow: "\u27FA",
+  DoubleLongRightArrow: "\u27F9",
+  DoubleRightArrow: "\u21D2",
+  DoubleRightTee: "\u22A8",
+  DoubleUpArrow: "\u21D1",
+  DoubleUpDownArrow: "\u21D5",
+  DoubleVerticalBar: "\u2225",
+  DownArrow: "\u2193",
+  DownArrowBar: "\u2913",
+  DownArrowUpArrow: "\u21F5",
+  DownBreve: "\u0311",
+  DownLeftRightVector: "\u2950",
+  DownLeftTeeVector: "\u295E",
+  DownLeftVector: "\u21BD",
+  DownLeftVectorBar: "\u2956",
+  DownRightTeeVector: "\u295F",
+  DownRightVector: "\u21C1",
+  DownRightVectorBar: "\u2957",
+  DownTee: "\u22A4",
+  DownTeeArrow: "\u21A7",
+  Downarrow: "\u21D3",
+  Dscr: "\u{1D49F}",
+  Dstrok: "\u0110",
+  ENG: "\u014A",
+  ETH: "\xD0",
+  Eacute: "\xC9",
+  Ecaron: "\u011A",
+  Ecirc: "\xCA",
+  Ecy: "\u042D",
+  Edot: "\u0116",
+  Efr: "\u{1D508}",
+  Egrave: "\xC8",
+  Element: "\u2208",
+  Emacr: "\u0112",
+  EmptySmallSquare: "\u25FB",
+  EmptyVerySmallSquare: "\u25AB",
+  Eogon: "\u0118",
+  Eopf: "\u{1D53C}",
+  Epsilon: "\u0395",
+  Equal: "\u2A75",
+  EqualTilde: "\u2242",
+  Equilibrium: "\u21CC",
+  Escr: "\u2130",
+  Esim: "\u2A73",
+  Eta: "\u0397",
+  Euml: "\xCB",
+  Exists: "\u2203",
+  ExponentialE: "\u2147",
+  Fcy: "\u0424",
+  Ffr: "\u{1D509}",
+  FilledSmallSquare: "\u25FC",
+  FilledVerySmallSquare: "\u25AA",
+  Fopf: "\u{1D53D}",
+  ForAll: "\u2200",
+  Fouriertrf: "\u2131",
+  Fscr: "\u2131",
+  GJcy: "\u0403",
+  GT: ">",
+  Gamma: "\u0393",
+  Gammad: "\u03DC",
+  Gbreve: "\u011E",
+  Gcedil: "\u0122",
+  Gcirc: "\u011C",
+  Gcy: "\u0413",
+  Gdot: "\u0120",
+  Gfr: "\u{1D50A}",
+  Gg: "\u22D9",
+  Gopf: "\u{1D53E}",
+  GreaterEqual: "\u2265",
+  GreaterEqualLess: "\u22DB",
+  GreaterFullEqual: "\u2267",
+  GreaterGreater: "\u2AA2",
+  GreaterLess: "\u2277",
+  GreaterSlantEqual: "\u2A7E",
+  GreaterTilde: "\u2273",
+  Gscr: "\u{1D4A2}",
+  Gt: "\u226B",
+  HARDcy: "\u042A",
+  Hacek: "\u02C7",
+  Hat: "^",
+  Hcirc: "\u0124",
+  Hfr: "\u210C",
+  HilbertSpace: "\u210B",
+  Hopf: "\u210D",
+  HorizontalLine: "\u2500",
+  Hscr: "\u210B",
+  Hstrok: "\u0126",
+  HumpDownHump: "\u224E",
+  HumpEqual: "\u224F",
+  IEcy: "\u0415",
+  IJlig: "\u0132",
+  IOcy: "\u0401",
+  Iacute: "\xCD",
+  Icirc: "\xCE",
+  Icy: "\u0418",
+  Idot: "\u0130",
+  Ifr: "\u2111",
+  Igrave: "\xCC",
+  Im: "\u2111",
+  Imacr: "\u012A",
+  ImaginaryI: "\u2148",
+  Implies: "\u21D2",
+  Int: "\u222C",
+  Integral: "\u222B",
+  Intersection: "\u22C2",
+  InvisibleComma: "\u2063",
+  InvisibleTimes: "\u2062",
+  Iogon: "\u012E",
+  Iopf: "\u{1D540}",
+  Iota: "\u0399",
+  Iscr: "\u2110",
+  Itilde: "\u0128",
+  Iukcy: "\u0406",
+  Iuml: "\xCF",
+  Jcirc: "\u0134",
+  Jcy: "\u0419",
+  Jfr: "\u{1D50D}",
+  Jopf: "\u{1D541}",
+  Jscr: "\u{1D4A5}",
+  Jsercy: "\u0408",
+  Jukcy: "\u0404",
+  KHcy: "\u0425",
+  KJcy: "\u040C",
+  Kappa: "\u039A",
+  Kcedil: "\u0136",
+  Kcy: "\u041A",
+  Kfr: "\u{1D50E}",
+  Kopf: "\u{1D542}",
+  Kscr: "\u{1D4A6}",
+  LJcy: "\u0409",
+  LT: "<",
+  Lacute: "\u0139",
+  Lambda: "\u039B",
+  Lang: "\u27EA",
+  Laplacetrf: "\u2112",
+  Larr: "\u219E",
+  Lcaron: "\u013D",
+  Lcedil: "\u013B",
+  Lcy: "\u041B",
+  LeftAngleBracket: "\u27E8",
+  LeftArrow: "\u2190",
+  LeftArrowBar: "\u21E4",
+  LeftArrowRightArrow: "\u21C6",
+  LeftCeiling: "\u2308",
+  LeftDoubleBracket: "\u27E6",
+  LeftDownTeeVector: "\u2961",
+  LeftDownVector: "\u21C3",
+  LeftDownVectorBar: "\u2959",
+  LeftFloor: "\u230A",
+  LeftRightArrow: "\u2194",
+  LeftRightVector: "\u294E",
+  LeftTee: "\u22A3",
+  LeftTeeArrow: "\u21A4",
+  LeftTeeVector: "\u295A",
+  LeftTriangle: "\u22B2",
+  LeftTriangleBar: "\u29CF",
+  LeftTriangleEqual: "\u22B4",
+  LeftUpDownVector: "\u2951",
+  LeftUpTeeVector: "\u2960",
+  LeftUpVector: "\u21BF",
+  LeftUpVectorBar: "\u2958",
+  LeftVector: "\u21BC",
+  LeftVectorBar: "\u2952",
+  Leftarrow: "\u21D0",
+  Leftrightarrow: "\u21D4",
+  LessEqualGreater: "\u22DA",
+  LessFullEqual: "\u2266",
+  LessGreater: "\u2276",
+  LessLess: "\u2AA1",
+  LessSlantEqual: "\u2A7D",
+  LessTilde: "\u2272",
+  Lfr: "\u{1D50F}",
+  Ll: "\u22D8",
+  Lleftarrow: "\u21DA",
+  Lmidot: "\u013F",
+  LongLeftArrow: "\u27F5",
+  LongLeftRightArrow: "\u27F7",
+  LongRightArrow: "\u27F6",
+  Longleftarrow: "\u27F8",
+  Longleftrightarrow: "\u27FA",
+  Longrightarrow: "\u27F9",
+  Lopf: "\u{1D543}",
+  LowerLeftArrow: "\u2199",
+  LowerRightArrow: "\u2198",
+  Lscr: "\u2112",
+  Lsh: "\u21B0",
+  Lstrok: "\u0141",
+  Lt: "\u226A",
+  Map: "\u2905",
+  Mcy: "\u041C",
+  MediumSpace: "\u205F",
+  Mellintrf: "\u2133",
+  Mfr: "\u{1D510}",
+  MinusPlus: "\u2213",
+  Mopf: "\u{1D544}",
+  Mscr: "\u2133",
+  Mu: "\u039C",
+  NJcy: "\u040A",
+  Nacute: "\u0143",
+  Ncaron: "\u0147",
+  Ncedil: "\u0145",
+  Ncy: "\u041D",
+  NegativeMediumSpace: "\u200B",
+  NegativeThickSpace: "\u200B",
+  NegativeThinSpace: "\u200B",
+  NegativeVeryThinSpace: "\u200B",
+  NestedGreaterGreater: "\u226B",
+  NestedLessLess: "\u226A",
+  NewLine: "\n",
+  Nfr: "\u{1D511}",
+  NoBreak: "\u2060",
+  NonBreakingSpace: "\xA0",
+  Nopf: "\u2115",
+  Not: "\u2AEC",
+  NotCongruent: "\u2262",
+  NotCupCap: "\u226D",
+  NotDoubleVerticalBar: "\u2226",
+  NotElement: "\u2209",
+  NotEqual: "\u2260",
+  NotEqualTilde: "\u2242\u0338",
+  NotExists: "\u2204",
+  NotGreater: "\u226F",
+  NotGreaterEqual: "\u2271",
+  NotGreaterFullEqual: "\u2267\u0338",
+  NotGreaterGreater: "\u226B\u0338",
+  NotGreaterLess: "\u2279",
+  NotGreaterSlantEqual: "\u2A7E\u0338",
+  NotGreaterTilde: "\u2275",
+  NotHumpDownHump: "\u224E\u0338",
+  NotHumpEqual: "\u224F\u0338",
+  NotLeftTriangle: "\u22EA",
+  NotLeftTriangleBar: "\u29CF\u0338",
+  NotLeftTriangleEqual: "\u22EC",
+  NotLess: "\u226E",
+  NotLessEqual: "\u2270",
+  NotLessGreater: "\u2278",
+  NotLessLess: "\u226A\u0338",
+  NotLessSlantEqual: "\u2A7D\u0338",
+  NotLessTilde: "\u2274",
+  NotNestedGreaterGreater: "\u2AA2\u0338",
+  NotNestedLessLess: "\u2AA1\u0338",
+  NotPrecedes: "\u2280",
+  NotPrecedesEqual: "\u2AAF\u0338",
+  NotPrecedesSlantEqual: "\u22E0",
+  NotReverseElement: "\u220C",
+  NotRightTriangle: "\u22EB",
+  NotRightTriangleBar: "\u29D0\u0338",
+  NotRightTriangleEqual: "\u22ED",
+  NotSquareSubset: "\u228F\u0338",
+  NotSquareSubsetEqual: "\u22E2",
+  NotSquareSuperset: "\u2290\u0338",
+  NotSquareSupersetEqual: "\u22E3",
+  NotSubset: "\u2282\u20D2",
+  NotSubsetEqual: "\u2288",
+  NotSucceeds: "\u2281",
+  NotSucceedsEqual: "\u2AB0\u0338",
+  NotSucceedsSlantEqual: "\u22E1",
+  NotSucceedsTilde: "\u227F\u0338",
+  NotSuperset: "\u2283\u20D2",
+  NotSupersetEqual: "\u2289",
+  NotTilde: "\u2241",
+  NotTildeEqual: "\u2244",
+  NotTildeFullEqual: "\u2247",
+  NotTildeTilde: "\u2249",
+  NotVerticalBar: "\u2224",
+  Nscr: "\u{1D4A9}",
+  Ntilde: "\xD1",
+  Nu: "\u039D",
+  OElig: "\u0152",
+  Oacute: "\xD3",
+  Ocirc: "\xD4",
+  Ocy: "\u041E",
+  Odblac: "\u0150",
+  Ofr: "\u{1D512}",
+  Ograve: "\xD2",
+  Omacr: "\u014C",
+  Omega: "\u03A9",
+  Omicron: "\u039F",
+  Oopf: "\u{1D546}",
+  OpenCurlyDoubleQuote: "\u201C",
+  OpenCurlyQuote: "\u2018",
+  Or: "\u2A54",
+  Oscr: "\u{1D4AA}",
+  Oslash: "\xD8",
+  Otilde: "\xD5",
+  Otimes: "\u2A37",
+  Ouml: "\xD6",
+  OverBar: "\u203E",
+  OverBrace: "\u23DE",
+  OverBracket: "\u23B4",
+  OverParenthesis: "\u23DC",
+  PartialD: "\u2202",
+  Pcy: "\u041F",
+  Pfr: "\u{1D513}",
+  Phi: "\u03A6",
+  Pi: "\u03A0",
+  PlusMinus: "\xB1",
+  Poincareplane: "\u210C",
+  Popf: "\u2119",
+  Pr: "\u2ABB",
+  Precedes: "\u227A",
+  PrecedesEqual: "\u2AAF",
+  PrecedesSlantEqual: "\u227C",
+  PrecedesTilde: "\u227E",
+  Prime: "\u2033",
+  Product: "\u220F",
+  Proportion: "\u2237",
+  Proportional: "\u221D",
+  Pscr: "\u{1D4AB}",
+  Psi: "\u03A8",
+  QUOT: '"',
+  Qfr: "\u{1D514}",
+  Qopf: "\u211A",
+  Qscr: "\u{1D4AC}",
+  RBarr: "\u2910",
+  REG: "\xAE",
+  Racute: "\u0154",
+  Rang: "\u27EB",
+  Rarr: "\u21A0",
+  Rarrtl: "\u2916",
+  Rcaron: "\u0158",
+  Rcedil: "\u0156",
+  Rcy: "\u0420",
+  Re: "\u211C",
+  ReverseElement: "\u220B",
+  ReverseEquilibrium: "\u21CB",
+  ReverseUpEquilibrium: "\u296F",
+  Rfr: "\u211C",
+  Rho: "\u03A1",
+  RightAngleBracket: "\u27E9",
+  RightArrow: "\u2192",
+  RightArrowBar: "\u21E5",
+  RightArrowLeftArrow: "\u21C4",
+  RightCeiling: "\u2309",
+  RightDoubleBracket: "\u27E7",
+  RightDownTeeVector: "\u295D",
+  RightDownVector: "\u21C2",
+  RightDownVectorBar: "\u2955",
+  RightFloor: "\u230B",
+  RightTee: "\u22A2",
+  RightTeeArrow: "\u21A6",
+  RightTeeVector: "\u295B",
+  RightTriangle: "\u22B3",
+  RightTriangleBar: "\u29D0",
+  RightTriangleEqual: "\u22B5",
+  RightUpDownVector: "\u294F",
+  RightUpTeeVector: "\u295C",
+  RightUpVector: "\u21BE",
+  RightUpVectorBar: "\u2954",
+  RightVector: "\u21C0",
+  RightVectorBar: "\u2953",
+  Rightarrow: "\u21D2",
+  Ropf: "\u211D",
+  RoundImplies: "\u2970",
+  Rrightarrow: "\u21DB",
+  Rscr: "\u211B",
+  Rsh: "\u21B1",
+  RuleDelayed: "\u29F4",
+  SHCHcy: "\u0429",
+  SHcy: "\u0428",
+  SOFTcy: "\u042C",
+  Sacute: "\u015A",
+  Sc: "\u2ABC",
+  Scaron: "\u0160",
+  Scedil: "\u015E",
+  Scirc: "\u015C",
+  Scy: "\u0421",
+  Sfr: "\u{1D516}",
+  ShortDownArrow: "\u2193",
+  ShortLeftArrow: "\u2190",
+  ShortRightArrow: "\u2192",
+  ShortUpArrow: "\u2191",
+  Sigma: "\u03A3",
+  SmallCircle: "\u2218",
+  Sopf: "\u{1D54A}",
+  Sqrt: "\u221A",
+  Square: "\u25A1",
+  SquareIntersection: "\u2293",
+  SquareSubset: "\u228F",
+  SquareSubsetEqual: "\u2291",
+  SquareSuperset: "\u2290",
+  SquareSupersetEqual: "\u2292",
+  SquareUnion: "\u2294",
+  Sscr: "\u{1D4AE}",
+  Star: "\u22C6",
+  Sub: "\u22D0",
+  Subset: "\u22D0",
+  SubsetEqual: "\u2286",
+  Succeeds: "\u227B",
+  SucceedsEqual: "\u2AB0",
+  SucceedsSlantEqual: "\u227D",
+  SucceedsTilde: "\u227F",
+  SuchThat: "\u220B",
+  Sum: "\u2211",
+  Sup: "\u22D1",
+  Superset: "\u2283",
+  SupersetEqual: "\u2287",
+  Supset: "\u22D1",
+  THORN: "\xDE",
+  TRADE: "\u2122",
+  TSHcy: "\u040B",
+  TScy: "\u0426",
+  Tab: "	",
+  Tau: "\u03A4",
+  Tcaron: "\u0164",
+  Tcedil: "\u0162",
+  Tcy: "\u0422",
+  Tfr: "\u{1D517}",
+  Therefore: "\u2234",
+  Theta: "\u0398",
+  ThickSpace: "\u205F\u200A",
+  ThinSpace: "\u2009",
+  Tilde: "\u223C",
+  TildeEqual: "\u2243",
+  TildeFullEqual: "\u2245",
+  TildeTilde: "\u2248",
+  Topf: "\u{1D54B}",
+  TripleDot: "\u20DB",
+  Tscr: "\u{1D4AF}",
+  Tstrok: "\u0166",
+  Uacute: "\xDA",
+  Uarr: "\u219F",
+  Uarrocir: "\u2949",
+  Ubrcy: "\u040E",
+  Ubreve: "\u016C",
+  Ucirc: "\xDB",
+  Ucy: "\u0423",
+  Udblac: "\u0170",
+  Ufr: "\u{1D518}",
+  Ugrave: "\xD9",
+  Umacr: "\u016A",
+  UnderBar: "_",
+  UnderBrace: "\u23DF",
+  UnderBracket: "\u23B5",
+  UnderParenthesis: "\u23DD",
+  Union: "\u22C3",
+  UnionPlus: "\u228E",
+  Uogon: "\u0172",
+  Uopf: "\u{1D54C}",
+  UpArrow: "\u2191",
+  UpArrowBar: "\u2912",
+  UpArrowDownArrow: "\u21C5",
+  UpDownArrow: "\u2195",
+  UpEquilibrium: "\u296E",
+  UpTee: "\u22A5",
+  UpTeeArrow: "\u21A5",
+  Uparrow: "\u21D1",
+  Updownarrow: "\u21D5",
+  UpperLeftArrow: "\u2196",
+  UpperRightArrow: "\u2197",
+  Upsi: "\u03D2",
+  Upsilon: "\u03A5",
+  Uring: "\u016E",
+  Uscr: "\u{1D4B0}",
+  Utilde: "\u0168",
+  Uuml: "\xDC",
+  VDash: "\u22AB",
+  Vbar: "\u2AEB",
+  Vcy: "\u0412",
+  Vdash: "\u22A9",
+  Vdashl: "\u2AE6",
+  Vee: "\u22C1",
+  Verbar: "\u2016",
+  Vert: "\u2016",
+  VerticalBar: "\u2223",
+  VerticalLine: "|",
+  VerticalSeparator: "\u2758",
+  VerticalTilde: "\u2240",
+  VeryThinSpace: "\u200A",
+  Vfr: "\u{1D519}",
+  Vopf: "\u{1D54D}",
+  Vscr: "\u{1D4B1}",
+  Vvdash: "\u22AA",
+  Wcirc: "\u0174",
+  Wedge: "\u22C0",
+  Wfr: "\u{1D51A}",
+  Wopf: "\u{1D54E}",
+  Wscr: "\u{1D4B2}",
+  Xfr: "\u{1D51B}",
+  Xi: "\u039E",
+  Xopf: "\u{1D54F}",
+  Xscr: "\u{1D4B3}",
+  YAcy: "\u042F",
+  YIcy: "\u0407",
+  YUcy: "\u042E",
+  Yacute: "\xDD",
+  Ycirc: "\u0176",
+  Ycy: "\u042B",
+  Yfr: "\u{1D51C}",
+  Yopf: "\u{1D550}",
+  Yscr: "\u{1D4B4}",
+  Yuml: "\u0178",
+  ZHcy: "\u0416",
+  Zacute: "\u0179",
+  Zcaron: "\u017D",
+  Zcy: "\u0417",
+  Zdot: "\u017B",
+  ZeroWidthSpace: "\u200B",
+  Zeta: "\u0396",
+  Zfr: "\u2128",
+  Zopf: "\u2124",
+  Zscr: "\u{1D4B5}",
+  aacute: "\xE1",
+  abreve: "\u0103",
+  ac: "\u223E",
+  acE: "\u223E\u0333",
+  acd: "\u223F",
+  acirc: "\xE2",
+  acute: "\xB4",
+  acy: "\u0430",
+  aelig: "\xE6",
+  af: "\u2061",
+  afr: "\u{1D51E}",
+  agrave: "\xE0",
+  alefsym: "\u2135",
+  aleph: "\u2135",
+  alpha: "\u03B1",
+  amacr: "\u0101",
+  amalg: "\u2A3F",
+  amp: "&",
+  and: "\u2227",
+  andand: "\u2A55",
+  andd: "\u2A5C",
+  andslope: "\u2A58",
+  andv: "\u2A5A",
+  ang: "\u2220",
+  ange: "\u29A4",
+  angle: "\u2220",
+  angmsd: "\u2221",
+  angmsdaa: "\u29A8",
+  angmsdab: "\u29A9",
+  angmsdac: "\u29AA",
+  angmsdad: "\u29AB",
+  angmsdae: "\u29AC",
+  angmsdaf: "\u29AD",
+  angmsdag: "\u29AE",
+  angmsdah: "\u29AF",
+  angrt: "\u221F",
+  angrtvb: "\u22BE",
+  angrtvbd: "\u299D",
+  angsph: "\u2222",
+  angst: "\xC5",
+  angzarr: "\u237C",
+  aogon: "\u0105",
+  aopf: "\u{1D552}",
+  ap: "\u2248",
+  apE: "\u2A70",
+  apacir: "\u2A6F",
+  ape: "\u224A",
+  apid: "\u224B",
+  apos: "'",
+  approx: "\u2248",
+  approxeq: "\u224A",
+  aring: "\xE5",
+  ascr: "\u{1D4B6}",
+  ast: "*",
+  asymp: "\u2248",
+  asympeq: "\u224D",
+  atilde: "\xE3",
+  auml: "\xE4",
+  awconint: "\u2233",
+  awint: "\u2A11",
+  bNot: "\u2AED",
+  backcong: "\u224C",
+  backepsilon: "\u03F6",
+  backprime: "\u2035",
+  backsim: "\u223D",
+  backsimeq: "\u22CD",
+  barvee: "\u22BD",
+  barwed: "\u2305",
+  barwedge: "\u2305",
+  bbrk: "\u23B5",
+  bbrktbrk: "\u23B6",
+  bcong: "\u224C",
+  bcy: "\u0431",
+  bdquo: "\u201E",
+  becaus: "\u2235",
+  because: "\u2235",
+  bemptyv: "\u29B0",
+  bepsi: "\u03F6",
+  bernou: "\u212C",
+  beta: "\u03B2",
+  beth: "\u2136",
+  between: "\u226C",
+  bfr: "\u{1D51F}",
+  bigcap: "\u22C2",
+  bigcirc: "\u25EF",
+  bigcup: "\u22C3",
+  bigodot: "\u2A00",
+  bigoplus: "\u2A01",
+  bigotimes: "\u2A02",
+  bigsqcup: "\u2A06",
+  bigstar: "\u2605",
+  bigtriangledown: "\u25BD",
+  bigtriangleup: "\u25B3",
+  biguplus: "\u2A04",
+  bigvee: "\u22C1",
+  bigwedge: "\u22C0",
+  bkarow: "\u290D",
+  blacklozenge: "\u29EB",
+  blacksquare: "\u25AA",
+  blacktriangle: "\u25B4",
+  blacktriangledown: "\u25BE",
+  blacktriangleleft: "\u25C2",
+  blacktriangleright: "\u25B8",
+  blank: "\u2423",
+  blk12: "\u2592",
+  blk14: "\u2591",
+  blk34: "\u2593",
+  block: "\u2588",
+  bne: "=\u20E5",
+  bnequiv: "\u2261\u20E5",
+  bnot: "\u2310",
+  bopf: "\u{1D553}",
+  bot: "\u22A5",
+  bottom: "\u22A5",
+  bowtie: "\u22C8",
+  boxDL: "\u2557",
+  boxDR: "\u2554",
+  boxDl: "\u2556",
+  boxDr: "\u2553",
+  boxH: "\u2550",
+  boxHD: "\u2566",
+  boxHU: "\u2569",
+  boxHd: "\u2564",
+  boxHu: "\u2567",
+  boxUL: "\u255D",
+  boxUR: "\u255A",
+  boxUl: "\u255C",
+  boxUr: "\u2559",
+  boxV: "\u2551",
+  boxVH: "\u256C",
+  boxVL: "\u2563",
+  boxVR: "\u2560",
+  boxVh: "\u256B",
+  boxVl: "\u2562",
+  boxVr: "\u255F",
+  boxbox: "\u29C9",
+  boxdL: "\u2555",
+  boxdR: "\u2552",
+  boxdl: "\u2510",
+  boxdr: "\u250C",
+  boxh: "\u2500",
+  boxhD: "\u2565",
+  boxhU: "\u2568",
+  boxhd: "\u252C",
+  boxhu: "\u2534",
+  boxminus: "\u229F",
+  boxplus: "\u229E",
+  boxtimes: "\u22A0",
+  boxuL: "\u255B",
+  boxuR: "\u2558",
+  boxul: "\u2518",
+  boxur: "\u2514",
+  boxv: "\u2502",
+  boxvH: "\u256A",
+  boxvL: "\u2561",
+  boxvR: "\u255E",
+  boxvh: "\u253C",
+  boxvl: "\u2524",
+  boxvr: "\u251C",
+  bprime: "\u2035",
+  breve: "\u02D8",
+  brvbar: "\xA6",
+  bscr: "\u{1D4B7}",
+  bsemi: "\u204F",
+  bsim: "\u223D",
+  bsime: "\u22CD",
+  bsol: "\\",
+  bsolb: "\u29C5",
+  bsolhsub: "\u27C8",
+  bull: "\u2022",
+  bullet: "\u2022",
+  bump: "\u224E",
+  bumpE: "\u2AAE",
+  bumpe: "\u224F",
+  bumpeq: "\u224F",
+  cacute: "\u0107",
+  cap: "\u2229",
+  capand: "\u2A44",
+  capbrcup: "\u2A49",
+  capcap: "\u2A4B",
+  capcup: "\u2A47",
+  capdot: "\u2A40",
+  caps: "\u2229\uFE00",
+  caret: "\u2041",
+  caron: "\u02C7",
+  ccaps: "\u2A4D",
+  ccaron: "\u010D",
+  ccedil: "\xE7",
+  ccirc: "\u0109",
+  ccups: "\u2A4C",
+  ccupssm: "\u2A50",
+  cdot: "\u010B",
+  cedil: "\xB8",
+  cemptyv: "\u29B2",
+  cent: "\xA2",
+  centerdot: "\xB7",
+  cfr: "\u{1D520}",
+  chcy: "\u0447",
+  check: "\u2713",
+  checkmark: "\u2713",
+  chi: "\u03C7",
+  cir: "\u25CB",
+  cirE: "\u29C3",
+  circ: "\u02C6",
+  circeq: "\u2257",
+  circlearrowleft: "\u21BA",
+  circlearrowright: "\u21BB",
+  circledR: "\xAE",
+  circledS: "\u24C8",
+  circledast: "\u229B",
+  circledcirc: "\u229A",
+  circleddash: "\u229D",
+  cire: "\u2257",
+  cirfnint: "\u2A10",
+  cirmid: "\u2AEF",
+  cirscir: "\u29C2",
+  clubs: "\u2663",
+  clubsuit: "\u2663",
+  colon: ":",
+  colone: "\u2254",
+  coloneq: "\u2254",
+  comma: ",",
+  commat: "@",
+  comp: "\u2201",
+  compfn: "\u2218",
+  complement: "\u2201",
+  complexes: "\u2102",
+  cong: "\u2245",
+  congdot: "\u2A6D",
+  conint: "\u222E",
+  copf: "\u{1D554}",
+  coprod: "\u2210",
+  copy: "\xA9",
+  copysr: "\u2117",
+  crarr: "\u21B5",
+  cross: "\u2717",
+  cscr: "\u{1D4B8}",
+  csub: "\u2ACF",
+  csube: "\u2AD1",
+  csup: "\u2AD0",
+  csupe: "\u2AD2",
+  ctdot: "\u22EF",
+  cudarrl: "\u2938",
+  cudarrr: "\u2935",
+  cuepr: "\u22DE",
+  cuesc: "\u22DF",
+  cularr: "\u21B6",
+  cularrp: "\u293D",
+  cup: "\u222A",
+  cupbrcap: "\u2A48",
+  cupcap: "\u2A46",
+  cupcup: "\u2A4A",
+  cupdot: "\u228D",
+  cupor: "\u2A45",
+  cups: "\u222A\uFE00",
+  curarr: "\u21B7",
+  curarrm: "\u293C",
+  curlyeqprec: "\u22DE",
+  curlyeqsucc: "\u22DF",
+  curlyvee: "\u22CE",
+  curlywedge: "\u22CF",
+  curren: "\xA4",
+  curvearrowleft: "\u21B6",
+  curvearrowright: "\u21B7",
+  cuvee: "\u22CE",
+  cuwed: "\u22CF",
+  cwconint: "\u2232",
+  cwint: "\u2231",
+  cylcty: "\u232D",
+  dArr: "\u21D3",
+  dHar: "\u2965",
+  dagger: "\u2020",
+  daleth: "\u2138",
+  darr: "\u2193",
+  dash: "\u2010",
+  dashv: "\u22A3",
+  dbkarow: "\u290F",
+  dblac: "\u02DD",
+  dcaron: "\u010F",
+  dcy: "\u0434",
+  dd: "\u2146",
+  ddagger: "\u2021",
+  ddarr: "\u21CA",
+  ddotseq: "\u2A77",
+  deg: "\xB0",
+  delta: "\u03B4",
+  demptyv: "\u29B1",
+  dfisht: "\u297F",
+  dfr: "\u{1D521}",
+  dharl: "\u21C3",
+  dharr: "\u21C2",
+  diam: "\u22C4",
+  diamond: "\u22C4",
+  diamondsuit: "\u2666",
+  diams: "\u2666",
+  die: "\xA8",
+  digamma: "\u03DD",
+  disin: "\u22F2",
+  div: "\xF7",
+  divide: "\xF7",
+  divideontimes: "\u22C7",
+  divonx: "\u22C7",
+  djcy: "\u0452",
+  dlcorn: "\u231E",
+  dlcrop: "\u230D",
+  dollar: "$",
+  dopf: "\u{1D555}",
+  dot: "\u02D9",
+  doteq: "\u2250",
+  doteqdot: "\u2251",
+  dotminus: "\u2238",
+  dotplus: "\u2214",
+  dotsquare: "\u22A1",
+  doublebarwedge: "\u2306",
+  downarrow: "\u2193",
+  downdownarrows: "\u21CA",
+  downharpoonleft: "\u21C3",
+  downharpoonright: "\u21C2",
+  drbkarow: "\u2910",
+  drcorn: "\u231F",
+  drcrop: "\u230C",
+  dscr: "\u{1D4B9}",
+  dscy: "\u0455",
+  dsol: "\u29F6",
+  dstrok: "\u0111",
+  dtdot: "\u22F1",
+  dtri: "\u25BF",
+  dtrif: "\u25BE",
+  duarr: "\u21F5",
+  duhar: "\u296F",
+  dwangle: "\u29A6",
+  dzcy: "\u045F",
+  dzigrarr: "\u27FF",
+  eDDot: "\u2A77",
+  eDot: "\u2251",
+  eacute: "\xE9",
+  easter: "\u2A6E",
+  ecaron: "\u011B",
+  ecir: "\u2256",
+  ecirc: "\xEA",
+  ecolon: "\u2255",
+  ecy: "\u044D",
+  edot: "\u0117",
+  ee: "\u2147",
+  efDot: "\u2252",
+  efr: "\u{1D522}",
+  eg: "\u2A9A",
+  egrave: "\xE8",
+  egs: "\u2A96",
+  egsdot: "\u2A98",
+  el: "\u2A99",
+  elinters: "\u23E7",
+  ell: "\u2113",
+  els: "\u2A95",
+  elsdot: "\u2A97",
+  emacr: "\u0113",
+  empty: "\u2205",
+  emptyset: "\u2205",
+  emptyv: "\u2205",
+  emsp13: "\u2004",
+  emsp14: "\u2005",
+  emsp: "\u2003",
+  eng: "\u014B",
+  ensp: "\u2002",
+  eogon: "\u0119",
+  eopf: "\u{1D556}",
+  epar: "\u22D5",
+  eparsl: "\u29E3",
+  eplus: "\u2A71",
+  epsi: "\u03B5",
+  epsilon: "\u03B5",
+  epsiv: "\u03F5",
+  eqcirc: "\u2256",
+  eqcolon: "\u2255",
+  eqsim: "\u2242",
+  eqslantgtr: "\u2A96",
+  eqslantless: "\u2A95",
+  equals: "=",
+  equest: "\u225F",
+  equiv: "\u2261",
+  equivDD: "\u2A78",
+  eqvparsl: "\u29E5",
+  erDot: "\u2253",
+  erarr: "\u2971",
+  escr: "\u212F",
+  esdot: "\u2250",
+  esim: "\u2242",
+  eta: "\u03B7",
+  eth: "\xF0",
+  euml: "\xEB",
+  euro: "\u20AC",
+  excl: "!",
+  exist: "\u2203",
+  expectation: "\u2130",
+  exponentiale: "\u2147",
+  fallingdotseq: "\u2252",
+  fcy: "\u0444",
+  female: "\u2640",
+  ffilig: "\uFB03",
+  fflig: "\uFB00",
+  ffllig: "\uFB04",
+  ffr: "\u{1D523}",
+  filig: "\uFB01",
+  fjlig: "fj",
+  flat: "\u266D",
+  fllig: "\uFB02",
+  fltns: "\u25B1",
+  fnof: "\u0192",
+  fopf: "\u{1D557}",
+  forall: "\u2200",
+  fork: "\u22D4",
+  forkv: "\u2AD9",
+  fpartint: "\u2A0D",
+  frac12: "\xBD",
+  frac13: "\u2153",
+  frac14: "\xBC",
+  frac15: "\u2155",
+  frac16: "\u2159",
+  frac18: "\u215B",
+  frac23: "\u2154",
+  frac25: "\u2156",
+  frac34: "\xBE",
+  frac35: "\u2157",
+  frac38: "\u215C",
+  frac45: "\u2158",
+  frac56: "\u215A",
+  frac58: "\u215D",
+  frac78: "\u215E",
+  frasl: "\u2044",
+  frown: "\u2322",
+  fscr: "\u{1D4BB}",
+  gE: "\u2267",
+  gEl: "\u2A8C",
+  gacute: "\u01F5",
+  gamma: "\u03B3",
+  gammad: "\u03DD",
+  gap: "\u2A86",
+  gbreve: "\u011F",
+  gcirc: "\u011D",
+  gcy: "\u0433",
+  gdot: "\u0121",
+  ge: "\u2265",
+  gel: "\u22DB",
+  geq: "\u2265",
+  geqq: "\u2267",
+  geqslant: "\u2A7E",
+  ges: "\u2A7E",
+  gescc: "\u2AA9",
+  gesdot: "\u2A80",
+  gesdoto: "\u2A82",
+  gesdotol: "\u2A84",
+  gesl: "\u22DB\uFE00",
+  gesles: "\u2A94",
+  gfr: "\u{1D524}",
+  gg: "\u226B",
+  ggg: "\u22D9",
+  gimel: "\u2137",
+  gjcy: "\u0453",
+  gl: "\u2277",
+  glE: "\u2A92",
+  gla: "\u2AA5",
+  glj: "\u2AA4",
+  gnE: "\u2269",
+  gnap: "\u2A8A",
+  gnapprox: "\u2A8A",
+  gne: "\u2A88",
+  gneq: "\u2A88",
+  gneqq: "\u2269",
+  gnsim: "\u22E7",
+  gopf: "\u{1D558}",
+  grave: "`",
+  gscr: "\u210A",
+  gsim: "\u2273",
+  gsime: "\u2A8E",
+  gsiml: "\u2A90",
+  gt: ">",
+  gtcc: "\u2AA7",
+  gtcir: "\u2A7A",
+  gtdot: "\u22D7",
+  gtlPar: "\u2995",
+  gtquest: "\u2A7C",
+  gtrapprox: "\u2A86",
+  gtrarr: "\u2978",
+  gtrdot: "\u22D7",
+  gtreqless: "\u22DB",
+  gtreqqless: "\u2A8C",
+  gtrless: "\u2277",
+  gtrsim: "\u2273",
+  gvertneqq: "\u2269\uFE00",
+  gvnE: "\u2269\uFE00",
+  hArr: "\u21D4",
+  hairsp: "\u200A",
+  half: "\xBD",
+  hamilt: "\u210B",
+  hardcy: "\u044A",
+  harr: "\u2194",
+  harrcir: "\u2948",
+  harrw: "\u21AD",
+  hbar: "\u210F",
+  hcirc: "\u0125",
+  hearts: "\u2665",
+  heartsuit: "\u2665",
+  hellip: "\u2026",
+  hercon: "\u22B9",
+  hfr: "\u{1D525}",
+  hksearow: "\u2925",
+  hkswarow: "\u2926",
+  hoarr: "\u21FF",
+  homtht: "\u223B",
+  hookleftarrow: "\u21A9",
+  hookrightarrow: "\u21AA",
+  hopf: "\u{1D559}",
+  horbar: "\u2015",
+  hscr: "\u{1D4BD}",
+  hslash: "\u210F",
+  hstrok: "\u0127",
+  hybull: "\u2043",
+  hyphen: "\u2010",
+  iacute: "\xED",
+  ic: "\u2063",
+  icirc: "\xEE",
+  icy: "\u0438",
+  iecy: "\u0435",
+  iexcl: "\xA1",
+  iff: "\u21D4",
+  ifr: "\u{1D526}",
+  igrave: "\xEC",
+  ii: "\u2148",
+  iiiint: "\u2A0C",
+  iiint: "\u222D",
+  iinfin: "\u29DC",
+  iiota: "\u2129",
+  ijlig: "\u0133",
+  imacr: "\u012B",
+  image: "\u2111",
+  imagline: "\u2110",
+  imagpart: "\u2111",
+  imath: "\u0131",
+  imof: "\u22B7",
+  imped: "\u01B5",
+  in: "\u2208",
+  incare: "\u2105",
+  infin: "\u221E",
+  infintie: "\u29DD",
+  inodot: "\u0131",
+  int: "\u222B",
+  intcal: "\u22BA",
+  integers: "\u2124",
+  intercal: "\u22BA",
+  intlarhk: "\u2A17",
+  intprod: "\u2A3C",
+  iocy: "\u0451",
+  iogon: "\u012F",
+  iopf: "\u{1D55A}",
+  iota: "\u03B9",
+  iprod: "\u2A3C",
+  iquest: "\xBF",
+  iscr: "\u{1D4BE}",
+  isin: "\u2208",
+  isinE: "\u22F9",
+  isindot: "\u22F5",
+  isins: "\u22F4",
+  isinsv: "\u22F3",
+  isinv: "\u2208",
+  it: "\u2062",
+  itilde: "\u0129",
+  iukcy: "\u0456",
+  iuml: "\xEF",
+  jcirc: "\u0135",
+  jcy: "\u0439",
+  jfr: "\u{1D527}",
+  jmath: "\u0237",
+  jopf: "\u{1D55B}",
+  jscr: "\u{1D4BF}",
+  jsercy: "\u0458",
+  jukcy: "\u0454",
+  kappa: "\u03BA",
+  kappav: "\u03F0",
+  kcedil: "\u0137",
+  kcy: "\u043A",
+  kfr: "\u{1D528}",
+  kgreen: "\u0138",
+  khcy: "\u0445",
+  kjcy: "\u045C",
+  kopf: "\u{1D55C}",
+  kscr: "\u{1D4C0}",
+  lAarr: "\u21DA",
+  lArr: "\u21D0",
+  lAtail: "\u291B",
+  lBarr: "\u290E",
+  lE: "\u2266",
+  lEg: "\u2A8B",
+  lHar: "\u2962",
+  lacute: "\u013A",
+  laemptyv: "\u29B4",
+  lagran: "\u2112",
+  lambda: "\u03BB",
+  lang: "\u27E8",
+  langd: "\u2991",
+  langle: "\u27E8",
+  lap: "\u2A85",
+  laquo: "\xAB",
+  larr: "\u2190",
+  larrb: "\u21E4",
+  larrbfs: "\u291F",
+  larrfs: "\u291D",
+  larrhk: "\u21A9",
+  larrlp: "\u21AB",
+  larrpl: "\u2939",
+  larrsim: "\u2973",
+  larrtl: "\u21A2",
+  lat: "\u2AAB",
+  latail: "\u2919",
+  late: "\u2AAD",
+  lates: "\u2AAD\uFE00",
+  lbarr: "\u290C",
+  lbbrk: "\u2772",
+  lbrace: "{",
+  lbrack: "[",
+  lbrke: "\u298B",
+  lbrksld: "\u298F",
+  lbrkslu: "\u298D",
+  lcaron: "\u013E",
+  lcedil: "\u013C",
+  lceil: "\u2308",
+  lcub: "{",
+  lcy: "\u043B",
+  ldca: "\u2936",
+  ldquo: "\u201C",
+  ldquor: "\u201E",
+  ldrdhar: "\u2967",
+  ldrushar: "\u294B",
+  ldsh: "\u21B2",
+  le: "\u2264",
+  leftarrow: "\u2190",
+  leftarrowtail: "\u21A2",
+  leftharpoondown: "\u21BD",
+  leftharpoonup: "\u21BC",
+  leftleftarrows: "\u21C7",
+  leftrightarrow: "\u2194",
+  leftrightarrows: "\u21C6",
+  leftrightharpoons: "\u21CB",
+  leftrightsquigarrow: "\u21AD",
+  leftthreetimes: "\u22CB",
+  leg: "\u22DA",
+  leq: "\u2264",
+  leqq: "\u2266",
+  leqslant: "\u2A7D",
+  les: "\u2A7D",
+  lescc: "\u2AA8",
+  lesdot: "\u2A7F",
+  lesdoto: "\u2A81",
+  lesdotor: "\u2A83",
+  lesg: "\u22DA\uFE00",
+  lesges: "\u2A93",
+  lessapprox: "\u2A85",
+  lessdot: "\u22D6",
+  lesseqgtr: "\u22DA",
+  lesseqqgtr: "\u2A8B",
+  lessgtr: "\u2276",
+  lesssim: "\u2272",
+  lfisht: "\u297C",
+  lfloor: "\u230A",
+  lfr: "\u{1D529}",
+  lg: "\u2276",
+  lgE: "\u2A91",
+  lhard: "\u21BD",
+  lharu: "\u21BC",
+  lharul: "\u296A",
+  lhblk: "\u2584",
+  ljcy: "\u0459",
+  ll: "\u226A",
+  llarr: "\u21C7",
+  llcorner: "\u231E",
+  llhard: "\u296B",
+  lltri: "\u25FA",
+  lmidot: "\u0140",
+  lmoust: "\u23B0",
+  lmoustache: "\u23B0",
+  lnE: "\u2268",
+  lnap: "\u2A89",
+  lnapprox: "\u2A89",
+  lne: "\u2A87",
+  lneq: "\u2A87",
+  lneqq: "\u2268",
+  lnsim: "\u22E6",
+  loang: "\u27EC",
+  loarr: "\u21FD",
+  lobrk: "\u27E6",
+  longleftarrow: "\u27F5",
+  longleftrightarrow: "\u27F7",
+  longmapsto: "\u27FC",
+  longrightarrow: "\u27F6",
+  looparrowleft: "\u21AB",
+  looparrowright: "\u21AC",
+  lopar: "\u2985",
+  lopf: "\u{1D55D}",
+  loplus: "\u2A2D",
+  lotimes: "\u2A34",
+  lowast: "\u2217",
+  lowbar: "_",
+  loz: "\u25CA",
+  lozenge: "\u25CA",
+  lozf: "\u29EB",
+  lpar: "(",
+  lparlt: "\u2993",
+  lrarr: "\u21C6",
+  lrcorner: "\u231F",
+  lrhar: "\u21CB",
+  lrhard: "\u296D",
+  lrm: "\u200E",
+  lrtri: "\u22BF",
+  lsaquo: "\u2039",
+  lscr: "\u{1D4C1}",
+  lsh: "\u21B0",
+  lsim: "\u2272",
+  lsime: "\u2A8D",
+  lsimg: "\u2A8F",
+  lsqb: "[",
+  lsquo: "\u2018",
+  lsquor: "\u201A",
+  lstrok: "\u0142",
+  lt: "<",
+  ltcc: "\u2AA6",
+  ltcir: "\u2A79",
+  ltdot: "\u22D6",
+  lthree: "\u22CB",
+  ltimes: "\u22C9",
+  ltlarr: "\u2976",
+  ltquest: "\u2A7B",
+  ltrPar: "\u2996",
+  ltri: "\u25C3",
+  ltrie: "\u22B4",
+  ltrif: "\u25C2",
+  lurdshar: "\u294A",
+  luruhar: "\u2966",
+  lvertneqq: "\u2268\uFE00",
+  lvnE: "\u2268\uFE00",
+  mDDot: "\u223A",
+  macr: "\xAF",
+  male: "\u2642",
+  malt: "\u2720",
+  maltese: "\u2720",
+  map: "\u21A6",
+  mapsto: "\u21A6",
+  mapstodown: "\u21A7",
+  mapstoleft: "\u21A4",
+  mapstoup: "\u21A5",
+  marker: "\u25AE",
+  mcomma: "\u2A29",
+  mcy: "\u043C",
+  mdash: "\u2014",
+  measuredangle: "\u2221",
+  mfr: "\u{1D52A}",
+  mho: "\u2127",
+  micro: "\xB5",
+  mid: "\u2223",
+  midast: "*",
+  midcir: "\u2AF0",
+  middot: "\xB7",
+  minus: "\u2212",
+  minusb: "\u229F",
+  minusd: "\u2238",
+  minusdu: "\u2A2A",
+  mlcp: "\u2ADB",
+  mldr: "\u2026",
+  mnplus: "\u2213",
+  models: "\u22A7",
+  mopf: "\u{1D55E}",
+  mp: "\u2213",
+  mscr: "\u{1D4C2}",
+  mstpos: "\u223E",
+  mu: "\u03BC",
+  multimap: "\u22B8",
+  mumap: "\u22B8",
+  nGg: "\u22D9\u0338",
+  nGt: "\u226B\u20D2",
+  nGtv: "\u226B\u0338",
+  nLeftarrow: "\u21CD",
+  nLeftrightarrow: "\u21CE",
+  nLl: "\u22D8\u0338",
+  nLt: "\u226A\u20D2",
+  nLtv: "\u226A\u0338",
+  nRightarrow: "\u21CF",
+  nVDash: "\u22AF",
+  nVdash: "\u22AE",
+  nabla: "\u2207",
+  nacute: "\u0144",
+  nang: "\u2220\u20D2",
+  nap: "\u2249",
+  napE: "\u2A70\u0338",
+  napid: "\u224B\u0338",
+  napos: "\u0149",
+  napprox: "\u2249",
+  natur: "\u266E",
+  natural: "\u266E",
+  naturals: "\u2115",
+  nbsp: "\xA0",
+  nbump: "\u224E\u0338",
+  nbumpe: "\u224F\u0338",
+  ncap: "\u2A43",
+  ncaron: "\u0148",
+  ncedil: "\u0146",
+  ncong: "\u2247",
+  ncongdot: "\u2A6D\u0338",
+  ncup: "\u2A42",
+  ncy: "\u043D",
+  ndash: "\u2013",
+  ne: "\u2260",
+  neArr: "\u21D7",
+  nearhk: "\u2924",
+  nearr: "\u2197",
+  nearrow: "\u2197",
+  nedot: "\u2250\u0338",
+  nequiv: "\u2262",
+  nesear: "\u2928",
+  nesim: "\u2242\u0338",
+  nexist: "\u2204",
+  nexists: "\u2204",
+  nfr: "\u{1D52B}",
+  ngE: "\u2267\u0338",
+  nge: "\u2271",
+  ngeq: "\u2271",
+  ngeqq: "\u2267\u0338",
+  ngeqslant: "\u2A7E\u0338",
+  nges: "\u2A7E\u0338",
+  ngsim: "\u2275",
+  ngt: "\u226F",
+  ngtr: "\u226F",
+  nhArr: "\u21CE",
+  nharr: "\u21AE",
+  nhpar: "\u2AF2",
+  ni: "\u220B",
+  nis: "\u22FC",
+  nisd: "\u22FA",
+  niv: "\u220B",
+  njcy: "\u045A",
+  nlArr: "\u21CD",
+  nlE: "\u2266\u0338",
+  nlarr: "\u219A",
+  nldr: "\u2025",
+  nle: "\u2270",
+  nleftarrow: "\u219A",
+  nleftrightarrow: "\u21AE",
+  nleq: "\u2270",
+  nleqq: "\u2266\u0338",
+  nleqslant: "\u2A7D\u0338",
+  nles: "\u2A7D\u0338",
+  nless: "\u226E",
+  nlsim: "\u2274",
+  nlt: "\u226E",
+  nltri: "\u22EA",
+  nltrie: "\u22EC",
+  nmid: "\u2224",
+  nopf: "\u{1D55F}",
+  not: "\xAC",
+  notin: "\u2209",
+  notinE: "\u22F9\u0338",
+  notindot: "\u22F5\u0338",
+  notinva: "\u2209",
+  notinvb: "\u22F7",
+  notinvc: "\u22F6",
+  notni: "\u220C",
+  notniva: "\u220C",
+  notnivb: "\u22FE",
+  notnivc: "\u22FD",
+  npar: "\u2226",
+  nparallel: "\u2226",
+  nparsl: "\u2AFD\u20E5",
+  npart: "\u2202\u0338",
+  npolint: "\u2A14",
+  npr: "\u2280",
+  nprcue: "\u22E0",
+  npre: "\u2AAF\u0338",
+  nprec: "\u2280",
+  npreceq: "\u2AAF\u0338",
+  nrArr: "\u21CF",
+  nrarr: "\u219B",
+  nrarrc: "\u2933\u0338",
+  nrarrw: "\u219D\u0338",
+  nrightarrow: "\u219B",
+  nrtri: "\u22EB",
+  nrtrie: "\u22ED",
+  nsc: "\u2281",
+  nsccue: "\u22E1",
+  nsce: "\u2AB0\u0338",
+  nscr: "\u{1D4C3}",
+  nshortmid: "\u2224",
+  nshortparallel: "\u2226",
+  nsim: "\u2241",
+  nsime: "\u2244",
+  nsimeq: "\u2244",
+  nsmid: "\u2224",
+  nspar: "\u2226",
+  nsqsube: "\u22E2",
+  nsqsupe: "\u22E3",
+  nsub: "\u2284",
+  nsubE: "\u2AC5\u0338",
+  nsube: "\u2288",
+  nsubset: "\u2282\u20D2",
+  nsubseteq: "\u2288",
+  nsubseteqq: "\u2AC5\u0338",
+  nsucc: "\u2281",
+  nsucceq: "\u2AB0\u0338",
+  nsup: "\u2285",
+  nsupE: "\u2AC6\u0338",
+  nsupe: "\u2289",
+  nsupset: "\u2283\u20D2",
+  nsupseteq: "\u2289",
+  nsupseteqq: "\u2AC6\u0338",
+  ntgl: "\u2279",
+  ntilde: "\xF1",
+  ntlg: "\u2278",
+  ntriangleleft: "\u22EA",
+  ntrianglelefteq: "\u22EC",
+  ntriangleright: "\u22EB",
+  ntrianglerighteq: "\u22ED",
+  nu: "\u03BD",
+  num: "#",
+  numero: "\u2116",
+  numsp: "\u2007",
+  nvDash: "\u22AD",
+  nvHarr: "\u2904",
+  nvap: "\u224D\u20D2",
+  nvdash: "\u22AC",
+  nvge: "\u2265\u20D2",
+  nvgt: ">\u20D2",
+  nvinfin: "\u29DE",
+  nvlArr: "\u2902",
+  nvle: "\u2264\u20D2",
+  nvlt: "<\u20D2",
+  nvltrie: "\u22B4\u20D2",
+  nvrArr: "\u2903",
+  nvrtrie: "\u22B5\u20D2",
+  nvsim: "\u223C\u20D2",
+  nwArr: "\u21D6",
+  nwarhk: "\u2923",
+  nwarr: "\u2196",
+  nwarrow: "\u2196",
+  nwnear: "\u2927",
+  oS: "\u24C8",
+  oacute: "\xF3",
+  oast: "\u229B",
+  ocir: "\u229A",
+  ocirc: "\xF4",
+  ocy: "\u043E",
+  odash: "\u229D",
+  odblac: "\u0151",
+  odiv: "\u2A38",
+  odot: "\u2299",
+  odsold: "\u29BC",
+  oelig: "\u0153",
+  ofcir: "\u29BF",
+  ofr: "\u{1D52C}",
+  ogon: "\u02DB",
+  ograve: "\xF2",
+  ogt: "\u29C1",
+  ohbar: "\u29B5",
+  ohm: "\u03A9",
+  oint: "\u222E",
+  olarr: "\u21BA",
+  olcir: "\u29BE",
+  olcross: "\u29BB",
+  oline: "\u203E",
+  olt: "\u29C0",
+  omacr: "\u014D",
+  omega: "\u03C9",
+  omicron: "\u03BF",
+  omid: "\u29B6",
+  ominus: "\u2296",
+  oopf: "\u{1D560}",
+  opar: "\u29B7",
+  operp: "\u29B9",
+  oplus: "\u2295",
+  or: "\u2228",
+  orarr: "\u21BB",
+  ord: "\u2A5D",
+  order: "\u2134",
+  orderof: "\u2134",
+  ordf: "\xAA",
+  ordm: "\xBA",
+  origof: "\u22B6",
+  oror: "\u2A56",
+  orslope: "\u2A57",
+  orv: "\u2A5B",
+  oscr: "\u2134",
+  oslash: "\xF8",
+  osol: "\u2298",
+  otilde: "\xF5",
+  otimes: "\u2297",
+  otimesas: "\u2A36",
+  ouml: "\xF6",
+  ovbar: "\u233D",
+  par: "\u2225",
+  para: "\xB6",
+  parallel: "\u2225",
+  parsim: "\u2AF3",
+  parsl: "\u2AFD",
+  part: "\u2202",
+  pcy: "\u043F",
+  percnt: "%",
+  period: ".",
+  permil: "\u2030",
+  perp: "\u22A5",
+  pertenk: "\u2031",
+  pfr: "\u{1D52D}",
+  phi: "\u03C6",
+  phiv: "\u03D5",
+  phmmat: "\u2133",
+  phone: "\u260E",
+  pi: "\u03C0",
+  pitchfork: "\u22D4",
+  piv: "\u03D6",
+  planck: "\u210F",
+  planckh: "\u210E",
+  plankv: "\u210F",
+  plus: "+",
+  plusacir: "\u2A23",
+  plusb: "\u229E",
+  pluscir: "\u2A22",
+  plusdo: "\u2214",
+  plusdu: "\u2A25",
+  pluse: "\u2A72",
+  plusmn: "\xB1",
+  plussim: "\u2A26",
+  plustwo: "\u2A27",
+  pm: "\xB1",
+  pointint: "\u2A15",
+  popf: "\u{1D561}",
+  pound: "\xA3",
+  pr: "\u227A",
+  prE: "\u2AB3",
+  prap: "\u2AB7",
+  prcue: "\u227C",
+  pre: "\u2AAF",
+  prec: "\u227A",
+  precapprox: "\u2AB7",
+  preccurlyeq: "\u227C",
+  preceq: "\u2AAF",
+  precnapprox: "\u2AB9",
+  precneqq: "\u2AB5",
+  precnsim: "\u22E8",
+  precsim: "\u227E",
+  prime: "\u2032",
+  primes: "\u2119",
+  prnE: "\u2AB5",
+  prnap: "\u2AB9",
+  prnsim: "\u22E8",
+  prod: "\u220F",
+  profalar: "\u232E",
+  profline: "\u2312",
+  profsurf: "\u2313",
+  prop: "\u221D",
+  propto: "\u221D",
+  prsim: "\u227E",
+  prurel: "\u22B0",
+  pscr: "\u{1D4C5}",
+  psi: "\u03C8",
+  puncsp: "\u2008",
+  qfr: "\u{1D52E}",
+  qint: "\u2A0C",
+  qopf: "\u{1D562}",
+  qprime: "\u2057",
+  qscr: "\u{1D4C6}",
+  quaternions: "\u210D",
+  quatint: "\u2A16",
+  quest: "?",
+  questeq: "\u225F",
+  quot: '"',
+  rAarr: "\u21DB",
+  rArr: "\u21D2",
+  rAtail: "\u291C",
+  rBarr: "\u290F",
+  rHar: "\u2964",
+  race: "\u223D\u0331",
+  racute: "\u0155",
+  radic: "\u221A",
+  raemptyv: "\u29B3",
+  rang: "\u27E9",
+  rangd: "\u2992",
+  range: "\u29A5",
+  rangle: "\u27E9",
+  raquo: "\xBB",
+  rarr: "\u2192",
+  rarrap: "\u2975",
+  rarrb: "\u21E5",
+  rarrbfs: "\u2920",
+  rarrc: "\u2933",
+  rarrfs: "\u291E",
+  rarrhk: "\u21AA",
+  rarrlp: "\u21AC",
+  rarrpl: "\u2945",
+  rarrsim: "\u2974",
+  rarrtl: "\u21A3",
+  rarrw: "\u219D",
+  ratail: "\u291A",
+  ratio: "\u2236",
+  rationals: "\u211A",
+  rbarr: "\u290D",
+  rbbrk: "\u2773",
+  rbrace: "}",
+  rbrack: "]",
+  rbrke: "\u298C",
+  rbrksld: "\u298E",
+  rbrkslu: "\u2990",
+  rcaron: "\u0159",
+  rcedil: "\u0157",
+  rceil: "\u2309",
+  rcub: "}",
+  rcy: "\u0440",
+  rdca: "\u2937",
+  rdldhar: "\u2969",
+  rdquo: "\u201D",
+  rdquor: "\u201D",
+  rdsh: "\u21B3",
+  real: "\u211C",
+  realine: "\u211B",
+  realpart: "\u211C",
+  reals: "\u211D",
+  rect: "\u25AD",
+  reg: "\xAE",
+  rfisht: "\u297D",
+  rfloor: "\u230B",
+  rfr: "\u{1D52F}",
+  rhard: "\u21C1",
+  rharu: "\u21C0",
+  rharul: "\u296C",
+  rho: "\u03C1",
+  rhov: "\u03F1",
+  rightarrow: "\u2192",
+  rightarrowtail: "\u21A3",
+  rightharpoondown: "\u21C1",
+  rightharpoonup: "\u21C0",
+  rightleftarrows: "\u21C4",
+  rightleftharpoons: "\u21CC",
+  rightrightarrows: "\u21C9",
+  rightsquigarrow: "\u219D",
+  rightthreetimes: "\u22CC",
+  ring: "\u02DA",
+  risingdotseq: "\u2253",
+  rlarr: "\u21C4",
+  rlhar: "\u21CC",
+  rlm: "\u200F",
+  rmoust: "\u23B1",
+  rmoustache: "\u23B1",
+  rnmid: "\u2AEE",
+  roang: "\u27ED",
+  roarr: "\u21FE",
+  robrk: "\u27E7",
+  ropar: "\u2986",
+  ropf: "\u{1D563}",
+  roplus: "\u2A2E",
+  rotimes: "\u2A35",
+  rpar: ")",
+  rpargt: "\u2994",
+  rppolint: "\u2A12",
+  rrarr: "\u21C9",
+  rsaquo: "\u203A",
+  rscr: "\u{1D4C7}",
+  rsh: "\u21B1",
+  rsqb: "]",
+  rsquo: "\u2019",
+  rsquor: "\u2019",
+  rthree: "\u22CC",
+  rtimes: "\u22CA",
+  rtri: "\u25B9",
+  rtrie: "\u22B5",
+  rtrif: "\u25B8",
+  rtriltri: "\u29CE",
+  ruluhar: "\u2968",
+  rx: "\u211E",
+  sacute: "\u015B",
+  sbquo: "\u201A",
+  sc: "\u227B",
+  scE: "\u2AB4",
+  scap: "\u2AB8",
+  scaron: "\u0161",
+  sccue: "\u227D",
+  sce: "\u2AB0",
+  scedil: "\u015F",
+  scirc: "\u015D",
+  scnE: "\u2AB6",
+  scnap: "\u2ABA",
+  scnsim: "\u22E9",
+  scpolint: "\u2A13",
+  scsim: "\u227F",
+  scy: "\u0441",
+  sdot: "\u22C5",
+  sdotb: "\u22A1",
+  sdote: "\u2A66",
+  seArr: "\u21D8",
+  searhk: "\u2925",
+  searr: "\u2198",
+  searrow: "\u2198",
+  sect: "\xA7",
+  semi: ";",
+  seswar: "\u2929",
+  setminus: "\u2216",
+  setmn: "\u2216",
+  sext: "\u2736",
+  sfr: "\u{1D530}",
+  sfrown: "\u2322",
+  sharp: "\u266F",
+  shchcy: "\u0449",
+  shcy: "\u0448",
+  shortmid: "\u2223",
+  shortparallel: "\u2225",
+  shy: "\xAD",
+  sigma: "\u03C3",
+  sigmaf: "\u03C2",
+  sigmav: "\u03C2",
+  sim: "\u223C",
+  simdot: "\u2A6A",
+  sime: "\u2243",
+  simeq: "\u2243",
+  simg: "\u2A9E",
+  simgE: "\u2AA0",
+  siml: "\u2A9D",
+  simlE: "\u2A9F",
+  simne: "\u2246",
+  simplus: "\u2A24",
+  simrarr: "\u2972",
+  slarr: "\u2190",
+  smallsetminus: "\u2216",
+  smashp: "\u2A33",
+  smeparsl: "\u29E4",
+  smid: "\u2223",
+  smile: "\u2323",
+  smt: "\u2AAA",
+  smte: "\u2AAC",
+  smtes: "\u2AAC\uFE00",
+  softcy: "\u044C",
+  sol: "/",
+  solb: "\u29C4",
+  solbar: "\u233F",
+  sopf: "\u{1D564}",
+  spades: "\u2660",
+  spadesuit: "\u2660",
+  spar: "\u2225",
+  sqcap: "\u2293",
+  sqcaps: "\u2293\uFE00",
+  sqcup: "\u2294",
+  sqcups: "\u2294\uFE00",
+  sqsub: "\u228F",
+  sqsube: "\u2291",
+  sqsubset: "\u228F",
+  sqsubseteq: "\u2291",
+  sqsup: "\u2290",
+  sqsupe: "\u2292",
+  sqsupset: "\u2290",
+  sqsupseteq: "\u2292",
+  squ: "\u25A1",
+  square: "\u25A1",
+  squarf: "\u25AA",
+  squf: "\u25AA",
+  srarr: "\u2192",
+  sscr: "\u{1D4C8}",
+  ssetmn: "\u2216",
+  ssmile: "\u2323",
+  sstarf: "\u22C6",
+  star: "\u2606",
+  starf: "\u2605",
+  straightepsilon: "\u03F5",
+  straightphi: "\u03D5",
+  strns: "\xAF",
+  sub: "\u2282",
+  subE: "\u2AC5",
+  subdot: "\u2ABD",
+  sube: "\u2286",
+  subedot: "\u2AC3",
+  submult: "\u2AC1",
+  subnE: "\u2ACB",
+  subne: "\u228A",
+  subplus: "\u2ABF",
+  subrarr: "\u2979",
+  subset: "\u2282",
+  subseteq: "\u2286",
+  subseteqq: "\u2AC5",
+  subsetneq: "\u228A",
+  subsetneqq: "\u2ACB",
+  subsim: "\u2AC7",
+  subsub: "\u2AD5",
+  subsup: "\u2AD3",
+  succ: "\u227B",
+  succapprox: "\u2AB8",
+  succcurlyeq: "\u227D",
+  succeq: "\u2AB0",
+  succnapprox: "\u2ABA",
+  succneqq: "\u2AB6",
+  succnsim: "\u22E9",
+  succsim: "\u227F",
+  sum: "\u2211",
+  sung: "\u266A",
+  sup1: "\xB9",
+  sup2: "\xB2",
+  sup3: "\xB3",
+  sup: "\u2283",
+  supE: "\u2AC6",
+  supdot: "\u2ABE",
+  supdsub: "\u2AD8",
+  supe: "\u2287",
+  supedot: "\u2AC4",
+  suphsol: "\u27C9",
+  suphsub: "\u2AD7",
+  suplarr: "\u297B",
+  supmult: "\u2AC2",
+  supnE: "\u2ACC",
+  supne: "\u228B",
+  supplus: "\u2AC0",
+  supset: "\u2283",
+  supseteq: "\u2287",
+  supseteqq: "\u2AC6",
+  supsetneq: "\u228B",
+  supsetneqq: "\u2ACC",
+  supsim: "\u2AC8",
+  supsub: "\u2AD4",
+  supsup: "\u2AD6",
+  swArr: "\u21D9",
+  swarhk: "\u2926",
+  swarr: "\u2199",
+  swarrow: "\u2199",
+  swnwar: "\u292A",
+  szlig: "\xDF",
+  target: "\u2316",
+  tau: "\u03C4",
+  tbrk: "\u23B4",
+  tcaron: "\u0165",
+  tcedil: "\u0163",
+  tcy: "\u0442",
+  tdot: "\u20DB",
+  telrec: "\u2315",
+  tfr: "\u{1D531}",
+  there4: "\u2234",
+  therefore: "\u2234",
+  theta: "\u03B8",
+  thetasym: "\u03D1",
+  thetav: "\u03D1",
+  thickapprox: "\u2248",
+  thicksim: "\u223C",
+  thinsp: "\u2009",
+  thkap: "\u2248",
+  thksim: "\u223C",
+  thorn: "\xFE",
+  tilde: "\u02DC",
+  times: "\xD7",
+  timesb: "\u22A0",
+  timesbar: "\u2A31",
+  timesd: "\u2A30",
+  tint: "\u222D",
+  toea: "\u2928",
+  top: "\u22A4",
+  topbot: "\u2336",
+  topcir: "\u2AF1",
+  topf: "\u{1D565}",
+  topfork: "\u2ADA",
+  tosa: "\u2929",
+  tprime: "\u2034",
+  trade: "\u2122",
+  triangle: "\u25B5",
+  triangledown: "\u25BF",
+  triangleleft: "\u25C3",
+  trianglelefteq: "\u22B4",
+  triangleq: "\u225C",
+  triangleright: "\u25B9",
+  trianglerighteq: "\u22B5",
+  tridot: "\u25EC",
+  trie: "\u225C",
+  triminus: "\u2A3A",
+  triplus: "\u2A39",
+  trisb: "\u29CD",
+  tritime: "\u2A3B",
+  trpezium: "\u23E2",
+  tscr: "\u{1D4C9}",
+  tscy: "\u0446",
+  tshcy: "\u045B",
+  tstrok: "\u0167",
+  twixt: "\u226C",
+  twoheadleftarrow: "\u219E",
+  twoheadrightarrow: "\u21A0",
+  uArr: "\u21D1",
+  uHar: "\u2963",
+  uacute: "\xFA",
+  uarr: "\u2191",
+  ubrcy: "\u045E",
+  ubreve: "\u016D",
+  ucirc: "\xFB",
+  ucy: "\u0443",
+  udarr: "\u21C5",
+  udblac: "\u0171",
+  udhar: "\u296E",
+  ufisht: "\u297E",
+  ufr: "\u{1D532}",
+  ugrave: "\xF9",
+  uharl: "\u21BF",
+  uharr: "\u21BE",
+  uhblk: "\u2580",
+  ulcorn: "\u231C",
+  ulcorner: "\u231C",
+  ulcrop: "\u230F",
+  ultri: "\u25F8",
+  umacr: "\u016B",
+  uml: "\xA8",
+  uogon: "\u0173",
+  uopf: "\u{1D566}",
+  uparrow: "\u2191",
+  updownarrow: "\u2195",
+  upharpoonleft: "\u21BF",
+  upharpoonright: "\u21BE",
+  uplus: "\u228E",
+  upsi: "\u03C5",
+  upsih: "\u03D2",
+  upsilon: "\u03C5",
+  upuparrows: "\u21C8",
+  urcorn: "\u231D",
+  urcorner: "\u231D",
+  urcrop: "\u230E",
+  uring: "\u016F",
+  urtri: "\u25F9",
+  uscr: "\u{1D4CA}",
+  utdot: "\u22F0",
+  utilde: "\u0169",
+  utri: "\u25B5",
+  utrif: "\u25B4",
+  uuarr: "\u21C8",
+  uuml: "\xFC",
+  uwangle: "\u29A7",
+  vArr: "\u21D5",
+  vBar: "\u2AE8",
+  vBarv: "\u2AE9",
+  vDash: "\u22A8",
+  vangrt: "\u299C",
+  varepsilon: "\u03F5",
+  varkappa: "\u03F0",
+  varnothing: "\u2205",
+  varphi: "\u03D5",
+  varpi: "\u03D6",
+  varpropto: "\u221D",
+  varr: "\u2195",
+  varrho: "\u03F1",
+  varsigma: "\u03C2",
+  varsubsetneq: "\u228A\uFE00",
+  varsubsetneqq: "\u2ACB\uFE00",
+  varsupsetneq: "\u228B\uFE00",
+  varsupsetneqq: "\u2ACC\uFE00",
+  vartheta: "\u03D1",
+  vartriangleleft: "\u22B2",
+  vartriangleright: "\u22B3",
+  vcy: "\u0432",
+  vdash: "\u22A2",
+  vee: "\u2228",
+  veebar: "\u22BB",
+  veeeq: "\u225A",
+  vellip: "\u22EE",
+  verbar: "|",
+  vert: "|",
+  vfr: "\u{1D533}",
+  vltri: "\u22B2",
+  vnsub: "\u2282\u20D2",
+  vnsup: "\u2283\u20D2",
+  vopf: "\u{1D567}",
+  vprop: "\u221D",
+  vrtri: "\u22B3",
+  vscr: "\u{1D4CB}",
+  vsubnE: "\u2ACB\uFE00",
+  vsubne: "\u228A\uFE00",
+  vsupnE: "\u2ACC\uFE00",
+  vsupne: "\u228B\uFE00",
+  vzigzag: "\u299A",
+  wcirc: "\u0175",
+  wedbar: "\u2A5F",
+  wedge: "\u2227",
+  wedgeq: "\u2259",
+  weierp: "\u2118",
+  wfr: "\u{1D534}",
+  wopf: "\u{1D568}",
+  wp: "\u2118",
+  wr: "\u2240",
+  wreath: "\u2240",
+  wscr: "\u{1D4CC}",
+  xcap: "\u22C2",
+  xcirc: "\u25EF",
+  xcup: "\u22C3",
+  xdtri: "\u25BD",
+  xfr: "\u{1D535}",
+  xhArr: "\u27FA",
+  xharr: "\u27F7",
+  xi: "\u03BE",
+  xlArr: "\u27F8",
+  xlarr: "\u27F5",
+  xmap: "\u27FC",
+  xnis: "\u22FB",
+  xodot: "\u2A00",
+  xopf: "\u{1D569}",
+  xoplus: "\u2A01",
+  xotime: "\u2A02",
+  xrArr: "\u27F9",
+  xrarr: "\u27F6",
+  xscr: "\u{1D4CD}",
+  xsqcup: "\u2A06",
+  xuplus: "\u2A04",
+  xutri: "\u25B3",
+  xvee: "\u22C1",
+  xwedge: "\u22C0",
+  yacute: "\xFD",
+  yacy: "\u044F",
+  ycirc: "\u0177",
+  ycy: "\u044B",
+  yen: "\xA5",
+  yfr: "\u{1D536}",
+  yicy: "\u0457",
+  yopf: "\u{1D56A}",
+  yscr: "\u{1D4CE}",
+  yucy: "\u044E",
+  yuml: "\xFF",
+  zacute: "\u017A",
+  zcaron: "\u017E",
+  zcy: "\u0437",
+  zdot: "\u017C",
+  zeetrf: "\u2128",
+  zeta: "\u03B6",
+  zfr: "\u{1D537}",
+  zhcy: "\u0436",
+  zigrarr: "\u21DD",
+  zopf: "\u{1D56B}",
+  zscr: "\u{1D4CF}",
+  zwj: "\u200D",
+  zwnj: "\u200C"
+};
+
+// ../../node_modules/.pnpm/decode-named-character-reference@1.3.0/node_modules/decode-named-character-reference/index.js
+var own = {}.hasOwnProperty;
+function decodeNamedCharacterReference(value) {
+  return own.call(characterEntities, value) ? characterEntities[value] : false;
+}
+
+// ../../node_modules/.pnpm/micromark-util-chunked@2.0.1/node_modules/micromark-util-chunked/index.js
+function splice(list2, start, remove, items) {
+  const end = list2.length;
+  let chunkStart = 0;
+  let parameters;
+  if (start < 0) {
+    start = -start > end ? 0 : end + start;
+  } else {
+    start = start > end ? end : start;
+  }
+  remove = remove > 0 ? remove : 0;
+  if (items.length < 1e4) {
+    parameters = Array.from(items);
+    parameters.unshift(start, remove);
+    list2.splice(...parameters);
+  } else {
+    if (remove) list2.splice(start, remove);
+    while (chunkStart < items.length) {
+      parameters = items.slice(chunkStart, chunkStart + 1e4);
+      parameters.unshift(start, 0);
+      list2.splice(...parameters);
+      chunkStart += 1e4;
+      start += 1e4;
+    }
+  }
+}
+function push(list2, items) {
+  if (list2.length > 0) {
+    splice(list2, list2.length, 0, items);
+    return list2;
+  }
+  return items;
+}
+
+// ../../node_modules/.pnpm/micromark-util-combine-extensions@2.0.1/node_modules/micromark-util-combine-extensions/index.js
+var hasOwnProperty = {}.hasOwnProperty;
+function combineExtensions(extensions) {
+  const all2 = {};
+  let index2 = -1;
+  while (++index2 < extensions.length) {
+    syntaxExtension(all2, extensions[index2]);
+  }
+  return all2;
+}
+function syntaxExtension(all2, extension2) {
+  let hook;
+  for (hook in extension2) {
+    const maybe = hasOwnProperty.call(all2, hook) ? all2[hook] : void 0;
+    const left = maybe || (all2[hook] = {});
+    const right = extension2[hook];
+    let code;
+    if (right) {
+      for (code in right) {
+        if (!hasOwnProperty.call(left, code)) left[code] = [];
+        const value = right[code];
+        constructs(
+          // @ts-expect-error Looks like a list.
+          left[code],
+          Array.isArray(value) ? value : value ? [value] : []
+        );
+      }
+    }
+  }
+}
+function constructs(existing, list2) {
+  let index2 = -1;
+  const before = [];
+  while (++index2 < list2.length) {
+    ;
+    (list2[index2].add === "after" ? existing : before).push(list2[index2]);
+  }
+  splice(existing, 0, 0, before);
+}
+
+// ../../node_modules/.pnpm/micromark-util-decode-numeric-character-reference@2.0.2/node_modules/micromark-util-decode-numeric-character-reference/index.js
+function decodeNumericCharacterReference(value, base) {
+  const code = Number.parseInt(value, base);
+  if (
+    // C0 except for HT, LF, FF, CR, space.
+    code < 9 || code === 11 || code > 13 && code < 32 || // Control character (DEL) of C0, and C1 controls.
+    code > 126 && code < 160 || // Lone high surrogates and low surrogates.
+    code > 55295 && code < 57344 || // Noncharacters.
+    code > 64975 && code < 65008 || /* eslint-disable no-bitwise */
+    (code & 65535) === 65535 || (code & 65535) === 65534 || /* eslint-enable no-bitwise */
+    // Out of range
+    code > 1114111
+  ) {
+    return "\uFFFD";
+  }
+  return String.fromCodePoint(code);
+}
+
+// ../../node_modules/.pnpm/micromark-util-normalize-identifier@2.0.1/node_modules/micromark-util-normalize-identifier/index.js
+function normalizeIdentifier(value) {
+  return value.replace(/[\t\n\r ]+/g, " ").replace(/^ | $/g, "").toLowerCase().toUpperCase();
+}
+
+// ../../node_modules/.pnpm/micromark-util-character@2.1.1/node_modules/micromark-util-character/index.js
+var asciiAlpha = regexCheck(/[A-Za-z]/);
+var asciiAlphanumeric = regexCheck(/[\dA-Za-z]/);
+var asciiAtext = regexCheck(/[#-'*+\--9=?A-Z^-~]/);
+function asciiControl(code) {
+  return (
+    // Special whitespace codes (which have negative values), C0 and Control
+    // character DEL
+    code !== null && (code < 32 || code === 127)
+  );
+}
+var asciiDigit = regexCheck(/\d/);
+var asciiHexDigit = regexCheck(/[\dA-Fa-f]/);
+var asciiPunctuation = regexCheck(/[!-/:-@[-`{-~]/);
+function markdownLineEnding(code) {
+  return code !== null && code < -2;
+}
+function markdownLineEndingOrSpace(code) {
+  return code !== null && (code < 0 || code === 32);
+}
+function markdownSpace(code) {
+  return code === -2 || code === -1 || code === 32;
+}
+var unicodePunctuation = regexCheck(/\p{P}|\p{S}/u);
+var unicodeWhitespace = regexCheck(/\s/);
+function regexCheck(regex) {
+  return check;
+  function check(code) {
+    return code !== null && code > -1 && regex.test(String.fromCharCode(code));
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-factory-space@2.0.1/node_modules/micromark-factory-space/index.js
+function factorySpace(effects, ok, type, max) {
+  const limit = max ? max - 1 : Number.POSITIVE_INFINITY;
+  let size = 0;
+  return start;
+  function start(code) {
+    if (markdownSpace(code)) {
+      effects.enter(type);
+      return prefix(code);
+    }
+    return ok(code);
+  }
+  function prefix(code) {
+    if (markdownSpace(code) && size++ < limit) {
+      effects.consume(code);
+      return prefix;
+    }
+    effects.exit(type);
+    return ok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark@4.0.2/node_modules/micromark/lib/initialize/content.js
+var content = {
+  tokenize: initializeContent
+};
+function initializeContent(effects) {
+  const contentStart = effects.attempt(this.parser.constructs.contentInitial, afterContentStartConstruct, paragraphInitial);
+  let previous2;
+  return contentStart;
+  function afterContentStartConstruct(code) {
+    if (code === null) {
+      effects.consume(code);
+      return;
+    }
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return factorySpace(effects, contentStart, "linePrefix");
+  }
+  function paragraphInitial(code) {
+    effects.enter("paragraph");
+    return lineStart(code);
+  }
+  function lineStart(code) {
+    const token = effects.enter("chunkText", {
+      contentType: "text",
+      previous: previous2
+    });
+    if (previous2) {
+      previous2.next = token;
+    }
+    previous2 = token;
+    return data(code);
+  }
+  function data(code) {
+    if (code === null) {
+      effects.exit("chunkText");
+      effects.exit("paragraph");
+      effects.consume(code);
+      return;
+    }
+    if (markdownLineEnding(code)) {
+      effects.consume(code);
+      effects.exit("chunkText");
+      return lineStart;
+    }
+    effects.consume(code);
+    return data;
+  }
+}
+
+// ../../node_modules/.pnpm/micromark@4.0.2/node_modules/micromark/lib/initialize/document.js
+var document2 = {
+  tokenize: initializeDocument
+};
+var containerConstruct = {
+  tokenize: tokenizeContainer
+};
+function initializeDocument(effects) {
+  const self = this;
+  const stack = [];
+  let continued = 0;
+  let childFlow;
+  let childToken;
+  let lineStartOffset;
+  return start;
+  function start(code) {
+    if (continued < stack.length) {
+      const item = stack[continued];
+      self.containerState = item[1];
+      return effects.attempt(item[0].continuation, documentContinue, checkNewContainers)(code);
+    }
+    return checkNewContainers(code);
+  }
+  function documentContinue(code) {
+    continued++;
+    if (self.containerState._closeFlow) {
+      self.containerState._closeFlow = void 0;
+      if (childFlow) {
+        closeFlow();
+      }
+      const indexBeforeExits = self.events.length;
+      let indexBeforeFlow = indexBeforeExits;
+      let point3;
+      while (indexBeforeFlow--) {
+        if (self.events[indexBeforeFlow][0] === "exit" && self.events[indexBeforeFlow][1].type === "chunkFlow") {
+          point3 = self.events[indexBeforeFlow][1].end;
+          break;
+        }
+      }
+      exitContainers(continued);
+      let index2 = indexBeforeExits;
+      while (index2 < self.events.length) {
+        self.events[index2][1].end = {
+          ...point3
+        };
+        index2++;
+      }
+      splice(self.events, indexBeforeFlow + 1, 0, self.events.slice(indexBeforeExits));
+      self.events.length = index2;
+      return checkNewContainers(code);
+    }
+    return start(code);
+  }
+  function checkNewContainers(code) {
+    if (continued === stack.length) {
+      if (!childFlow) {
+        return documentContinued(code);
+      }
+      if (childFlow.currentConstruct && childFlow.currentConstruct.concrete) {
+        return flowStart(code);
+      }
+      self.interrupt = Boolean(childFlow.currentConstruct && !childFlow._gfmTableDynamicInterruptHack);
+    }
+    self.containerState = {};
+    return effects.check(containerConstruct, thereIsANewContainer, thereIsNoNewContainer)(code);
+  }
+  function thereIsANewContainer(code) {
+    if (childFlow) closeFlow();
+    exitContainers(continued);
+    return documentContinued(code);
+  }
+  function thereIsNoNewContainer(code) {
+    self.parser.lazy[self.now().line] = continued !== stack.length;
+    lineStartOffset = self.now().offset;
+    return flowStart(code);
+  }
+  function documentContinued(code) {
+    self.containerState = {};
+    return effects.attempt(containerConstruct, containerContinue, flowStart)(code);
+  }
+  function containerContinue(code) {
+    continued++;
+    stack.push([self.currentConstruct, self.containerState]);
+    return documentContinued(code);
+  }
+  function flowStart(code) {
+    if (code === null) {
+      if (childFlow) closeFlow();
+      exitContainers(0);
+      effects.consume(code);
+      return;
+    }
+    childFlow = childFlow || self.parser.flow(self.now());
+    effects.enter("chunkFlow", {
+      _tokenizer: childFlow,
+      contentType: "flow",
+      previous: childToken
+    });
+    return flowContinue(code);
+  }
+  function flowContinue(code) {
+    if (code === null) {
+      writeToChild(effects.exit("chunkFlow"), true);
+      exitContainers(0);
+      effects.consume(code);
+      return;
+    }
+    if (markdownLineEnding(code)) {
+      effects.consume(code);
+      writeToChild(effects.exit("chunkFlow"));
+      continued = 0;
+      self.interrupt = void 0;
+      return start;
+    }
+    effects.consume(code);
+    return flowContinue;
+  }
+  function writeToChild(token, endOfFile) {
+    const stream = self.sliceStream(token);
+    if (endOfFile) stream.push(null);
+    token.previous = childToken;
+    if (childToken) childToken.next = token;
+    childToken = token;
+    childFlow.defineSkip(token.start);
+    childFlow.write(stream);
+    if (self.parser.lazy[token.start.line]) {
+      let index2 = childFlow.events.length;
+      while (index2--) {
+        if (
+          // The token starts before the line ending…
+          childFlow.events[index2][1].start.offset < lineStartOffset && // …and either is not ended yet…
+          (!childFlow.events[index2][1].end || // …or ends after it.
+          childFlow.events[index2][1].end.offset > lineStartOffset)
+        ) {
+          return;
+        }
+      }
+      const indexBeforeExits = self.events.length;
+      let indexBeforeFlow = indexBeforeExits;
+      let seen;
+      let point3;
+      while (indexBeforeFlow--) {
+        if (self.events[indexBeforeFlow][0] === "exit" && self.events[indexBeforeFlow][1].type === "chunkFlow") {
+          if (seen) {
+            point3 = self.events[indexBeforeFlow][1].end;
+            break;
+          }
+          seen = true;
+        }
+      }
+      exitContainers(continued);
+      index2 = indexBeforeExits;
+      while (index2 < self.events.length) {
+        self.events[index2][1].end = {
+          ...point3
+        };
+        index2++;
+      }
+      splice(self.events, indexBeforeFlow + 1, 0, self.events.slice(indexBeforeExits));
+      self.events.length = index2;
+    }
+  }
+  function exitContainers(size) {
+    let index2 = stack.length;
+    while (index2-- > size) {
+      const entry = stack[index2];
+      self.containerState = entry[1];
+      entry[0].exit.call(self, effects);
+    }
+    stack.length = size;
+  }
+  function closeFlow() {
+    childFlow.write([null]);
+    childToken = void 0;
+    childFlow = void 0;
+    self.containerState._closeFlow = void 0;
+  }
+}
+function tokenizeContainer(effects, ok, nok) {
+  return factorySpace(effects, effects.attempt(this.parser.constructs.document, ok, nok), "linePrefix", this.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4);
+}
+
+// ../../node_modules/.pnpm/micromark-util-classify-character@2.0.1/node_modules/micromark-util-classify-character/index.js
+function classifyCharacter(code) {
+  if (code === null || markdownLineEndingOrSpace(code) || unicodeWhitespace(code)) {
+    return 1;
+  }
+  if (unicodePunctuation(code)) {
+    return 2;
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-util-resolve-all@2.0.1/node_modules/micromark-util-resolve-all/index.js
+function resolveAll(constructs2, events, context) {
+  const called = [];
+  let index2 = -1;
+  while (++index2 < constructs2.length) {
+    const resolve = constructs2[index2].resolveAll;
+    if (resolve && !called.includes(resolve)) {
+      events = resolve(events, context);
+      called.push(resolve);
+    }
+  }
+  return events;
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/attention.js
+var attention = {
+  name: "attention",
+  resolveAll: resolveAllAttention,
+  tokenize: tokenizeAttention
+};
+function resolveAllAttention(events, context) {
+  let index2 = -1;
+  let open;
+  let group;
+  let text3;
+  let openingSequence;
+  let closingSequence;
+  let use;
+  let nextEvents;
+  let offset;
+  while (++index2 < events.length) {
+    if (events[index2][0] === "enter" && events[index2][1].type === "attentionSequence" && events[index2][1]._close) {
+      open = index2;
+      while (open--) {
+        if (events[open][0] === "exit" && events[open][1].type === "attentionSequence" && events[open][1]._open && // If the markers are the same:
+        context.sliceSerialize(events[open][1]).charCodeAt(0) === context.sliceSerialize(events[index2][1]).charCodeAt(0)) {
+          if ((events[open][1]._close || events[index2][1]._open) && (events[index2][1].end.offset - events[index2][1].start.offset) % 3 && !((events[open][1].end.offset - events[open][1].start.offset + events[index2][1].end.offset - events[index2][1].start.offset) % 3)) {
+            continue;
+          }
+          use = events[open][1].end.offset - events[open][1].start.offset > 1 && events[index2][1].end.offset - events[index2][1].start.offset > 1 ? 2 : 1;
+          const start = {
+            ...events[open][1].end
+          };
+          const end = {
+            ...events[index2][1].start
+          };
+          movePoint(start, -use);
+          movePoint(end, use);
+          openingSequence = {
+            type: use > 1 ? "strongSequence" : "emphasisSequence",
+            start,
+            end: {
+              ...events[open][1].end
+            }
+          };
+          closingSequence = {
+            type: use > 1 ? "strongSequence" : "emphasisSequence",
+            start: {
+              ...events[index2][1].start
+            },
+            end
+          };
+          text3 = {
+            type: use > 1 ? "strongText" : "emphasisText",
+            start: {
+              ...events[open][1].end
+            },
+            end: {
+              ...events[index2][1].start
+            }
+          };
+          group = {
+            type: use > 1 ? "strong" : "emphasis",
+            start: {
+              ...openingSequence.start
+            },
+            end: {
+              ...closingSequence.end
+            }
+          };
+          events[open][1].end = {
+            ...openingSequence.start
+          };
+          events[index2][1].start = {
+            ...closingSequence.end
+          };
+          nextEvents = [];
+          if (events[open][1].end.offset - events[open][1].start.offset) {
+            nextEvents = push(nextEvents, [["enter", events[open][1], context], ["exit", events[open][1], context]]);
+          }
+          nextEvents = push(nextEvents, [["enter", group, context], ["enter", openingSequence, context], ["exit", openingSequence, context], ["enter", text3, context]]);
+          nextEvents = push(nextEvents, resolveAll(context.parser.constructs.insideSpan.null, events.slice(open + 1, index2), context));
+          nextEvents = push(nextEvents, [["exit", text3, context], ["enter", closingSequence, context], ["exit", closingSequence, context], ["exit", group, context]]);
+          if (events[index2][1].end.offset - events[index2][1].start.offset) {
+            offset = 2;
+            nextEvents = push(nextEvents, [["enter", events[index2][1], context], ["exit", events[index2][1], context]]);
+          } else {
+            offset = 0;
+          }
+          splice(events, open - 1, index2 - open + 3, nextEvents);
+          index2 = open + nextEvents.length - offset - 2;
+          break;
+        }
+      }
+    }
+  }
+  index2 = -1;
+  while (++index2 < events.length) {
+    if (events[index2][1].type === "attentionSequence") {
+      events[index2][1].type = "data";
+    }
+  }
+  return events;
+}
+function tokenizeAttention(effects, ok) {
+  const attentionMarkers2 = this.parser.constructs.attentionMarkers.null;
+  const previous2 = this.previous;
+  const before = classifyCharacter(previous2);
+  let marker;
+  return start;
+  function start(code) {
+    marker = code;
+    effects.enter("attentionSequence");
+    return inside(code);
+  }
+  function inside(code) {
+    if (code === marker) {
+      effects.consume(code);
+      return inside;
+    }
+    const token = effects.exit("attentionSequence");
+    const after = classifyCharacter(code);
+    const open = !after || after === 2 && before || attentionMarkers2.includes(code);
+    const close = !before || before === 2 && after || attentionMarkers2.includes(previous2);
+    token._open = Boolean(marker === 42 ? open : open && (before || !close));
+    token._close = Boolean(marker === 42 ? close : close && (after || !open));
+    return ok(code);
+  }
+}
+function movePoint(point3, offset) {
+  point3.column += offset;
+  point3.offset += offset;
+  point3._bufferIndex += offset;
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/autolink.js
+var autolink = {
+  name: "autolink",
+  tokenize: tokenizeAutolink
+};
+function tokenizeAutolink(effects, ok, nok) {
+  let size = 0;
+  return start;
+  function start(code) {
+    effects.enter("autolink");
+    effects.enter("autolinkMarker");
+    effects.consume(code);
+    effects.exit("autolinkMarker");
+    effects.enter("autolinkProtocol");
+    return open;
+  }
+  function open(code) {
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      return schemeOrEmailAtext;
+    }
+    if (code === 64) {
+      return nok(code);
+    }
+    return emailAtext(code);
+  }
+  function schemeOrEmailAtext(code) {
+    if (code === 43 || code === 45 || code === 46 || asciiAlphanumeric(code)) {
+      size = 1;
+      return schemeInsideOrEmailAtext(code);
+    }
+    return emailAtext(code);
+  }
+  function schemeInsideOrEmailAtext(code) {
+    if (code === 58) {
+      effects.consume(code);
+      size = 0;
+      return urlInside;
+    }
+    if ((code === 43 || code === 45 || code === 46 || asciiAlphanumeric(code)) && size++ < 32) {
+      effects.consume(code);
+      return schemeInsideOrEmailAtext;
+    }
+    size = 0;
+    return emailAtext(code);
+  }
+  function urlInside(code) {
+    if (code === 62) {
+      effects.exit("autolinkProtocol");
+      effects.enter("autolinkMarker");
+      effects.consume(code);
+      effects.exit("autolinkMarker");
+      effects.exit("autolink");
+      return ok;
+    }
+    if (code === null || code === 32 || code === 60 || asciiControl(code)) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return urlInside;
+  }
+  function emailAtext(code) {
+    if (code === 64) {
+      effects.consume(code);
+      return emailAtSignOrDot;
+    }
+    if (asciiAtext(code)) {
+      effects.consume(code);
+      return emailAtext;
+    }
+    return nok(code);
+  }
+  function emailAtSignOrDot(code) {
+    return asciiAlphanumeric(code) ? emailLabel(code) : nok(code);
+  }
+  function emailLabel(code) {
+    if (code === 46) {
+      effects.consume(code);
+      size = 0;
+      return emailAtSignOrDot;
+    }
+    if (code === 62) {
+      effects.exit("autolinkProtocol").type = "autolinkEmail";
+      effects.enter("autolinkMarker");
+      effects.consume(code);
+      effects.exit("autolinkMarker");
+      effects.exit("autolink");
+      return ok;
+    }
+    return emailValue(code);
+  }
+  function emailValue(code) {
+    if ((code === 45 || asciiAlphanumeric(code)) && size++ < 63) {
+      const next = code === 45 ? emailValue : emailLabel;
+      effects.consume(code);
+      return next;
+    }
+    return nok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/blank-line.js
+var blankLine = {
+  partial: true,
+  tokenize: tokenizeBlankLine
+};
+function tokenizeBlankLine(effects, ok, nok) {
+  return start;
+  function start(code) {
+    return markdownSpace(code) ? factorySpace(effects, after, "linePrefix")(code) : after(code);
+  }
+  function after(code) {
+    return code === null || markdownLineEnding(code) ? ok(code) : nok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/block-quote.js
+var blockQuote = {
+  continuation: {
+    tokenize: tokenizeBlockQuoteContinuation
+  },
+  exit,
+  name: "blockQuote",
+  tokenize: tokenizeBlockQuoteStart
+};
+function tokenizeBlockQuoteStart(effects, ok, nok) {
+  const self = this;
+  return start;
+  function start(code) {
+    if (code === 62) {
+      const state = self.containerState;
+      if (!state.open) {
+        effects.enter("blockQuote", {
+          _container: true
+        });
+        state.open = true;
+      }
+      effects.enter("blockQuotePrefix");
+      effects.enter("blockQuoteMarker");
+      effects.consume(code);
+      effects.exit("blockQuoteMarker");
+      return after;
+    }
+    return nok(code);
+  }
+  function after(code) {
+    if (markdownSpace(code)) {
+      effects.enter("blockQuotePrefixWhitespace");
+      effects.consume(code);
+      effects.exit("blockQuotePrefixWhitespace");
+      effects.exit("blockQuotePrefix");
+      return ok;
+    }
+    effects.exit("blockQuotePrefix");
+    return ok(code);
+  }
+}
+function tokenizeBlockQuoteContinuation(effects, ok, nok) {
+  const self = this;
+  return contStart;
+  function contStart(code) {
+    if (markdownSpace(code)) {
+      return factorySpace(effects, contBefore, "linePrefix", self.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4)(code);
+    }
+    return contBefore(code);
+  }
+  function contBefore(code) {
+    return effects.attempt(blockQuote, ok, nok)(code);
+  }
+}
+function exit(effects) {
+  effects.exit("blockQuote");
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/character-escape.js
+var characterEscape = {
+  name: "characterEscape",
+  tokenize: tokenizeCharacterEscape
+};
+function tokenizeCharacterEscape(effects, ok, nok) {
+  return start;
+  function start(code) {
+    effects.enter("characterEscape");
+    effects.enter("escapeMarker");
+    effects.consume(code);
+    effects.exit("escapeMarker");
+    return inside;
+  }
+  function inside(code) {
+    if (asciiPunctuation(code)) {
+      effects.enter("characterEscapeValue");
+      effects.consume(code);
+      effects.exit("characterEscapeValue");
+      effects.exit("characterEscape");
+      return ok;
+    }
+    return nok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/character-reference.js
+var characterReference = {
+  name: "characterReference",
+  tokenize: tokenizeCharacterReference
+};
+function tokenizeCharacterReference(effects, ok, nok) {
+  const self = this;
+  let size = 0;
+  let max;
+  let test;
+  return start;
+  function start(code) {
+    effects.enter("characterReference");
+    effects.enter("characterReferenceMarker");
+    effects.consume(code);
+    effects.exit("characterReferenceMarker");
+    return open;
+  }
+  function open(code) {
+    if (code === 35) {
+      effects.enter("characterReferenceMarkerNumeric");
+      effects.consume(code);
+      effects.exit("characterReferenceMarkerNumeric");
+      return numeric;
+    }
+    effects.enter("characterReferenceValue");
+    max = 31;
+    test = asciiAlphanumeric;
+    return value(code);
+  }
+  function numeric(code) {
+    if (code === 88 || code === 120) {
+      effects.enter("characterReferenceMarkerHexadecimal");
+      effects.consume(code);
+      effects.exit("characterReferenceMarkerHexadecimal");
+      effects.enter("characterReferenceValue");
+      max = 6;
+      test = asciiHexDigit;
+      return value;
+    }
+    effects.enter("characterReferenceValue");
+    max = 7;
+    test = asciiDigit;
+    return value(code);
+  }
+  function value(code) {
+    if (code === 59 && size) {
+      const token = effects.exit("characterReferenceValue");
+      if (test === asciiAlphanumeric && !decodeNamedCharacterReference(self.sliceSerialize(token))) {
+        return nok(code);
+      }
+      effects.enter("characterReferenceMarker");
+      effects.consume(code);
+      effects.exit("characterReferenceMarker");
+      effects.exit("characterReference");
+      return ok;
+    }
+    if (test(code) && size++ < max) {
+      effects.consume(code);
+      return value;
+    }
+    return nok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/code-fenced.js
+var nonLazyContinuation = {
+  partial: true,
+  tokenize: tokenizeNonLazyContinuation
+};
+var codeFenced = {
+  concrete: true,
+  name: "codeFenced",
+  tokenize: tokenizeCodeFenced
+};
+function tokenizeCodeFenced(effects, ok, nok) {
+  const self = this;
+  const closeStart = {
+    partial: true,
+    tokenize: tokenizeCloseStart
+  };
+  let initialPrefix = 0;
+  let sizeOpen = 0;
+  let marker;
+  return start;
+  function start(code) {
+    return beforeSequenceOpen(code);
+  }
+  function beforeSequenceOpen(code) {
+    const tail = self.events[self.events.length - 1];
+    initialPrefix = tail && tail[1].type === "linePrefix" ? tail[2].sliceSerialize(tail[1], true).length : 0;
+    marker = code;
+    effects.enter("codeFenced");
+    effects.enter("codeFencedFence");
+    effects.enter("codeFencedFenceSequence");
+    return sequenceOpen(code);
+  }
+  function sequenceOpen(code) {
+    if (code === marker) {
+      sizeOpen++;
+      effects.consume(code);
+      return sequenceOpen;
+    }
+    if (sizeOpen < 3) {
+      return nok(code);
+    }
+    effects.exit("codeFencedFenceSequence");
+    return markdownSpace(code) ? factorySpace(effects, infoBefore, "whitespace")(code) : infoBefore(code);
+  }
+  function infoBefore(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("codeFencedFence");
+      return self.interrupt ? ok(code) : effects.check(nonLazyContinuation, atNonLazyBreak, after)(code);
+    }
+    effects.enter("codeFencedFenceInfo");
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return info(code);
+  }
+  function info(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("chunkString");
+      effects.exit("codeFencedFenceInfo");
+      return infoBefore(code);
+    }
+    if (markdownSpace(code)) {
+      effects.exit("chunkString");
+      effects.exit("codeFencedFenceInfo");
+      return factorySpace(effects, metaBefore, "whitespace")(code);
+    }
+    if (code === 96 && code === marker) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return info;
+  }
+  function metaBefore(code) {
+    if (code === null || markdownLineEnding(code)) {
+      return infoBefore(code);
+    }
+    effects.enter("codeFencedFenceMeta");
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return meta(code);
+  }
+  function meta(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("chunkString");
+      effects.exit("codeFencedFenceMeta");
+      return infoBefore(code);
+    }
+    if (code === 96 && code === marker) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return meta;
+  }
+  function atNonLazyBreak(code) {
+    return effects.attempt(closeStart, after, contentBefore)(code);
+  }
+  function contentBefore(code) {
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return contentStart;
+  }
+  function contentStart(code) {
+    return initialPrefix > 0 && markdownSpace(code) ? factorySpace(effects, beforeContentChunk, "linePrefix", initialPrefix + 1)(code) : beforeContentChunk(code);
+  }
+  function beforeContentChunk(code) {
+    if (code === null || markdownLineEnding(code)) {
+      return effects.check(nonLazyContinuation, atNonLazyBreak, after)(code);
+    }
+    effects.enter("codeFlowValue");
+    return contentChunk(code);
+  }
+  function contentChunk(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("codeFlowValue");
+      return beforeContentChunk(code);
+    }
+    effects.consume(code);
+    return contentChunk;
+  }
+  function after(code) {
+    effects.exit("codeFenced");
+    return ok(code);
+  }
+  function tokenizeCloseStart(effects2, ok2, nok2) {
+    let size = 0;
+    return startBefore;
+    function startBefore(code) {
+      effects2.enter("lineEnding");
+      effects2.consume(code);
+      effects2.exit("lineEnding");
+      return start2;
+    }
+    function start2(code) {
+      effects2.enter("codeFencedFence");
+      return markdownSpace(code) ? factorySpace(effects2, beforeSequenceClose, "linePrefix", self.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4)(code) : beforeSequenceClose(code);
+    }
+    function beforeSequenceClose(code) {
+      if (code === marker) {
+        effects2.enter("codeFencedFenceSequence");
+        return sequenceClose(code);
+      }
+      return nok2(code);
+    }
+    function sequenceClose(code) {
+      if (code === marker) {
+        size++;
+        effects2.consume(code);
+        return sequenceClose;
+      }
+      if (size >= sizeOpen) {
+        effects2.exit("codeFencedFenceSequence");
+        return markdownSpace(code) ? factorySpace(effects2, sequenceCloseAfter, "whitespace")(code) : sequenceCloseAfter(code);
+      }
+      return nok2(code);
+    }
+    function sequenceCloseAfter(code) {
+      if (code === null || markdownLineEnding(code)) {
+        effects2.exit("codeFencedFence");
+        return ok2(code);
+      }
+      return nok2(code);
+    }
+  }
+}
+function tokenizeNonLazyContinuation(effects, ok, nok) {
+  const self = this;
+  return start;
+  function start(code) {
+    if (code === null) {
+      return nok(code);
+    }
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return lineStart;
+  }
+  function lineStart(code) {
+    return self.parser.lazy[self.now().line] ? nok(code) : ok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/code-indented.js
+var codeIndented = {
+  name: "codeIndented",
+  tokenize: tokenizeCodeIndented
+};
+var furtherStart = {
+  partial: true,
+  tokenize: tokenizeFurtherStart
+};
+function tokenizeCodeIndented(effects, ok, nok) {
+  const self = this;
+  return start;
+  function start(code) {
+    effects.enter("codeIndented");
+    return factorySpace(effects, afterPrefix, "linePrefix", 4 + 1)(code);
+  }
+  function afterPrefix(code) {
+    const tail = self.events[self.events.length - 1];
+    return tail && tail[1].type === "linePrefix" && tail[2].sliceSerialize(tail[1], true).length >= 4 ? atBreak(code) : nok(code);
+  }
+  function atBreak(code) {
+    if (code === null) {
+      return after(code);
+    }
+    if (markdownLineEnding(code)) {
+      return effects.attempt(furtherStart, atBreak, after)(code);
+    }
+    effects.enter("codeFlowValue");
+    return inside(code);
+  }
+  function inside(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("codeFlowValue");
+      return atBreak(code);
+    }
+    effects.consume(code);
+    return inside;
+  }
+  function after(code) {
+    effects.exit("codeIndented");
+    return ok(code);
+  }
+}
+function tokenizeFurtherStart(effects, ok, nok) {
+  const self = this;
+  return furtherStart2;
+  function furtherStart2(code) {
+    if (self.parser.lazy[self.now().line]) {
+      return nok(code);
+    }
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      return furtherStart2;
+    }
+    return factorySpace(effects, afterPrefix, "linePrefix", 4 + 1)(code);
+  }
+  function afterPrefix(code) {
+    const tail = self.events[self.events.length - 1];
+    return tail && tail[1].type === "linePrefix" && tail[2].sliceSerialize(tail[1], true).length >= 4 ? ok(code) : markdownLineEnding(code) ? furtherStart2(code) : nok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/code-text.js
+var codeText = {
+  name: "codeText",
+  previous,
+  resolve: resolveCodeText,
+  tokenize: tokenizeCodeText
+};
+function resolveCodeText(events) {
+  let tailExitIndex = events.length - 4;
+  let headEnterIndex = 3;
+  let index2;
+  let enter;
+  if ((events[headEnterIndex][1].type === "lineEnding" || events[headEnterIndex][1].type === "space") && (events[tailExitIndex][1].type === "lineEnding" || events[tailExitIndex][1].type === "space")) {
+    index2 = headEnterIndex;
+    while (++index2 < tailExitIndex) {
+      if (events[index2][1].type === "codeTextData") {
+        events[headEnterIndex][1].type = "codeTextPadding";
+        events[tailExitIndex][1].type = "codeTextPadding";
+        headEnterIndex += 2;
+        tailExitIndex -= 2;
+        break;
+      }
+    }
+  }
+  index2 = headEnterIndex - 1;
+  tailExitIndex++;
+  while (++index2 <= tailExitIndex) {
+    if (enter === void 0) {
+      if (index2 !== tailExitIndex && events[index2][1].type !== "lineEnding") {
+        enter = index2;
+      }
+    } else if (index2 === tailExitIndex || events[index2][1].type === "lineEnding") {
+      events[enter][1].type = "codeTextData";
+      if (index2 !== enter + 2) {
+        events[enter][1].end = events[index2 - 1][1].end;
+        events.splice(enter + 2, index2 - enter - 2);
+        tailExitIndex -= index2 - enter - 2;
+        index2 = enter + 2;
+      }
+      enter = void 0;
+    }
+  }
+  return events;
+}
+function previous(code) {
+  return code !== 96 || this.events[this.events.length - 1][1].type === "characterEscape";
+}
+function tokenizeCodeText(effects, ok, nok) {
+  const self = this;
+  let sizeOpen = 0;
+  let size;
+  let token;
+  return start;
+  function start(code) {
+    effects.enter("codeText");
+    effects.enter("codeTextSequence");
+    return sequenceOpen(code);
+  }
+  function sequenceOpen(code) {
+    if (code === 96) {
+      effects.consume(code);
+      sizeOpen++;
+      return sequenceOpen;
+    }
+    effects.exit("codeTextSequence");
+    return between(code);
+  }
+  function between(code) {
+    if (code === null) {
+      return nok(code);
+    }
+    if (code === 32) {
+      effects.enter("space");
+      effects.consume(code);
+      effects.exit("space");
+      return between;
+    }
+    if (code === 96) {
+      token = effects.enter("codeTextSequence");
+      size = 0;
+      return sequenceClose(code);
+    }
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      return between;
+    }
+    effects.enter("codeTextData");
+    return data(code);
+  }
+  function data(code) {
+    if (code === null || code === 32 || code === 96 || markdownLineEnding(code)) {
+      effects.exit("codeTextData");
+      return between(code);
+    }
+    effects.consume(code);
+    return data;
+  }
+  function sequenceClose(code) {
+    if (code === 96) {
+      effects.consume(code);
+      size++;
+      return sequenceClose;
+    }
+    if (size === sizeOpen) {
+      effects.exit("codeTextSequence");
+      effects.exit("codeText");
+      return ok(code);
+    }
+    token.type = "codeTextData";
+    return data(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-util-subtokenize@2.1.0/node_modules/micromark-util-subtokenize/lib/splice-buffer.js
+var SpliceBuffer = class {
+  /**
+   * @param {ReadonlyArray<T> | null | undefined} [initial]
+   *   Initial items (optional).
+   * @returns
+   *   Splice buffer.
+   */
+  constructor(initial) {
+    this.left = initial ? [...initial] : [];
+    this.right = [];
+  }
+  /**
+   * Array access;
+   * does not move the cursor.
+   *
+   * @param {number} index
+   *   Index.
+   * @return {T}
+   *   Item.
+   */
+  get(index2) {
+    if (index2 < 0 || index2 >= this.left.length + this.right.length) {
+      throw new RangeError("Cannot access index `" + index2 + "` in a splice buffer of size `" + (this.left.length + this.right.length) + "`");
+    }
+    if (index2 < this.left.length) return this.left[index2];
+    return this.right[this.right.length - index2 + this.left.length - 1];
+  }
+  /**
+   * The length of the splice buffer, one greater than the largest index in the
+   * array.
+   */
+  get length() {
+    return this.left.length + this.right.length;
+  }
+  /**
+   * Remove and return `list[0]`;
+   * moves the cursor to `0`.
+   *
+   * @returns {T | undefined}
+   *   Item, optional.
+   */
+  shift() {
+    this.setCursor(0);
+    return this.right.pop();
+  }
+  /**
+   * Slice the buffer to get an array;
+   * does not move the cursor.
+   *
+   * @param {number} start
+   *   Start.
+   * @param {number | null | undefined} [end]
+   *   End (optional).
+   * @returns {Array<T>}
+   *   Array of items.
+   */
+  slice(start, end) {
+    const stop = end === null || end === void 0 ? Number.POSITIVE_INFINITY : end;
+    if (stop < this.left.length) {
+      return this.left.slice(start, stop);
+    }
+    if (start > this.left.length) {
+      return this.right.slice(this.right.length - stop + this.left.length, this.right.length - start + this.left.length).reverse();
+    }
+    return this.left.slice(start).concat(this.right.slice(this.right.length - stop + this.left.length).reverse());
+  }
+  /**
+   * Mimics the behavior of Array.prototype.splice() except for the change of
+   * interface necessary to avoid segfaults when patching in very large arrays.
+   *
+   * This operation moves cursor is moved to `start` and results in the cursor
+   * placed after any inserted items.
+   *
+   * @param {number} start
+   *   Start;
+   *   zero-based index at which to start changing the array;
+   *   negative numbers count backwards from the end of the array and values
+   *   that are out-of bounds are clamped to the appropriate end of the array.
+   * @param {number | null | undefined} [deleteCount=0]
+   *   Delete count (default: `0`);
+   *   maximum number of elements to delete, starting from start.
+   * @param {Array<T> | null | undefined} [items=[]]
+   *   Items to include in place of the deleted items (default: `[]`).
+   * @return {Array<T>}
+   *   Any removed items.
+   */
+  splice(start, deleteCount, items) {
+    const count = deleteCount || 0;
+    this.setCursor(Math.trunc(start));
+    const removed = this.right.splice(this.right.length - count, Number.POSITIVE_INFINITY);
+    if (items) chunkedPush(this.left, items);
+    return removed.reverse();
+  }
+  /**
+   * Remove and return the highest-numbered item in the array, so
+   * `list[list.length - 1]`;
+   * Moves the cursor to `length`.
+   *
+   * @returns {T | undefined}
+   *   Item, optional.
+   */
+  pop() {
+    this.setCursor(Number.POSITIVE_INFINITY);
+    return this.left.pop();
+  }
+  /**
+   * Inserts a single item to the high-numbered side of the array;
+   * moves the cursor to `length`.
+   *
+   * @param {T} item
+   *   Item.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  push(item) {
+    this.setCursor(Number.POSITIVE_INFINITY);
+    this.left.push(item);
+  }
+  /**
+   * Inserts many items to the high-numbered side of the array.
+   * Moves the cursor to `length`.
+   *
+   * @param {Array<T>} items
+   *   Items.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  pushMany(items) {
+    this.setCursor(Number.POSITIVE_INFINITY);
+    chunkedPush(this.left, items);
+  }
+  /**
+   * Inserts a single item to the low-numbered side of the array;
+   * Moves the cursor to `0`.
+   *
+   * @param {T} item
+   *   Item.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  unshift(item) {
+    this.setCursor(0);
+    this.right.push(item);
+  }
+  /**
+   * Inserts many items to the low-numbered side of the array;
+   * moves the cursor to `0`.
+   *
+   * @param {Array<T>} items
+   *   Items.
+   * @returns {undefined}
+   *   Nothing.
+   */
+  unshiftMany(items) {
+    this.setCursor(0);
+    chunkedPush(this.right, items.reverse());
+  }
+  /**
+   * Move the cursor to a specific position in the array. Requires
+   * time proportional to the distance moved.
+   *
+   * If `n < 0`, the cursor will end up at the beginning.
+   * If `n > length`, the cursor will end up at the end.
+   *
+   * @param {number} n
+   *   Position.
+   * @return {undefined}
+   *   Nothing.
+   */
+  setCursor(n) {
+    if (n === this.left.length || n > this.left.length && this.right.length === 0 || n < 0 && this.left.length === 0) return;
+    if (n < this.left.length) {
+      const removed = this.left.splice(n, Number.POSITIVE_INFINITY);
+      chunkedPush(this.right, removed.reverse());
+    } else {
+      const removed = this.right.splice(this.left.length + this.right.length - n, Number.POSITIVE_INFINITY);
+      chunkedPush(this.left, removed.reverse());
+    }
+  }
+};
+function chunkedPush(list2, right) {
+  let chunkStart = 0;
+  if (right.length < 1e4) {
+    list2.push(...right);
+  } else {
+    while (chunkStart < right.length) {
+      list2.push(...right.slice(chunkStart, chunkStart + 1e4));
+      chunkStart += 1e4;
+    }
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-util-subtokenize@2.1.0/node_modules/micromark-util-subtokenize/index.js
+function subtokenize(eventsArray) {
+  const jumps = {};
+  let index2 = -1;
+  let event;
+  let lineIndex;
+  let otherIndex;
+  let otherEvent;
+  let parameters;
+  let subevents;
+  let more;
+  const events = new SpliceBuffer(eventsArray);
+  while (++index2 < events.length) {
+    while (index2 in jumps) {
+      index2 = jumps[index2];
+    }
+    event = events.get(index2);
+    if (index2 && event[1].type === "chunkFlow" && events.get(index2 - 1)[1].type === "listItemPrefix") {
+      subevents = event[1]._tokenizer.events;
+      otherIndex = 0;
+      if (otherIndex < subevents.length && subevents[otherIndex][1].type === "lineEndingBlank") {
+        otherIndex += 2;
+      }
+      if (otherIndex < subevents.length && subevents[otherIndex][1].type === "content") {
+        while (++otherIndex < subevents.length) {
+          if (subevents[otherIndex][1].type === "content") {
+            break;
+          }
+          if (subevents[otherIndex][1].type === "chunkText") {
+            subevents[otherIndex][1]._isInFirstContentOfListItem = true;
+            otherIndex++;
+          }
+        }
+      }
+    }
+    if (event[0] === "enter") {
+      if (event[1].contentType) {
+        Object.assign(jumps, subcontent(events, index2));
+        index2 = jumps[index2];
+        more = true;
+      }
+    } else if (event[1]._container) {
+      otherIndex = index2;
+      lineIndex = void 0;
+      while (otherIndex--) {
+        otherEvent = events.get(otherIndex);
+        if (otherEvent[1].type === "lineEnding" || otherEvent[1].type === "lineEndingBlank") {
+          if (otherEvent[0] === "enter") {
+            if (lineIndex) {
+              events.get(lineIndex)[1].type = "lineEndingBlank";
+            }
+            otherEvent[1].type = "lineEnding";
+            lineIndex = otherIndex;
+          }
+        } else if (otherEvent[1].type === "linePrefix" || otherEvent[1].type === "listItemIndent") {
+        } else {
+          break;
+        }
+      }
+      if (lineIndex) {
+        event[1].end = {
+          ...events.get(lineIndex)[1].start
+        };
+        parameters = events.slice(lineIndex, index2);
+        parameters.unshift(event);
+        events.splice(lineIndex, index2 - lineIndex + 1, parameters);
+      }
+    }
+  }
+  splice(eventsArray, 0, Number.POSITIVE_INFINITY, events.slice(0));
+  return !more;
+}
+function subcontent(events, eventIndex) {
+  const token = events.get(eventIndex)[1];
+  const context = events.get(eventIndex)[2];
+  let startPosition = eventIndex - 1;
+  const startPositions = [];
+  let tokenizer2 = token._tokenizer;
+  if (!tokenizer2) {
+    tokenizer2 = context.parser[token.contentType](token.start);
+    if (token._contentTypeTextTrailing) {
+      tokenizer2._contentTypeTextTrailing = true;
+    }
+  }
+  const childEvents = tokenizer2.events;
+  const jumps = [];
+  const gaps = {};
+  let stream;
+  let previous2;
+  let index2 = -1;
+  let current = token;
+  let adjust = 0;
+  let start = 0;
+  const breaks = [start];
+  while (current) {
+    while (events.get(++startPosition)[1] !== current) {
+    }
+    startPositions.push(startPosition);
+    if (!current._tokenizer) {
+      stream = context.sliceStream(current);
+      if (!current.next) {
+        stream.push(null);
+      }
+      if (previous2) {
+        tokenizer2.defineSkip(current.start);
+      }
+      if (current._isInFirstContentOfListItem) {
+        tokenizer2._gfmTasklistFirstContentOfListItem = true;
+      }
+      tokenizer2.write(stream);
+      if (current._isInFirstContentOfListItem) {
+        tokenizer2._gfmTasklistFirstContentOfListItem = void 0;
+      }
+    }
+    previous2 = current;
+    current = current.next;
+  }
+  current = token;
+  while (++index2 < childEvents.length) {
+    if (
+      // Find a void token that includes a break.
+      childEvents[index2][0] === "exit" && childEvents[index2 - 1][0] === "enter" && childEvents[index2][1].type === childEvents[index2 - 1][1].type && childEvents[index2][1].start.line !== childEvents[index2][1].end.line
+    ) {
+      start = index2 + 1;
+      breaks.push(start);
+      current._tokenizer = void 0;
+      current.previous = void 0;
+      current = current.next;
+    }
+  }
+  tokenizer2.events = [];
+  if (current) {
+    current._tokenizer = void 0;
+    current.previous = void 0;
+  } else {
+    breaks.pop();
+  }
+  index2 = breaks.length;
+  while (index2--) {
+    const slice = childEvents.slice(breaks[index2], breaks[index2 + 1]);
+    const start2 = startPositions.pop();
+    jumps.push([start2, start2 + slice.length - 1]);
+    events.splice(start2, 2, slice);
+  }
+  jumps.reverse();
+  index2 = -1;
+  while (++index2 < jumps.length) {
+    gaps[adjust + jumps[index2][0]] = adjust + jumps[index2][1];
+    adjust += jumps[index2][1] - jumps[index2][0] - 1;
+  }
+  return gaps;
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/content.js
+var content2 = {
+  resolve: resolveContent,
+  tokenize: tokenizeContent
+};
+var continuationConstruct = {
+  partial: true,
+  tokenize: tokenizeContinuation
+};
+function resolveContent(events) {
+  subtokenize(events);
+  return events;
+}
+function tokenizeContent(effects, ok) {
+  let previous2;
+  return chunkStart;
+  function chunkStart(code) {
+    effects.enter("content");
+    previous2 = effects.enter("chunkContent", {
+      contentType: "content"
+    });
+    return chunkInside(code);
+  }
+  function chunkInside(code) {
+    if (code === null) {
+      return contentEnd(code);
+    }
+    if (markdownLineEnding(code)) {
+      return effects.check(continuationConstruct, contentContinue, contentEnd)(code);
+    }
+    effects.consume(code);
+    return chunkInside;
+  }
+  function contentEnd(code) {
+    effects.exit("chunkContent");
+    effects.exit("content");
+    return ok(code);
+  }
+  function contentContinue(code) {
+    effects.consume(code);
+    effects.exit("chunkContent");
+    previous2.next = effects.enter("chunkContent", {
+      contentType: "content",
+      previous: previous2
+    });
+    previous2 = previous2.next;
+    return chunkInside;
+  }
+}
+function tokenizeContinuation(effects, ok, nok) {
+  const self = this;
+  return startLookahead;
+  function startLookahead(code) {
+    effects.exit("chunkContent");
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return factorySpace(effects, prefixed, "linePrefix");
+  }
+  function prefixed(code) {
+    if (code === null || markdownLineEnding(code)) {
+      return nok(code);
+    }
+    const tail = self.events[self.events.length - 1];
+    if (!self.parser.constructs.disable.null.includes("codeIndented") && tail && tail[1].type === "linePrefix" && tail[2].sliceSerialize(tail[1], true).length >= 4) {
+      return ok(code);
+    }
+    return effects.interrupt(self.parser.constructs.flow, nok, ok)(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-factory-destination@2.0.1/node_modules/micromark-factory-destination/index.js
+function factoryDestination(effects, ok, nok, type, literalType, literalMarkerType, rawType, stringType, max) {
+  const limit = max || Number.POSITIVE_INFINITY;
+  let balance = 0;
+  return start;
+  function start(code) {
+    if (code === 60) {
+      effects.enter(type);
+      effects.enter(literalType);
+      effects.enter(literalMarkerType);
+      effects.consume(code);
+      effects.exit(literalMarkerType);
+      return enclosedBefore;
+    }
+    if (code === null || code === 32 || code === 41 || asciiControl(code)) {
+      return nok(code);
+    }
+    effects.enter(type);
+    effects.enter(rawType);
+    effects.enter(stringType);
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return raw(code);
+  }
+  function enclosedBefore(code) {
+    if (code === 62) {
+      effects.enter(literalMarkerType);
+      effects.consume(code);
+      effects.exit(literalMarkerType);
+      effects.exit(literalType);
+      effects.exit(type);
+      return ok;
+    }
+    effects.enter(stringType);
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return enclosed(code);
+  }
+  function enclosed(code) {
+    if (code === 62) {
+      effects.exit("chunkString");
+      effects.exit(stringType);
+      return enclosedBefore(code);
+    }
+    if (code === null || code === 60 || markdownLineEnding(code)) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return code === 92 ? enclosedEscape : enclosed;
+  }
+  function enclosedEscape(code) {
+    if (code === 60 || code === 62 || code === 92) {
+      effects.consume(code);
+      return enclosed;
+    }
+    return enclosed(code);
+  }
+  function raw(code) {
+    if (!balance && (code === null || code === 41 || markdownLineEndingOrSpace(code))) {
+      effects.exit("chunkString");
+      effects.exit(stringType);
+      effects.exit(rawType);
+      effects.exit(type);
+      return ok(code);
+    }
+    if (balance < limit && code === 40) {
+      effects.consume(code);
+      balance++;
+      return raw;
+    }
+    if (code === 41) {
+      effects.consume(code);
+      balance--;
+      return raw;
+    }
+    if (code === null || code === 32 || code === 40 || asciiControl(code)) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return code === 92 ? rawEscape : raw;
+  }
+  function rawEscape(code) {
+    if (code === 40 || code === 41 || code === 92) {
+      effects.consume(code);
+      return raw;
+    }
+    return raw(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-factory-label@2.0.1/node_modules/micromark-factory-label/index.js
+function factoryLabel(effects, ok, nok, type, markerType, stringType) {
+  const self = this;
+  let size = 0;
+  let seen;
+  return start;
+  function start(code) {
+    effects.enter(type);
+    effects.enter(markerType);
+    effects.consume(code);
+    effects.exit(markerType);
+    effects.enter(stringType);
+    return atBreak;
+  }
+  function atBreak(code) {
+    if (size > 999 || code === null || code === 91 || code === 93 && !seen || // To do: remove in the future once we’ve switched from
+    // `micromark-extension-footnote` to `micromark-extension-gfm-footnote`,
+    // which doesn’t need this.
+    // Hidden footnotes hook.
+    /* c8 ignore next 3 */
+    code === 94 && !size && "_hiddenFootnoteSupport" in self.parser.constructs) {
+      return nok(code);
+    }
+    if (code === 93) {
+      effects.exit(stringType);
+      effects.enter(markerType);
+      effects.consume(code);
+      effects.exit(markerType);
+      effects.exit(type);
+      return ok;
+    }
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      return atBreak;
+    }
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return labelInside(code);
+  }
+  function labelInside(code) {
+    if (code === null || code === 91 || code === 93 || markdownLineEnding(code) || size++ > 999) {
+      effects.exit("chunkString");
+      return atBreak(code);
+    }
+    effects.consume(code);
+    if (!seen) seen = !markdownSpace(code);
+    return code === 92 ? labelEscape : labelInside;
+  }
+  function labelEscape(code) {
+    if (code === 91 || code === 92 || code === 93) {
+      effects.consume(code);
+      size++;
+      return labelInside;
+    }
+    return labelInside(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-factory-title@2.0.1/node_modules/micromark-factory-title/index.js
+function factoryTitle(effects, ok, nok, type, markerType, stringType) {
+  let marker;
+  return start;
+  function start(code) {
+    if (code === 34 || code === 39 || code === 40) {
+      effects.enter(type);
+      effects.enter(markerType);
+      effects.consume(code);
+      effects.exit(markerType);
+      marker = code === 40 ? 41 : code;
+      return begin;
+    }
+    return nok(code);
+  }
+  function begin(code) {
+    if (code === marker) {
+      effects.enter(markerType);
+      effects.consume(code);
+      effects.exit(markerType);
+      effects.exit(type);
+      return ok;
+    }
+    effects.enter(stringType);
+    return atBreak(code);
+  }
+  function atBreak(code) {
+    if (code === marker) {
+      effects.exit(stringType);
+      return begin(marker);
+    }
+    if (code === null) {
+      return nok(code);
+    }
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      return factorySpace(effects, atBreak, "linePrefix");
+    }
+    effects.enter("chunkString", {
+      contentType: "string"
+    });
+    return inside(code);
+  }
+  function inside(code) {
+    if (code === marker || code === null || markdownLineEnding(code)) {
+      effects.exit("chunkString");
+      return atBreak(code);
+    }
+    effects.consume(code);
+    return code === 92 ? escape : inside;
+  }
+  function escape(code) {
+    if (code === marker || code === 92) {
+      effects.consume(code);
+      return inside;
+    }
+    return inside(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-factory-whitespace@2.0.1/node_modules/micromark-factory-whitespace/index.js
+function factoryWhitespace(effects, ok) {
+  let seen;
+  return start;
+  function start(code) {
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      seen = true;
+      return start;
+    }
+    if (markdownSpace(code)) {
+      return factorySpace(effects, start, seen ? "linePrefix" : "lineSuffix")(code);
+    }
+    return ok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/definition.js
+var definition = {
+  name: "definition",
+  tokenize: tokenizeDefinition
+};
+var titleBefore = {
+  partial: true,
+  tokenize: tokenizeTitleBefore
+};
+function tokenizeDefinition(effects, ok, nok) {
+  const self = this;
+  let identifier;
+  return start;
+  function start(code) {
+    effects.enter("definition");
+    return before(code);
+  }
+  function before(code) {
+    return factoryLabel.call(
+      self,
+      effects,
+      labelAfter,
+      // Note: we don’t need to reset the way `markdown-rs` does.
+      nok,
+      "definitionLabel",
+      "definitionLabelMarker",
+      "definitionLabelString"
+    )(code);
+  }
+  function labelAfter(code) {
+    identifier = normalizeIdentifier(self.sliceSerialize(self.events[self.events.length - 1][1]).slice(1, -1));
+    if (code === 58) {
+      effects.enter("definitionMarker");
+      effects.consume(code);
+      effects.exit("definitionMarker");
+      return markerAfter;
+    }
+    return nok(code);
+  }
+  function markerAfter(code) {
+    return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, destinationBefore)(code) : destinationBefore(code);
+  }
+  function destinationBefore(code) {
+    return factoryDestination(
+      effects,
+      destinationAfter,
+      // Note: we don’t need to reset the way `markdown-rs` does.
+      nok,
+      "definitionDestination",
+      "definitionDestinationLiteral",
+      "definitionDestinationLiteralMarker",
+      "definitionDestinationRaw",
+      "definitionDestinationString"
+    )(code);
+  }
+  function destinationAfter(code) {
+    return effects.attempt(titleBefore, after, after)(code);
+  }
+  function after(code) {
+    return markdownSpace(code) ? factorySpace(effects, afterWhitespace, "whitespace")(code) : afterWhitespace(code);
+  }
+  function afterWhitespace(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("definition");
+      self.parser.defined.push(identifier);
+      return ok(code);
+    }
+    return nok(code);
+  }
+}
+function tokenizeTitleBefore(effects, ok, nok) {
+  return titleBefore2;
+  function titleBefore2(code) {
+    return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, beforeMarker)(code) : nok(code);
+  }
+  function beforeMarker(code) {
+    return factoryTitle(effects, titleAfter, nok, "definitionTitle", "definitionTitleMarker", "definitionTitleString")(code);
+  }
+  function titleAfter(code) {
+    return markdownSpace(code) ? factorySpace(effects, titleAfterOptionalWhitespace, "whitespace")(code) : titleAfterOptionalWhitespace(code);
+  }
+  function titleAfterOptionalWhitespace(code) {
+    return code === null || markdownLineEnding(code) ? ok(code) : nok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/hard-break-escape.js
+var hardBreakEscape = {
+  name: "hardBreakEscape",
+  tokenize: tokenizeHardBreakEscape
+};
+function tokenizeHardBreakEscape(effects, ok, nok) {
+  return start;
+  function start(code) {
+    effects.enter("hardBreakEscape");
+    effects.consume(code);
+    return after;
+  }
+  function after(code) {
+    if (markdownLineEnding(code)) {
+      effects.exit("hardBreakEscape");
+      return ok(code);
+    }
+    return nok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/heading-atx.js
+var headingAtx = {
+  name: "headingAtx",
+  resolve: resolveHeadingAtx,
+  tokenize: tokenizeHeadingAtx
+};
+function resolveHeadingAtx(events, context) {
+  let contentEnd = events.length - 2;
+  let contentStart = 3;
+  let content3;
+  let text3;
+  if (events[contentStart][1].type === "whitespace") {
+    contentStart += 2;
+  }
+  if (contentEnd - 2 > contentStart && events[contentEnd][1].type === "whitespace") {
+    contentEnd -= 2;
+  }
+  if (events[contentEnd][1].type === "atxHeadingSequence" && (contentStart === contentEnd - 1 || contentEnd - 4 > contentStart && events[contentEnd - 2][1].type === "whitespace")) {
+    contentEnd -= contentStart + 1 === contentEnd ? 2 : 4;
+  }
+  if (contentEnd > contentStart) {
+    content3 = {
+      type: "atxHeadingText",
+      start: events[contentStart][1].start,
+      end: events[contentEnd][1].end
+    };
+    text3 = {
+      type: "chunkText",
+      start: events[contentStart][1].start,
+      end: events[contentEnd][1].end,
+      contentType: "text"
+    };
+    splice(events, contentStart, contentEnd - contentStart + 1, [["enter", content3, context], ["enter", text3, context], ["exit", text3, context], ["exit", content3, context]]);
+  }
+  return events;
+}
+function tokenizeHeadingAtx(effects, ok, nok) {
+  let size = 0;
+  return start;
+  function start(code) {
+    effects.enter("atxHeading");
+    return before(code);
+  }
+  function before(code) {
+    effects.enter("atxHeadingSequence");
+    return sequenceOpen(code);
+  }
+  function sequenceOpen(code) {
+    if (code === 35 && size++ < 6) {
+      effects.consume(code);
+      return sequenceOpen;
+    }
+    if (code === null || markdownLineEndingOrSpace(code)) {
+      effects.exit("atxHeadingSequence");
+      return atBreak(code);
+    }
+    return nok(code);
+  }
+  function atBreak(code) {
+    if (code === 35) {
+      effects.enter("atxHeadingSequence");
+      return sequenceFurther(code);
+    }
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("atxHeading");
+      return ok(code);
+    }
+    if (markdownSpace(code)) {
+      return factorySpace(effects, atBreak, "whitespace")(code);
+    }
+    effects.enter("atxHeadingText");
+    return data(code);
+  }
+  function sequenceFurther(code) {
+    if (code === 35) {
+      effects.consume(code);
+      return sequenceFurther;
+    }
+    effects.exit("atxHeadingSequence");
+    return atBreak(code);
+  }
+  function data(code) {
+    if (code === null || code === 35 || markdownLineEndingOrSpace(code)) {
+      effects.exit("atxHeadingText");
+      return atBreak(code);
+    }
+    effects.consume(code);
+    return data;
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-util-html-tag-name@2.0.1/node_modules/micromark-util-html-tag-name/index.js
+var htmlBlockNames = [
+  "address",
+  "article",
+  "aside",
+  "base",
+  "basefont",
+  "blockquote",
+  "body",
+  "caption",
+  "center",
+  "col",
+  "colgroup",
+  "dd",
+  "details",
+  "dialog",
+  "dir",
+  "div",
+  "dl",
+  "dt",
+  "fieldset",
+  "figcaption",
+  "figure",
+  "footer",
+  "form",
+  "frame",
+  "frameset",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "head",
+  "header",
+  "hr",
+  "html",
+  "iframe",
+  "legend",
+  "li",
+  "link",
+  "main",
+  "menu",
+  "menuitem",
+  "nav",
+  "noframes",
+  "ol",
+  "optgroup",
+  "option",
+  "p",
+  "param",
+  "search",
+  "section",
+  "summary",
+  "table",
+  "tbody",
+  "td",
+  "tfoot",
+  "th",
+  "thead",
+  "title",
+  "tr",
+  "track",
+  "ul"
+];
+var htmlRawNames = ["pre", "script", "style", "textarea"];
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/html-flow.js
+var htmlFlow = {
+  concrete: true,
+  name: "htmlFlow",
+  resolveTo: resolveToHtmlFlow,
+  tokenize: tokenizeHtmlFlow
+};
+var blankLineBefore = {
+  partial: true,
+  tokenize: tokenizeBlankLineBefore
+};
+var nonLazyContinuationStart = {
+  partial: true,
+  tokenize: tokenizeNonLazyContinuationStart
+};
+function resolveToHtmlFlow(events) {
+  let index2 = events.length;
+  while (index2--) {
+    if (events[index2][0] === "enter" && events[index2][1].type === "htmlFlow") {
+      break;
+    }
+  }
+  if (index2 > 1 && events[index2 - 2][1].type === "linePrefix") {
+    events[index2][1].start = events[index2 - 2][1].start;
+    events[index2 + 1][1].start = events[index2 - 2][1].start;
+    events.splice(index2 - 2, 2);
+  }
+  return events;
+}
+function tokenizeHtmlFlow(effects, ok, nok) {
+  const self = this;
+  let marker;
+  let closingTag;
+  let buffer;
+  let index2;
+  let markerB;
+  return start;
+  function start(code) {
+    return before(code);
+  }
+  function before(code) {
+    effects.enter("htmlFlow");
+    effects.enter("htmlFlowData");
+    effects.consume(code);
+    return open;
+  }
+  function open(code) {
+    if (code === 33) {
+      effects.consume(code);
+      return declarationOpen;
+    }
+    if (code === 47) {
+      effects.consume(code);
+      closingTag = true;
+      return tagCloseStart;
+    }
+    if (code === 63) {
+      effects.consume(code);
+      marker = 3;
+      return self.interrupt ? ok : continuationDeclarationInside;
+    }
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      buffer = String.fromCharCode(code);
+      return tagName;
+    }
+    return nok(code);
+  }
+  function declarationOpen(code) {
+    if (code === 45) {
+      effects.consume(code);
+      marker = 2;
+      return commentOpenInside;
+    }
+    if (code === 91) {
+      effects.consume(code);
+      marker = 5;
+      index2 = 0;
+      return cdataOpenInside;
+    }
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      marker = 4;
+      return self.interrupt ? ok : continuationDeclarationInside;
+    }
+    return nok(code);
+  }
+  function commentOpenInside(code) {
+    if (code === 45) {
+      effects.consume(code);
+      return self.interrupt ? ok : continuationDeclarationInside;
+    }
+    return nok(code);
+  }
+  function cdataOpenInside(code) {
+    const value = "CDATA[";
+    if (code === value.charCodeAt(index2++)) {
+      effects.consume(code);
+      if (index2 === value.length) {
+        return self.interrupt ? ok : continuation;
+      }
+      return cdataOpenInside;
+    }
+    return nok(code);
+  }
+  function tagCloseStart(code) {
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      buffer = String.fromCharCode(code);
+      return tagName;
+    }
+    return nok(code);
+  }
+  function tagName(code) {
+    if (code === null || code === 47 || code === 62 || markdownLineEndingOrSpace(code)) {
+      const slash = code === 47;
+      const name = buffer.toLowerCase();
+      if (!slash && !closingTag && htmlRawNames.includes(name)) {
+        marker = 1;
+        return self.interrupt ? ok(code) : continuation(code);
+      }
+      if (htmlBlockNames.includes(buffer.toLowerCase())) {
+        marker = 6;
+        if (slash) {
+          effects.consume(code);
+          return basicSelfClosing;
+        }
+        return self.interrupt ? ok(code) : continuation(code);
+      }
+      marker = 7;
+      return self.interrupt && !self.parser.lazy[self.now().line] ? nok(code) : closingTag ? completeClosingTagAfter(code) : completeAttributeNameBefore(code);
+    }
+    if (code === 45 || asciiAlphanumeric(code)) {
+      effects.consume(code);
+      buffer += String.fromCharCode(code);
+      return tagName;
+    }
+    return nok(code);
+  }
+  function basicSelfClosing(code) {
+    if (code === 62) {
+      effects.consume(code);
+      return self.interrupt ? ok : continuation;
+    }
+    return nok(code);
+  }
+  function completeClosingTagAfter(code) {
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return completeClosingTagAfter;
+    }
+    return completeEnd(code);
+  }
+  function completeAttributeNameBefore(code) {
+    if (code === 47) {
+      effects.consume(code);
+      return completeEnd;
+    }
+    if (code === 58 || code === 95 || asciiAlpha(code)) {
+      effects.consume(code);
+      return completeAttributeName;
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return completeAttributeNameBefore;
+    }
+    return completeEnd(code);
+  }
+  function completeAttributeName(code) {
+    if (code === 45 || code === 46 || code === 58 || code === 95 || asciiAlphanumeric(code)) {
+      effects.consume(code);
+      return completeAttributeName;
+    }
+    return completeAttributeNameAfter(code);
+  }
+  function completeAttributeNameAfter(code) {
+    if (code === 61) {
+      effects.consume(code);
+      return completeAttributeValueBefore;
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return completeAttributeNameAfter;
+    }
+    return completeAttributeNameBefore(code);
+  }
+  function completeAttributeValueBefore(code) {
+    if (code === null || code === 60 || code === 61 || code === 62 || code === 96) {
+      return nok(code);
+    }
+    if (code === 34 || code === 39) {
+      effects.consume(code);
+      markerB = code;
+      return completeAttributeValueQuoted;
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return completeAttributeValueBefore;
+    }
+    return completeAttributeValueUnquoted(code);
+  }
+  function completeAttributeValueQuoted(code) {
+    if (code === markerB) {
+      effects.consume(code);
+      markerB = null;
+      return completeAttributeValueQuotedAfter;
+    }
+    if (code === null || markdownLineEnding(code)) {
+      return nok(code);
+    }
+    effects.consume(code);
+    return completeAttributeValueQuoted;
+  }
+  function completeAttributeValueUnquoted(code) {
+    if (code === null || code === 34 || code === 39 || code === 47 || code === 60 || code === 61 || code === 62 || code === 96 || markdownLineEndingOrSpace(code)) {
+      return completeAttributeNameAfter(code);
+    }
+    effects.consume(code);
+    return completeAttributeValueUnquoted;
+  }
+  function completeAttributeValueQuotedAfter(code) {
+    if (code === 47 || code === 62 || markdownSpace(code)) {
+      return completeAttributeNameBefore(code);
+    }
+    return nok(code);
+  }
+  function completeEnd(code) {
+    if (code === 62) {
+      effects.consume(code);
+      return completeAfter;
+    }
+    return nok(code);
+  }
+  function completeAfter(code) {
+    if (code === null || markdownLineEnding(code)) {
+      return continuation(code);
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return completeAfter;
+    }
+    return nok(code);
+  }
+  function continuation(code) {
+    if (code === 45 && marker === 2) {
+      effects.consume(code);
+      return continuationCommentInside;
+    }
+    if (code === 60 && marker === 1) {
+      effects.consume(code);
+      return continuationRawTagOpen;
+    }
+    if (code === 62 && marker === 4) {
+      effects.consume(code);
+      return continuationClose;
+    }
+    if (code === 63 && marker === 3) {
+      effects.consume(code);
+      return continuationDeclarationInside;
+    }
+    if (code === 93 && marker === 5) {
+      effects.consume(code);
+      return continuationCdataInside;
+    }
+    if (markdownLineEnding(code) && (marker === 6 || marker === 7)) {
+      effects.exit("htmlFlowData");
+      return effects.check(blankLineBefore, continuationAfter, continuationStart)(code);
+    }
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("htmlFlowData");
+      return continuationStart(code);
+    }
+    effects.consume(code);
+    return continuation;
+  }
+  function continuationStart(code) {
+    return effects.check(nonLazyContinuationStart, continuationStartNonLazy, continuationAfter)(code);
+  }
+  function continuationStartNonLazy(code) {
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return continuationBefore;
+  }
+  function continuationBefore(code) {
+    if (code === null || markdownLineEnding(code)) {
+      return continuationStart(code);
+    }
+    effects.enter("htmlFlowData");
+    return continuation(code);
+  }
+  function continuationCommentInside(code) {
+    if (code === 45) {
+      effects.consume(code);
+      return continuationDeclarationInside;
+    }
+    return continuation(code);
+  }
+  function continuationRawTagOpen(code) {
+    if (code === 47) {
+      effects.consume(code);
+      buffer = "";
+      return continuationRawEndTag;
+    }
+    return continuation(code);
+  }
+  function continuationRawEndTag(code) {
+    if (code === 62) {
+      const name = buffer.toLowerCase();
+      if (htmlRawNames.includes(name)) {
+        effects.consume(code);
+        return continuationClose;
+      }
+      return continuation(code);
+    }
+    if (asciiAlpha(code) && buffer.length < 8) {
+      effects.consume(code);
+      buffer += String.fromCharCode(code);
+      return continuationRawEndTag;
+    }
+    return continuation(code);
+  }
+  function continuationCdataInside(code) {
+    if (code === 93) {
+      effects.consume(code);
+      return continuationDeclarationInside;
+    }
+    return continuation(code);
+  }
+  function continuationDeclarationInside(code) {
+    if (code === 62) {
+      effects.consume(code);
+      return continuationClose;
+    }
+    if (code === 45 && marker === 2) {
+      effects.consume(code);
+      return continuationDeclarationInside;
+    }
+    return continuation(code);
+  }
+  function continuationClose(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("htmlFlowData");
+      return continuationAfter(code);
+    }
+    effects.consume(code);
+    return continuationClose;
+  }
+  function continuationAfter(code) {
+    effects.exit("htmlFlow");
+    return ok(code);
+  }
+}
+function tokenizeNonLazyContinuationStart(effects, ok, nok) {
+  const self = this;
+  return start;
+  function start(code) {
+    if (markdownLineEnding(code)) {
+      effects.enter("lineEnding");
+      effects.consume(code);
+      effects.exit("lineEnding");
+      return after;
+    }
+    return nok(code);
+  }
+  function after(code) {
+    return self.parser.lazy[self.now().line] ? nok(code) : ok(code);
+  }
+}
+function tokenizeBlankLineBefore(effects, ok, nok) {
+  return start;
+  function start(code) {
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return effects.attempt(blankLine, ok, nok);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/html-text.js
+var htmlText = {
+  name: "htmlText",
+  tokenize: tokenizeHtmlText
+};
+function tokenizeHtmlText(effects, ok, nok) {
+  const self = this;
+  let marker;
+  let index2;
+  let returnState;
+  return start;
+  function start(code) {
+    effects.enter("htmlText");
+    effects.enter("htmlTextData");
+    effects.consume(code);
+    return open;
+  }
+  function open(code) {
+    if (code === 33) {
+      effects.consume(code);
+      return declarationOpen;
+    }
+    if (code === 47) {
+      effects.consume(code);
+      return tagCloseStart;
+    }
+    if (code === 63) {
+      effects.consume(code);
+      return instruction;
+    }
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      return tagOpen;
+    }
+    return nok(code);
+  }
+  function declarationOpen(code) {
+    if (code === 45) {
+      effects.consume(code);
+      return commentOpenInside;
+    }
+    if (code === 91) {
+      effects.consume(code);
+      index2 = 0;
+      return cdataOpenInside;
+    }
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      return declaration;
+    }
+    return nok(code);
+  }
+  function commentOpenInside(code) {
+    if (code === 45) {
+      effects.consume(code);
+      return commentEnd;
+    }
+    return nok(code);
+  }
+  function comment(code) {
+    if (code === null) {
+      return nok(code);
+    }
+    if (code === 45) {
+      effects.consume(code);
+      return commentClose;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = comment;
+      return lineEndingBefore(code);
+    }
+    effects.consume(code);
+    return comment;
+  }
+  function commentClose(code) {
+    if (code === 45) {
+      effects.consume(code);
+      return commentEnd;
+    }
+    return comment(code);
+  }
+  function commentEnd(code) {
+    return code === 62 ? end(code) : code === 45 ? commentClose(code) : comment(code);
+  }
+  function cdataOpenInside(code) {
+    const value = "CDATA[";
+    if (code === value.charCodeAt(index2++)) {
+      effects.consume(code);
+      return index2 === value.length ? cdata : cdataOpenInside;
+    }
+    return nok(code);
+  }
+  function cdata(code) {
+    if (code === null) {
+      return nok(code);
+    }
+    if (code === 93) {
+      effects.consume(code);
+      return cdataClose;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = cdata;
+      return lineEndingBefore(code);
+    }
+    effects.consume(code);
+    return cdata;
+  }
+  function cdataClose(code) {
+    if (code === 93) {
+      effects.consume(code);
+      return cdataEnd;
+    }
+    return cdata(code);
+  }
+  function cdataEnd(code) {
+    if (code === 62) {
+      return end(code);
+    }
+    if (code === 93) {
+      effects.consume(code);
+      return cdataEnd;
+    }
+    return cdata(code);
+  }
+  function declaration(code) {
+    if (code === null || code === 62) {
+      return end(code);
+    }
+    if (markdownLineEnding(code)) {
+      returnState = declaration;
+      return lineEndingBefore(code);
+    }
+    effects.consume(code);
+    return declaration;
+  }
+  function instruction(code) {
+    if (code === null) {
+      return nok(code);
+    }
+    if (code === 63) {
+      effects.consume(code);
+      return instructionClose;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = instruction;
+      return lineEndingBefore(code);
+    }
+    effects.consume(code);
+    return instruction;
+  }
+  function instructionClose(code) {
+    return code === 62 ? end(code) : instruction(code);
+  }
+  function tagCloseStart(code) {
+    if (asciiAlpha(code)) {
+      effects.consume(code);
+      return tagClose;
+    }
+    return nok(code);
+  }
+  function tagClose(code) {
+    if (code === 45 || asciiAlphanumeric(code)) {
+      effects.consume(code);
+      return tagClose;
+    }
+    return tagCloseBetween(code);
+  }
+  function tagCloseBetween(code) {
+    if (markdownLineEnding(code)) {
+      returnState = tagCloseBetween;
+      return lineEndingBefore(code);
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return tagCloseBetween;
+    }
+    return end(code);
+  }
+  function tagOpen(code) {
+    if (code === 45 || asciiAlphanumeric(code)) {
+      effects.consume(code);
+      return tagOpen;
+    }
+    if (code === 47 || code === 62 || markdownLineEndingOrSpace(code)) {
+      return tagOpenBetween(code);
+    }
+    return nok(code);
+  }
+  function tagOpenBetween(code) {
+    if (code === 47) {
+      effects.consume(code);
+      return end;
+    }
+    if (code === 58 || code === 95 || asciiAlpha(code)) {
+      effects.consume(code);
+      return tagOpenAttributeName;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = tagOpenBetween;
+      return lineEndingBefore(code);
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return tagOpenBetween;
+    }
+    return end(code);
+  }
+  function tagOpenAttributeName(code) {
+    if (code === 45 || code === 46 || code === 58 || code === 95 || asciiAlphanumeric(code)) {
+      effects.consume(code);
+      return tagOpenAttributeName;
+    }
+    return tagOpenAttributeNameAfter(code);
+  }
+  function tagOpenAttributeNameAfter(code) {
+    if (code === 61) {
+      effects.consume(code);
+      return tagOpenAttributeValueBefore;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = tagOpenAttributeNameAfter;
+      return lineEndingBefore(code);
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return tagOpenAttributeNameAfter;
+    }
+    return tagOpenBetween(code);
+  }
+  function tagOpenAttributeValueBefore(code) {
+    if (code === null || code === 60 || code === 61 || code === 62 || code === 96) {
+      return nok(code);
+    }
+    if (code === 34 || code === 39) {
+      effects.consume(code);
+      marker = code;
+      return tagOpenAttributeValueQuoted;
+    }
+    if (markdownLineEnding(code)) {
+      returnState = tagOpenAttributeValueBefore;
+      return lineEndingBefore(code);
+    }
+    if (markdownSpace(code)) {
+      effects.consume(code);
+      return tagOpenAttributeValueBefore;
+    }
+    effects.consume(code);
+    return tagOpenAttributeValueUnquoted;
+  }
+  function tagOpenAttributeValueQuoted(code) {
+    if (code === marker) {
+      effects.consume(code);
+      marker = void 0;
+      return tagOpenAttributeValueQuotedAfter;
+    }
+    if (code === null) {
+      return nok(code);
+    }
+    if (markdownLineEnding(code)) {
+      returnState = tagOpenAttributeValueQuoted;
+      return lineEndingBefore(code);
+    }
+    effects.consume(code);
+    return tagOpenAttributeValueQuoted;
+  }
+  function tagOpenAttributeValueUnquoted(code) {
+    if (code === null || code === 34 || code === 39 || code === 60 || code === 61 || code === 96) {
+      return nok(code);
+    }
+    if (code === 47 || code === 62 || markdownLineEndingOrSpace(code)) {
+      return tagOpenBetween(code);
+    }
+    effects.consume(code);
+    return tagOpenAttributeValueUnquoted;
+  }
+  function tagOpenAttributeValueQuotedAfter(code) {
+    if (code === 47 || code === 62 || markdownLineEndingOrSpace(code)) {
+      return tagOpenBetween(code);
+    }
+    return nok(code);
+  }
+  function end(code) {
+    if (code === 62) {
+      effects.consume(code);
+      effects.exit("htmlTextData");
+      effects.exit("htmlText");
+      return ok;
+    }
+    return nok(code);
+  }
+  function lineEndingBefore(code) {
+    effects.exit("htmlTextData");
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return lineEndingAfter;
+  }
+  function lineEndingAfter(code) {
+    return markdownSpace(code) ? factorySpace(effects, lineEndingAfterPrefix, "linePrefix", self.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4)(code) : lineEndingAfterPrefix(code);
+  }
+  function lineEndingAfterPrefix(code) {
+    effects.enter("htmlTextData");
+    return returnState(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/label-end.js
+var labelEnd = {
+  name: "labelEnd",
+  resolveAll: resolveAllLabelEnd,
+  resolveTo: resolveToLabelEnd,
+  tokenize: tokenizeLabelEnd
+};
+var resourceConstruct = {
+  tokenize: tokenizeResource
+};
+var referenceFullConstruct = {
+  tokenize: tokenizeReferenceFull
+};
+var referenceCollapsedConstruct = {
+  tokenize: tokenizeReferenceCollapsed
+};
+function resolveAllLabelEnd(events) {
+  let index2 = -1;
+  const newEvents = [];
+  while (++index2 < events.length) {
+    const token = events[index2][1];
+    newEvents.push(events[index2]);
+    if (token.type === "labelImage" || token.type === "labelLink" || token.type === "labelEnd") {
+      const offset = token.type === "labelImage" ? 4 : 2;
+      token.type = "data";
+      index2 += offset;
+    }
+  }
+  if (events.length !== newEvents.length) {
+    splice(events, 0, events.length, newEvents);
+  }
+  return events;
+}
+function resolveToLabelEnd(events, context) {
+  let index2 = events.length;
+  let offset = 0;
+  let token;
+  let open;
+  let close;
+  let media;
+  while (index2--) {
+    token = events[index2][1];
+    if (open) {
+      if (token.type === "link" || token.type === "labelLink" && token._inactive) {
+        break;
+      }
+      if (events[index2][0] === "enter" && token.type === "labelLink") {
+        token._inactive = true;
+      }
+    } else if (close) {
+      if (events[index2][0] === "enter" && (token.type === "labelImage" || token.type === "labelLink") && !token._balanced) {
+        open = index2;
+        if (token.type !== "labelLink") {
+          offset = 2;
+          break;
+        }
+      }
+    } else if (token.type === "labelEnd") {
+      close = index2;
+    }
+  }
+  const group = {
+    type: events[open][1].type === "labelLink" ? "link" : "image",
+    start: {
+      ...events[open][1].start
+    },
+    end: {
+      ...events[events.length - 1][1].end
+    }
+  };
+  const label = {
+    type: "label",
+    start: {
+      ...events[open][1].start
+    },
+    end: {
+      ...events[close][1].end
+    }
+  };
+  const text3 = {
+    type: "labelText",
+    start: {
+      ...events[open + offset + 2][1].end
+    },
+    end: {
+      ...events[close - 2][1].start
+    }
+  };
+  media = [["enter", group, context], ["enter", label, context]];
+  media = push(media, events.slice(open + 1, open + offset + 3));
+  media = push(media, [["enter", text3, context]]);
+  media = push(media, resolveAll(context.parser.constructs.insideSpan.null, events.slice(open + offset + 4, close - 3), context));
+  media = push(media, [["exit", text3, context], events[close - 2], events[close - 1], ["exit", label, context]]);
+  media = push(media, events.slice(close + 1));
+  media = push(media, [["exit", group, context]]);
+  splice(events, open, events.length, media);
+  return events;
+}
+function tokenizeLabelEnd(effects, ok, nok) {
+  const self = this;
+  let index2 = self.events.length;
+  let labelStart;
+  let defined;
+  while (index2--) {
+    if ((self.events[index2][1].type === "labelImage" || self.events[index2][1].type === "labelLink") && !self.events[index2][1]._balanced) {
+      labelStart = self.events[index2][1];
+      break;
+    }
+  }
+  return start;
+  function start(code) {
+    if (!labelStart) {
+      return nok(code);
+    }
+    if (labelStart._inactive) {
+      return labelEndNok(code);
+    }
+    defined = self.parser.defined.includes(normalizeIdentifier(self.sliceSerialize({
+      start: labelStart.end,
+      end: self.now()
+    })));
+    effects.enter("labelEnd");
+    effects.enter("labelMarker");
+    effects.consume(code);
+    effects.exit("labelMarker");
+    effects.exit("labelEnd");
+    return after;
+  }
+  function after(code) {
+    if (code === 40) {
+      return effects.attempt(resourceConstruct, labelEndOk, defined ? labelEndOk : labelEndNok)(code);
+    }
+    if (code === 91) {
+      return effects.attempt(referenceFullConstruct, labelEndOk, defined ? referenceNotFull : labelEndNok)(code);
+    }
+    return defined ? labelEndOk(code) : labelEndNok(code);
+  }
+  function referenceNotFull(code) {
+    return effects.attempt(referenceCollapsedConstruct, labelEndOk, labelEndNok)(code);
+  }
+  function labelEndOk(code) {
+    return ok(code);
+  }
+  function labelEndNok(code) {
+    labelStart._balanced = true;
+    return nok(code);
+  }
+}
+function tokenizeResource(effects, ok, nok) {
+  return resourceStart;
+  function resourceStart(code) {
+    effects.enter("resource");
+    effects.enter("resourceMarker");
+    effects.consume(code);
+    effects.exit("resourceMarker");
+    return resourceBefore;
+  }
+  function resourceBefore(code) {
+    return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, resourceOpen)(code) : resourceOpen(code);
+  }
+  function resourceOpen(code) {
+    if (code === 41) {
+      return resourceEnd(code);
+    }
+    return factoryDestination(effects, resourceDestinationAfter, resourceDestinationMissing, "resourceDestination", "resourceDestinationLiteral", "resourceDestinationLiteralMarker", "resourceDestinationRaw", "resourceDestinationString", 32)(code);
+  }
+  function resourceDestinationAfter(code) {
+    return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, resourceBetween)(code) : resourceEnd(code);
+  }
+  function resourceDestinationMissing(code) {
+    return nok(code);
+  }
+  function resourceBetween(code) {
+    if (code === 34 || code === 39 || code === 40) {
+      return factoryTitle(effects, resourceTitleAfter, nok, "resourceTitle", "resourceTitleMarker", "resourceTitleString")(code);
+    }
+    return resourceEnd(code);
+  }
+  function resourceTitleAfter(code) {
+    return markdownLineEndingOrSpace(code) ? factoryWhitespace(effects, resourceEnd)(code) : resourceEnd(code);
+  }
+  function resourceEnd(code) {
+    if (code === 41) {
+      effects.enter("resourceMarker");
+      effects.consume(code);
+      effects.exit("resourceMarker");
+      effects.exit("resource");
+      return ok;
+    }
+    return nok(code);
+  }
+}
+function tokenizeReferenceFull(effects, ok, nok) {
+  const self = this;
+  return referenceFull;
+  function referenceFull(code) {
+    return factoryLabel.call(self, effects, referenceFullAfter, referenceFullMissing, "reference", "referenceMarker", "referenceString")(code);
+  }
+  function referenceFullAfter(code) {
+    return self.parser.defined.includes(normalizeIdentifier(self.sliceSerialize(self.events[self.events.length - 1][1]).slice(1, -1))) ? ok(code) : nok(code);
+  }
+  function referenceFullMissing(code) {
+    return nok(code);
+  }
+}
+function tokenizeReferenceCollapsed(effects, ok, nok) {
+  return referenceCollapsedStart;
+  function referenceCollapsedStart(code) {
+    effects.enter("reference");
+    effects.enter("referenceMarker");
+    effects.consume(code);
+    effects.exit("referenceMarker");
+    return referenceCollapsedOpen;
+  }
+  function referenceCollapsedOpen(code) {
+    if (code === 93) {
+      effects.enter("referenceMarker");
+      effects.consume(code);
+      effects.exit("referenceMarker");
+      effects.exit("reference");
+      return ok;
+    }
+    return nok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/label-start-image.js
+var labelStartImage = {
+  name: "labelStartImage",
+  resolveAll: labelEnd.resolveAll,
+  tokenize: tokenizeLabelStartImage
+};
+function tokenizeLabelStartImage(effects, ok, nok) {
+  const self = this;
+  return start;
+  function start(code) {
+    effects.enter("labelImage");
+    effects.enter("labelImageMarker");
+    effects.consume(code);
+    effects.exit("labelImageMarker");
+    return open;
+  }
+  function open(code) {
+    if (code === 91) {
+      effects.enter("labelMarker");
+      effects.consume(code);
+      effects.exit("labelMarker");
+      effects.exit("labelImage");
+      return after;
+    }
+    return nok(code);
+  }
+  function after(code) {
+    return code === 94 && "_hiddenFootnoteSupport" in self.parser.constructs ? nok(code) : ok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/label-start-link.js
+var labelStartLink = {
+  name: "labelStartLink",
+  resolveAll: labelEnd.resolveAll,
+  tokenize: tokenizeLabelStartLink
+};
+function tokenizeLabelStartLink(effects, ok, nok) {
+  const self = this;
+  return start;
+  function start(code) {
+    effects.enter("labelLink");
+    effects.enter("labelMarker");
+    effects.consume(code);
+    effects.exit("labelMarker");
+    effects.exit("labelLink");
+    return after;
+  }
+  function after(code) {
+    return code === 94 && "_hiddenFootnoteSupport" in self.parser.constructs ? nok(code) : ok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/line-ending.js
+var lineEnding = {
+  name: "lineEnding",
+  tokenize: tokenizeLineEnding
+};
+function tokenizeLineEnding(effects, ok) {
+  return start;
+  function start(code) {
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    return factorySpace(effects, ok, "linePrefix");
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/thematic-break.js
+var thematicBreak = {
+  name: "thematicBreak",
+  tokenize: tokenizeThematicBreak
+};
+function tokenizeThematicBreak(effects, ok, nok) {
+  let size = 0;
+  let marker;
+  return start;
+  function start(code) {
+    effects.enter("thematicBreak");
+    return before(code);
+  }
+  function before(code) {
+    marker = code;
+    return atBreak(code);
+  }
+  function atBreak(code) {
+    if (code === marker) {
+      effects.enter("thematicBreakSequence");
+      return sequence(code);
+    }
+    if (size >= 3 && (code === null || markdownLineEnding(code))) {
+      effects.exit("thematicBreak");
+      return ok(code);
+    }
+    return nok(code);
+  }
+  function sequence(code) {
+    if (code === marker) {
+      effects.consume(code);
+      size++;
+      return sequence;
+    }
+    effects.exit("thematicBreakSequence");
+    return markdownSpace(code) ? factorySpace(effects, atBreak, "whitespace")(code) : atBreak(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/list.js
+var list = {
+  continuation: {
+    tokenize: tokenizeListContinuation
+  },
+  exit: tokenizeListEnd,
+  name: "list",
+  tokenize: tokenizeListStart
+};
+var listItemPrefixWhitespaceConstruct = {
+  partial: true,
+  tokenize: tokenizeListItemPrefixWhitespace
+};
+var indentConstruct = {
+  partial: true,
+  tokenize: tokenizeIndent
+};
+function tokenizeListStart(effects, ok, nok) {
+  const self = this;
+  const tail = self.events[self.events.length - 1];
+  let initialSize = tail && tail[1].type === "linePrefix" ? tail[2].sliceSerialize(tail[1], true).length : 0;
+  let size = 0;
+  return start;
+  function start(code) {
+    const kind = self.containerState.type || (code === 42 || code === 43 || code === 45 ? "listUnordered" : "listOrdered");
+    if (kind === "listUnordered" ? !self.containerState.marker || code === self.containerState.marker : asciiDigit(code)) {
+      if (!self.containerState.type) {
+        self.containerState.type = kind;
+        effects.enter(kind, {
+          _container: true
+        });
+      }
+      if (kind === "listUnordered") {
+        effects.enter("listItemPrefix");
+        return code === 42 || code === 45 ? effects.check(thematicBreak, nok, atMarker)(code) : atMarker(code);
+      }
+      if (!self.interrupt || code === 49) {
+        effects.enter("listItemPrefix");
+        effects.enter("listItemValue");
+        return inside(code);
+      }
+    }
+    return nok(code);
+  }
+  function inside(code) {
+    if (asciiDigit(code) && ++size < 10) {
+      effects.consume(code);
+      return inside;
+    }
+    if ((!self.interrupt || size < 2) && (self.containerState.marker ? code === self.containerState.marker : code === 41 || code === 46)) {
+      effects.exit("listItemValue");
+      return atMarker(code);
+    }
+    return nok(code);
+  }
+  function atMarker(code) {
+    effects.enter("listItemMarker");
+    effects.consume(code);
+    effects.exit("listItemMarker");
+    self.containerState.marker = self.containerState.marker || code;
+    return effects.check(
+      blankLine,
+      // Can’t be empty when interrupting.
+      self.interrupt ? nok : onBlank,
+      effects.attempt(listItemPrefixWhitespaceConstruct, endOfPrefix, otherPrefix)
+    );
+  }
+  function onBlank(code) {
+    self.containerState.initialBlankLine = true;
+    initialSize++;
+    return endOfPrefix(code);
+  }
+  function otherPrefix(code) {
+    if (markdownSpace(code)) {
+      effects.enter("listItemPrefixWhitespace");
+      effects.consume(code);
+      effects.exit("listItemPrefixWhitespace");
+      return endOfPrefix;
+    }
+    return nok(code);
+  }
+  function endOfPrefix(code) {
+    self.containerState.size = initialSize + self.sliceSerialize(effects.exit("listItemPrefix"), true).length;
+    return ok(code);
+  }
+}
+function tokenizeListContinuation(effects, ok, nok) {
+  const self = this;
+  self.containerState._closeFlow = void 0;
+  return effects.check(blankLine, onBlank, notBlank);
+  function onBlank(code) {
+    self.containerState.furtherBlankLines = self.containerState.furtherBlankLines || self.containerState.initialBlankLine;
+    return factorySpace(effects, ok, "listItemIndent", self.containerState.size + 1)(code);
+  }
+  function notBlank(code) {
+    if (self.containerState.furtherBlankLines || !markdownSpace(code)) {
+      self.containerState.furtherBlankLines = void 0;
+      self.containerState.initialBlankLine = void 0;
+      return notInCurrentItem(code);
+    }
+    self.containerState.furtherBlankLines = void 0;
+    self.containerState.initialBlankLine = void 0;
+    return effects.attempt(indentConstruct, ok, notInCurrentItem)(code);
+  }
+  function notInCurrentItem(code) {
+    self.containerState._closeFlow = true;
+    self.interrupt = void 0;
+    return factorySpace(effects, effects.attempt(list, ok, nok), "linePrefix", self.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4)(code);
+  }
+}
+function tokenizeIndent(effects, ok, nok) {
+  const self = this;
+  return factorySpace(effects, afterPrefix, "listItemIndent", self.containerState.size + 1);
+  function afterPrefix(code) {
+    const tail = self.events[self.events.length - 1];
+    return tail && tail[1].type === "listItemIndent" && tail[2].sliceSerialize(tail[1], true).length === self.containerState.size ? ok(code) : nok(code);
+  }
+}
+function tokenizeListEnd(effects) {
+  effects.exit(this.containerState.type);
+}
+function tokenizeListItemPrefixWhitespace(effects, ok, nok) {
+  const self = this;
+  return factorySpace(effects, afterPrefix, "listItemPrefixWhitespace", self.parser.constructs.disable.null.includes("codeIndented") ? void 0 : 4 + 1);
+  function afterPrefix(code) {
+    const tail = self.events[self.events.length - 1];
+    return !markdownSpace(code) && tail && tail[1].type === "listItemPrefixWhitespace" ? ok(code) : nok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-core-commonmark@2.0.3/node_modules/micromark-core-commonmark/lib/setext-underline.js
+var setextUnderline = {
+  name: "setextUnderline",
+  resolveTo: resolveToSetextUnderline,
+  tokenize: tokenizeSetextUnderline
+};
+function resolveToSetextUnderline(events, context) {
+  let index2 = events.length;
+  let content3;
+  let text3;
+  let definition2;
+  while (index2--) {
+    if (events[index2][0] === "enter") {
+      if (events[index2][1].type === "content") {
+        content3 = index2;
+        break;
+      }
+      if (events[index2][1].type === "paragraph") {
+        text3 = index2;
+      }
+    } else {
+      if (events[index2][1].type === "content") {
+        events.splice(index2, 1);
+      }
+      if (!definition2 && events[index2][1].type === "definition") {
+        definition2 = index2;
+      }
+    }
+  }
+  const heading = {
+    type: "setextHeading",
+    start: {
+      ...events[content3][1].start
+    },
+    end: {
+      ...events[events.length - 1][1].end
+    }
+  };
+  events[text3][1].type = "setextHeadingText";
+  if (definition2) {
+    events.splice(text3, 0, ["enter", heading, context]);
+    events.splice(definition2 + 1, 0, ["exit", events[content3][1], context]);
+    events[content3][1].end = {
+      ...events[definition2][1].end
+    };
+  } else {
+    events[content3][1] = heading;
+  }
+  events.push(["exit", heading, context]);
+  return events;
+}
+function tokenizeSetextUnderline(effects, ok, nok) {
+  const self = this;
+  let marker;
+  return start;
+  function start(code) {
+    let index2 = self.events.length;
+    let paragraph;
+    while (index2--) {
+      if (self.events[index2][1].type !== "lineEnding" && self.events[index2][1].type !== "linePrefix" && self.events[index2][1].type !== "content") {
+        paragraph = self.events[index2][1].type === "paragraph";
+        break;
+      }
+    }
+    if (!self.parser.lazy[self.now().line] && (self.interrupt || paragraph)) {
+      effects.enter("setextHeadingLine");
+      marker = code;
+      return before(code);
+    }
+    return nok(code);
+  }
+  function before(code) {
+    effects.enter("setextHeadingLineSequence");
+    return inside(code);
+  }
+  function inside(code) {
+    if (code === marker) {
+      effects.consume(code);
+      return inside;
+    }
+    effects.exit("setextHeadingLineSequence");
+    return markdownSpace(code) ? factorySpace(effects, after, "lineSuffix")(code) : after(code);
+  }
+  function after(code) {
+    if (code === null || markdownLineEnding(code)) {
+      effects.exit("setextHeadingLine");
+      return ok(code);
+    }
+    return nok(code);
+  }
+}
+
+// ../../node_modules/.pnpm/micromark@4.0.2/node_modules/micromark/lib/initialize/flow.js
+var flow = {
+  tokenize: initializeFlow
+};
+function initializeFlow(effects) {
+  const self = this;
+  const initial = effects.attempt(
+    // Try to parse a blank line.
+    blankLine,
+    atBlankEnding,
+    // Try to parse initial flow (essentially, only code).
+    effects.attempt(this.parser.constructs.flowInitial, afterConstruct, factorySpace(effects, effects.attempt(this.parser.constructs.flow, afterConstruct, effects.attempt(content2, afterConstruct)), "linePrefix"))
+  );
+  return initial;
+  function atBlankEnding(code) {
+    if (code === null) {
+      effects.consume(code);
+      return;
+    }
+    effects.enter("lineEndingBlank");
+    effects.consume(code);
+    effects.exit("lineEndingBlank");
+    self.currentConstruct = void 0;
+    return initial;
+  }
+  function afterConstruct(code) {
+    if (code === null) {
+      effects.consume(code);
+      return;
+    }
+    effects.enter("lineEnding");
+    effects.consume(code);
+    effects.exit("lineEnding");
+    self.currentConstruct = void 0;
+    return initial;
+  }
+}
+
+// ../../node_modules/.pnpm/micromark@4.0.2/node_modules/micromark/lib/initialize/text.js
+var resolver = {
+  resolveAll: createResolver()
+};
+var string = initializeFactory("string");
+var text = initializeFactory("text");
+function initializeFactory(field) {
+  return {
+    resolveAll: createResolver(field === "text" ? resolveAllLineSuffixes : void 0),
+    tokenize: initializeText
+  };
+  function initializeText(effects) {
+    const self = this;
+    const constructs2 = this.parser.constructs[field];
+    const text3 = effects.attempt(constructs2, start, notText);
+    return start;
+    function start(code) {
+      return atBreak(code) ? text3(code) : notText(code);
+    }
+    function notText(code) {
+      if (code === null) {
+        effects.consume(code);
+        return;
+      }
+      effects.enter("data");
+      effects.consume(code);
+      return data;
+    }
+    function data(code) {
+      if (atBreak(code)) {
+        effects.exit("data");
+        return text3(code);
+      }
+      effects.consume(code);
+      return data;
+    }
+    function atBreak(code) {
+      if (code === null) {
+        return true;
+      }
+      const list2 = constructs2[code];
+      let index2 = -1;
+      if (list2) {
+        while (++index2 < list2.length) {
+          const item = list2[index2];
+          if (!item.previous || item.previous.call(self, self.previous)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+  }
+}
+function createResolver(extraResolver) {
+  return resolveAllText;
+  function resolveAllText(events, context) {
+    let index2 = -1;
+    let enter;
+    while (++index2 <= events.length) {
+      if (enter === void 0) {
+        if (events[index2] && events[index2][1].type === "data") {
+          enter = index2;
+          index2++;
+        }
+      } else if (!events[index2] || events[index2][1].type !== "data") {
+        if (index2 !== enter + 2) {
+          events[enter][1].end = events[index2 - 1][1].end;
+          events.splice(enter + 2, index2 - enter - 2);
+          index2 = enter + 2;
+        }
+        enter = void 0;
+      }
+    }
+    return extraResolver ? extraResolver(events, context) : events;
+  }
+}
+function resolveAllLineSuffixes(events, context) {
+  let eventIndex = 0;
+  while (++eventIndex <= events.length) {
+    if ((eventIndex === events.length || events[eventIndex][1].type === "lineEnding") && events[eventIndex - 1][1].type === "data") {
+      const data = events[eventIndex - 1][1];
+      const chunks = context.sliceStream(data);
+      let index2 = chunks.length;
+      let bufferIndex = -1;
+      let size = 0;
+      let tabs;
+      while (index2--) {
+        const chunk = chunks[index2];
+        if (typeof chunk === "string") {
+          bufferIndex = chunk.length;
+          while (chunk.charCodeAt(bufferIndex - 1) === 32) {
+            size++;
+            bufferIndex--;
+          }
+          if (bufferIndex) break;
+          bufferIndex = -1;
+        } else if (chunk === -2) {
+          tabs = true;
+          size++;
+        } else if (chunk === -1) {
+        } else {
+          index2++;
+          break;
+        }
+      }
+      if (context._contentTypeTextTrailing && eventIndex === events.length) {
+        size = 0;
+      }
+      if (size) {
+        const token = {
+          type: eventIndex === events.length || tabs || size < 2 ? "lineSuffix" : "hardBreakTrailing",
+          start: {
+            _bufferIndex: index2 ? bufferIndex : data.start._bufferIndex + bufferIndex,
+            _index: data.start._index + index2,
+            line: data.end.line,
+            column: data.end.column - size,
+            offset: data.end.offset - size
+          },
+          end: {
+            ...data.end
+          }
+        };
+        data.end = {
+          ...token.start
+        };
+        if (data.start.offset === data.end.offset) {
+          Object.assign(data, token);
+        } else {
+          events.splice(eventIndex, 0, ["enter", token, context], ["exit", token, context]);
+          eventIndex += 2;
+        }
+      }
+      eventIndex++;
+    }
+  }
+  return events;
+}
+
+// ../../node_modules/.pnpm/micromark@4.0.2/node_modules/micromark/lib/constructs.js
+var constructs_exports = {};
+__export(constructs_exports, {
+  attentionMarkers: () => attentionMarkers,
+  contentInitial: () => contentInitial,
+  disable: () => disable,
+  document: () => document3,
+  flow: () => flow2,
+  flowInitial: () => flowInitial,
+  insideSpan: () => insideSpan,
+  string: () => string2,
+  text: () => text2
+});
+var document3 = {
+  [42]: list,
+  [43]: list,
+  [45]: list,
+  [48]: list,
+  [49]: list,
+  [50]: list,
+  [51]: list,
+  [52]: list,
+  [53]: list,
+  [54]: list,
+  [55]: list,
+  [56]: list,
+  [57]: list,
+  [62]: blockQuote
+};
+var contentInitial = {
+  [91]: definition
+};
+var flowInitial = {
+  [-2]: codeIndented,
+  [-1]: codeIndented,
+  [32]: codeIndented
+};
+var flow2 = {
+  [35]: headingAtx,
+  [42]: thematicBreak,
+  [45]: [setextUnderline, thematicBreak],
+  [60]: htmlFlow,
+  [61]: setextUnderline,
+  [95]: thematicBreak,
+  [96]: codeFenced,
+  [126]: codeFenced
+};
+var string2 = {
+  [38]: characterReference,
+  [92]: characterEscape
+};
+var text2 = {
+  [-5]: lineEnding,
+  [-4]: lineEnding,
+  [-3]: lineEnding,
+  [33]: labelStartImage,
+  [38]: characterReference,
+  [42]: attention,
+  [60]: [autolink, htmlText],
+  [91]: labelStartLink,
+  [92]: [hardBreakEscape, characterEscape],
+  [93]: labelEnd,
+  [95]: attention,
+  [96]: codeText
+};
+var insideSpan = {
+  null: [attention, resolver]
+};
+var attentionMarkers = {
+  null: [42, 95]
+};
+var disable = {
+  null: []
+};
+
+// ../../node_modules/.pnpm/micromark@4.0.2/node_modules/micromark/lib/create-tokenizer.js
+function createTokenizer(parser, initialize, from) {
+  let point3 = {
+    _bufferIndex: -1,
+    _index: 0,
+    line: from && from.line || 1,
+    column: from && from.column || 1,
+    offset: from && from.offset || 0
+  };
+  const columnStart = {};
+  const resolveAllConstructs = [];
+  let chunks = [];
+  let stack = [];
+  let consumed = true;
+  const effects = {
+    attempt: constructFactory(onsuccessfulconstruct),
+    check: constructFactory(onsuccessfulcheck),
+    consume,
+    enter,
+    exit: exit2,
+    interrupt: constructFactory(onsuccessfulcheck, {
+      interrupt: true
+    })
+  };
+  const context = {
+    code: null,
+    containerState: {},
+    defineSkip,
+    events: [],
+    now,
+    parser,
+    previous: null,
+    sliceSerialize,
+    sliceStream,
+    write: write2
+  };
+  let state = initialize.tokenize.call(context, effects);
+  let expectedCode;
+  if (initialize.resolveAll) {
+    resolveAllConstructs.push(initialize);
+  }
+  return context;
+  function write2(slice) {
+    chunks = push(chunks, slice);
+    main();
+    if (chunks[chunks.length - 1] !== null) {
+      return [];
+    }
+    addResult(initialize, 0);
+    context.events = resolveAll(resolveAllConstructs, context.events, context);
+    return context.events;
+  }
+  function sliceSerialize(token, expandTabs) {
+    return serializeChunks(sliceStream(token), expandTabs);
+  }
+  function sliceStream(token) {
+    return sliceChunks(chunks, token);
+  }
+  function now() {
+    const {
+      _bufferIndex,
+      _index,
+      line,
+      column,
+      offset
+    } = point3;
+    return {
+      _bufferIndex,
+      _index,
+      line,
+      column,
+      offset
+    };
+  }
+  function defineSkip(value) {
+    columnStart[value.line] = value.column;
+    accountForPotentialSkip();
+  }
+  function main() {
+    let chunkIndex;
+    while (point3._index < chunks.length) {
+      const chunk = chunks[point3._index];
+      if (typeof chunk === "string") {
+        chunkIndex = point3._index;
+        if (point3._bufferIndex < 0) {
+          point3._bufferIndex = 0;
+        }
+        while (point3._index === chunkIndex && point3._bufferIndex < chunk.length) {
+          go(chunk.charCodeAt(point3._bufferIndex));
+        }
+      } else {
+        go(chunk);
+      }
+    }
+  }
+  function go(code) {
+    consumed = void 0;
+    expectedCode = code;
+    state = state(code);
+  }
+  function consume(code) {
+    if (markdownLineEnding(code)) {
+      point3.line++;
+      point3.column = 1;
+      point3.offset += code === -3 ? 2 : 1;
+      accountForPotentialSkip();
+    } else if (code !== -1) {
+      point3.column++;
+      point3.offset++;
+    }
+    if (point3._bufferIndex < 0) {
+      point3._index++;
+    } else {
+      point3._bufferIndex++;
+      if (point3._bufferIndex === // Points w/ non-negative `_bufferIndex` reference
+      // strings.
+      /** @type {string} */
+      chunks[point3._index].length) {
+        point3._bufferIndex = -1;
+        point3._index++;
+      }
+    }
+    context.previous = code;
+    consumed = true;
+  }
+  function enter(type, fields) {
+    const token = fields || {};
+    token.type = type;
+    token.start = now();
+    context.events.push(["enter", token, context]);
+    stack.push(token);
+    return token;
+  }
+  function exit2(type) {
+    const token = stack.pop();
+    token.end = now();
+    context.events.push(["exit", token, context]);
+    return token;
+  }
+  function onsuccessfulconstruct(construct, info) {
+    addResult(construct, info.from);
+  }
+  function onsuccessfulcheck(_, info) {
+    info.restore();
+  }
+  function constructFactory(onreturn, fields) {
+    return hook;
+    function hook(constructs2, returnState, bogusState) {
+      let listOfConstructs;
+      let constructIndex;
+      let currentConstruct;
+      let info;
+      return Array.isArray(constructs2) ? (
+        /* c8 ignore next 1 */
+        handleListOfConstructs(constructs2)
+      ) : "tokenize" in constructs2 ? (
+        // Looks like a construct.
+        handleListOfConstructs([
+          /** @type {Construct} */
+          constructs2
+        ])
+      ) : handleMapOfConstructs(constructs2);
+      function handleMapOfConstructs(map) {
+        return start;
+        function start(code) {
+          const left = code !== null && map[code];
+          const all2 = code !== null && map.null;
+          const list2 = [
+            // To do: add more extension tests.
+            /* c8 ignore next 2 */
+            ...Array.isArray(left) ? left : left ? [left] : [],
+            ...Array.isArray(all2) ? all2 : all2 ? [all2] : []
+          ];
+          return handleListOfConstructs(list2)(code);
+        }
+      }
+      function handleListOfConstructs(list2) {
+        listOfConstructs = list2;
+        constructIndex = 0;
+        if (list2.length === 0) {
+          return bogusState;
+        }
+        return handleConstruct(list2[constructIndex]);
+      }
+      function handleConstruct(construct) {
+        return start;
+        function start(code) {
+          info = store();
+          currentConstruct = construct;
+          if (!construct.partial) {
+            context.currentConstruct = construct;
+          }
+          if (construct.name && context.parser.constructs.disable.null.includes(construct.name)) {
+            return nok(code);
+          }
+          return construct.tokenize.call(
+            // If we do have fields, create an object w/ `context` as its
+            // prototype.
+            // This allows a “live binding”, which is needed for `interrupt`.
+            fields ? Object.assign(Object.create(context), fields) : context,
+            effects,
+            ok,
+            nok
+          )(code);
+        }
+      }
+      function ok(code) {
+        consumed = true;
+        onreturn(currentConstruct, info);
+        return returnState;
+      }
+      function nok(code) {
+        consumed = true;
+        info.restore();
+        if (++constructIndex < listOfConstructs.length) {
+          return handleConstruct(listOfConstructs[constructIndex]);
+        }
+        return bogusState;
+      }
+    }
+  }
+  function addResult(construct, from2) {
+    if (construct.resolveAll && !resolveAllConstructs.includes(construct)) {
+      resolveAllConstructs.push(construct);
+    }
+    if (construct.resolve) {
+      splice(context.events, from2, context.events.length - from2, construct.resolve(context.events.slice(from2), context));
+    }
+    if (construct.resolveTo) {
+      context.events = construct.resolveTo(context.events, context);
+    }
+  }
+  function store() {
+    const startPoint = now();
+    const startPrevious = context.previous;
+    const startCurrentConstruct = context.currentConstruct;
+    const startEventsIndex = context.events.length;
+    const startStack = Array.from(stack);
+    return {
+      from: startEventsIndex,
+      restore
+    };
+    function restore() {
+      point3 = startPoint;
+      context.previous = startPrevious;
+      context.currentConstruct = startCurrentConstruct;
+      context.events.length = startEventsIndex;
+      stack = startStack;
+      accountForPotentialSkip();
+    }
+  }
+  function accountForPotentialSkip() {
+    if (point3.line in columnStart && point3.column < 2) {
+      point3.column = columnStart[point3.line];
+      point3.offset += columnStart[point3.line] - 1;
+    }
+  }
+}
+function sliceChunks(chunks, token) {
+  const startIndex = token.start._index;
+  const startBufferIndex = token.start._bufferIndex;
+  const endIndex = token.end._index;
+  const endBufferIndex = token.end._bufferIndex;
+  let view;
+  if (startIndex === endIndex) {
+    view = [chunks[startIndex].slice(startBufferIndex, endBufferIndex)];
+  } else {
+    view = chunks.slice(startIndex, endIndex);
+    if (startBufferIndex > -1) {
+      const head = view[0];
+      if (typeof head === "string") {
+        view[0] = head.slice(startBufferIndex);
+      } else {
+        view.shift();
+      }
+    }
+    if (endBufferIndex > 0) {
+      view.push(chunks[endIndex].slice(0, endBufferIndex));
+    }
+  }
+  return view;
+}
+function serializeChunks(chunks, expandTabs) {
+  let index2 = -1;
+  const result = [];
+  let atTab;
+  while (++index2 < chunks.length) {
+    const chunk = chunks[index2];
+    let value;
+    if (typeof chunk === "string") {
+      value = chunk;
+    } else switch (chunk) {
+      case -5: {
+        value = "\r";
+        break;
+      }
+      case -4: {
+        value = "\n";
+        break;
+      }
+      case -3: {
+        value = "\r\n";
+        break;
+      }
+      case -2: {
+        value = expandTabs ? " " : "	";
+        break;
+      }
+      case -1: {
+        if (!expandTabs && atTab) continue;
+        value = " ";
+        break;
+      }
+      default: {
+        value = String.fromCharCode(chunk);
+      }
+    }
+    atTab = chunk === -2;
+    result.push(value);
+  }
+  return result.join("");
+}
+
+// ../../node_modules/.pnpm/micromark@4.0.2/node_modules/micromark/lib/parse.js
+function parse(options) {
+  const settings = options || {};
+  const constructs2 = (
+    /** @type {FullNormalizedExtension} */
+    combineExtensions([constructs_exports, ...settings.extensions || []])
+  );
+  const parser = {
+    constructs: constructs2,
+    content: create(content),
+    defined: [],
+    document: create(document2),
+    flow: create(flow),
+    lazy: {},
+    string: create(string),
+    text: create(text)
+  };
+  return parser;
+  function create(initial) {
+    return creator;
+    function creator(from) {
+      return createTokenizer(parser, initial, from);
+    }
+  }
+}
+
+// ../../node_modules/.pnpm/micromark@4.0.2/node_modules/micromark/lib/postprocess.js
+function postprocess(events) {
+  while (!subtokenize(events)) {
+  }
+  return events;
+}
+
+// ../../node_modules/.pnpm/micromark@4.0.2/node_modules/micromark/lib/preprocess.js
+var search = /[\0\t\n\r]/g;
+function preprocess() {
+  let column = 1;
+  let buffer = "";
+  let start = true;
+  let atCarriageReturn;
+  return preprocessor;
+  function preprocessor(value, encoding, end) {
+    const chunks = [];
+    let match;
+    let next;
+    let startPosition;
+    let endPosition;
+    let code;
+    value = buffer + (typeof value === "string" ? value.toString() : new TextDecoder(encoding || void 0).decode(value));
+    startPosition = 0;
+    buffer = "";
+    if (start) {
+      if (value.charCodeAt(0) === 65279) {
+        startPosition++;
+      }
+      start = void 0;
+    }
+    while (startPosition < value.length) {
+      search.lastIndex = startPosition;
+      match = search.exec(value);
+      endPosition = match && match.index !== void 0 ? match.index : value.length;
+      code = value.charCodeAt(endPosition);
+      if (!match) {
+        buffer = value.slice(startPosition);
+        break;
+      }
+      if (code === 10 && startPosition === endPosition && atCarriageReturn) {
+        chunks.push(-3);
+        atCarriageReturn = void 0;
+      } else {
+        if (atCarriageReturn) {
+          chunks.push(-5);
+          atCarriageReturn = void 0;
+        }
+        if (startPosition < endPosition) {
+          chunks.push(value.slice(startPosition, endPosition));
+          column += endPosition - startPosition;
+        }
+        switch (code) {
+          case 0: {
+            chunks.push(65533);
+            column++;
+            break;
+          }
+          case 9: {
+            next = Math.ceil(column / 4) * 4;
+            chunks.push(-2);
+            while (column++ < next) chunks.push(-1);
+            break;
+          }
+          case 10: {
+            chunks.push(-4);
+            column = 1;
+            break;
+          }
+          default: {
+            atCarriageReturn = true;
+            column = 1;
+          }
+        }
+      }
+      startPosition = endPosition + 1;
+    }
+    if (end) {
+      if (atCarriageReturn) chunks.push(-5);
+      if (buffer) chunks.push(buffer);
+      chunks.push(null);
+    }
+    return chunks;
+  }
+}
+
+// ../../node_modules/.pnpm/micromark-util-decode-string@2.0.1/node_modules/micromark-util-decode-string/index.js
+var characterEscapeOrReference = /\\([!-/:-@[-`{-~])|&(#(?:\d{1,7}|x[\da-f]{1,6})|[\da-z]{1,31});/gi;
+function decodeString(value) {
+  return value.replace(characterEscapeOrReference, decode);
+}
+function decode($0, $1, $2) {
+  if ($1) {
+    return $1;
+  }
+  const head = $2.charCodeAt(0);
+  if (head === 35) {
+    const head2 = $2.charCodeAt(1);
+    const hex = head2 === 120 || head2 === 88;
+    return decodeNumericCharacterReference($2.slice(hex ? 2 : 1), hex ? 16 : 10);
+  }
+  return decodeNamedCharacterReference($2) || $0;
+}
+
+// ../../node_modules/.pnpm/unist-util-stringify-position@4.0.0/node_modules/unist-util-stringify-position/lib/index.js
+function stringifyPosition(value) {
+  if (!value || typeof value !== "object") {
+    return "";
+  }
+  if ("position" in value || "type" in value) {
+    return position(value.position);
+  }
+  if ("start" in value || "end" in value) {
+    return position(value);
+  }
+  if ("line" in value || "column" in value) {
+    return point(value);
+  }
+  return "";
+}
+function point(point3) {
+  return index(point3 && point3.line) + ":" + index(point3 && point3.column);
+}
+function position(pos) {
+  return point(pos && pos.start) + "-" + point(pos && pos.end);
+}
+function index(value) {
+  return value && typeof value === "number" ? value : 1;
+}
+
+// ../../node_modules/.pnpm/mdast-util-from-markdown@2.0.3/node_modules/mdast-util-from-markdown/lib/index.js
+var own2 = {}.hasOwnProperty;
+function fromMarkdown2(value, encoding, options) {
+  if (encoding && typeof encoding === "object") {
+    options = encoding;
+    encoding = void 0;
+  }
+  return compiler(options)(postprocess(parse(options).document().write(preprocess()(value, encoding, true))));
+}
+function compiler(options) {
+  const config = {
+    transforms: [],
+    canContainEols: ["emphasis", "fragment", "heading", "paragraph", "strong"],
+    enter: {
+      autolink: opener(link),
+      autolinkProtocol: onenterdata,
+      autolinkEmail: onenterdata,
+      atxHeading: opener(heading),
+      blockQuote: opener(blockQuote2),
+      characterEscape: onenterdata,
+      characterReference: onenterdata,
+      codeFenced: opener(codeFlow),
+      codeFencedFenceInfo: buffer,
+      codeFencedFenceMeta: buffer,
+      codeIndented: opener(codeFlow, buffer),
+      codeText: opener(codeText2, buffer),
+      codeTextData: onenterdata,
+      data: onenterdata,
+      codeFlowValue: onenterdata,
+      definition: opener(definition2),
+      definitionDestinationString: buffer,
+      definitionLabelString: buffer,
+      definitionTitleString: buffer,
+      emphasis: opener(emphasis),
+      hardBreakEscape: opener(hardBreak),
+      hardBreakTrailing: opener(hardBreak),
+      htmlFlow: opener(html, buffer),
+      htmlFlowData: onenterdata,
+      htmlText: opener(html, buffer),
+      htmlTextData: onenterdata,
+      image: opener(image),
+      label: buffer,
+      link: opener(link),
+      listItem: opener(listItem),
+      listItemValue: onenterlistitemvalue,
+      listOrdered: opener(list2, onenterlistordered),
+      listUnordered: opener(list2),
+      paragraph: opener(paragraph),
+      reference: onenterreference,
+      referenceString: buffer,
+      resourceDestinationString: buffer,
+      resourceTitleString: buffer,
+      setextHeading: opener(heading),
+      strong: opener(strong),
+      thematicBreak: opener(thematicBreak2)
+    },
+    exit: {
+      atxHeading: closer(),
+      atxHeadingSequence: onexitatxheadingsequence,
+      autolink: closer(),
+      autolinkEmail: onexitautolinkemail,
+      autolinkProtocol: onexitautolinkprotocol,
+      blockQuote: closer(),
+      characterEscapeValue: onexitdata,
+      characterReferenceMarkerHexadecimal: onexitcharacterreferencemarker,
+      characterReferenceMarkerNumeric: onexitcharacterreferencemarker,
+      characterReferenceValue: onexitcharacterreferencevalue,
+      characterReference: onexitcharacterreference,
+      codeFenced: closer(onexitcodefenced),
+      codeFencedFence: onexitcodefencedfence,
+      codeFencedFenceInfo: onexitcodefencedfenceinfo,
+      codeFencedFenceMeta: onexitcodefencedfencemeta,
+      codeFlowValue: onexitdata,
+      codeIndented: closer(onexitcodeindented),
+      codeText: closer(onexitcodetext),
+      codeTextData: onexitdata,
+      data: onexitdata,
+      definition: closer(),
+      definitionDestinationString: onexitdefinitiondestinationstring,
+      definitionLabelString: onexitdefinitionlabelstring,
+      definitionTitleString: onexitdefinitiontitlestring,
+      emphasis: closer(),
+      hardBreakEscape: closer(onexithardbreak),
+      hardBreakTrailing: closer(onexithardbreak),
+      htmlFlow: closer(onexithtmlflow),
+      htmlFlowData: onexitdata,
+      htmlText: closer(onexithtmltext),
+      htmlTextData: onexitdata,
+      image: closer(onexitimage),
+      label: onexitlabel,
+      labelText: onexitlabeltext,
+      lineEnding: onexitlineending,
+      link: closer(onexitlink),
+      listItem: closer(),
+      listOrdered: closer(),
+      listUnordered: closer(),
+      paragraph: closer(),
+      referenceString: onexitreferencestring,
+      resourceDestinationString: onexitresourcedestinationstring,
+      resourceTitleString: onexitresourcetitlestring,
+      resource: onexitresource,
+      setextHeading: closer(onexitsetextheading),
+      setextHeadingLineSequence: onexitsetextheadinglinesequence,
+      setextHeadingText: onexitsetextheadingtext,
+      strong: closer(),
+      thematicBreak: closer()
+    }
+  };
+  configure(config, (options || {}).mdastExtensions || []);
+  const data = {};
+  return compile;
+  function compile(events) {
+    let tree = {
+      type: "root",
+      children: []
+    };
+    const context = {
+      stack: [tree],
+      tokenStack: [],
+      config,
+      enter,
+      exit: exit2,
+      buffer,
+      resume,
+      data
+    };
+    const listStack = [];
+    let index2 = -1;
+    while (++index2 < events.length) {
+      if (events[index2][1].type === "listOrdered" || events[index2][1].type === "listUnordered") {
+        if (events[index2][0] === "enter") {
+          listStack.push(index2);
+        } else {
+          const tail = listStack.pop();
+          index2 = prepareList(events, tail, index2);
+        }
+      }
+    }
+    index2 = -1;
+    while (++index2 < events.length) {
+      const handler = config[events[index2][0]];
+      if (own2.call(handler, events[index2][1].type)) {
+        handler[events[index2][1].type].call(Object.assign({
+          sliceSerialize: events[index2][2].sliceSerialize
+        }, context), events[index2][1]);
+      }
+    }
+    if (context.tokenStack.length > 0) {
+      const tail = context.tokenStack[context.tokenStack.length - 1];
+      const handler = tail[1] || defaultOnError;
+      handler.call(context, void 0, tail[0]);
+    }
+    tree.position = {
+      start: point2(events.length > 0 ? events[0][1].start : {
+        line: 1,
+        column: 1,
+        offset: 0
+      }),
+      end: point2(events.length > 0 ? events[events.length - 2][1].end : {
+        line: 1,
+        column: 1,
+        offset: 0
+      })
+    };
+    index2 = -1;
+    while (++index2 < config.transforms.length) {
+      tree = config.transforms[index2](tree) || tree;
+    }
+    return tree;
+  }
+  function prepareList(events, start, length) {
+    let index2 = start - 1;
+    let containerBalance = -1;
+    let listSpread = false;
+    let listItem2;
+    let lineIndex;
+    let firstBlankLineIndex;
+    let atMarker;
+    while (++index2 <= length) {
+      const event = events[index2];
+      switch (event[1].type) {
+        case "listUnordered":
+        case "listOrdered":
+        case "blockQuote": {
+          if (event[0] === "enter") {
+            containerBalance++;
+          } else {
+            containerBalance--;
+          }
+          atMarker = void 0;
+          break;
+        }
+        case "lineEndingBlank": {
+          if (event[0] === "enter") {
+            if (listItem2 && !atMarker && !containerBalance && !firstBlankLineIndex) {
+              firstBlankLineIndex = index2;
+            }
+            atMarker = void 0;
+          }
+          break;
+        }
+        case "linePrefix":
+        case "listItemValue":
+        case "listItemMarker":
+        case "listItemPrefix":
+        case "listItemPrefixWhitespace": {
+          break;
+        }
+        default: {
+          atMarker = void 0;
+        }
+      }
+      if (!containerBalance && event[0] === "enter" && event[1].type === "listItemPrefix" || containerBalance === -1 && event[0] === "exit" && (event[1].type === "listUnordered" || event[1].type === "listOrdered")) {
+        if (listItem2) {
+          let tailIndex = index2;
+          lineIndex = void 0;
+          while (tailIndex--) {
+            const tailEvent = events[tailIndex];
+            if (tailEvent[1].type === "lineEnding" || tailEvent[1].type === "lineEndingBlank") {
+              if (tailEvent[0] === "exit") continue;
+              if (lineIndex) {
+                events[lineIndex][1].type = "lineEndingBlank";
+                listSpread = true;
+              }
+              tailEvent[1].type = "lineEnding";
+              lineIndex = tailIndex;
+            } else if (tailEvent[1].type === "linePrefix" || tailEvent[1].type === "blockQuotePrefix" || tailEvent[1].type === "blockQuotePrefixWhitespace" || tailEvent[1].type === "blockQuoteMarker" || tailEvent[1].type === "listItemIndent") {
+            } else {
+              break;
+            }
+          }
+          if (firstBlankLineIndex && (!lineIndex || firstBlankLineIndex < lineIndex)) {
+            listItem2._spread = true;
+          }
+          listItem2.end = Object.assign({}, lineIndex ? events[lineIndex][1].start : event[1].end);
+          events.splice(lineIndex || index2, 0, ["exit", listItem2, event[2]]);
+          index2++;
+          length++;
+        }
+        if (event[1].type === "listItemPrefix") {
+          const item = {
+            type: "listItem",
+            _spread: false,
+            start: Object.assign({}, event[1].start),
+            // @ts-expect-error: we’ll add `end` in a second.
+            end: void 0
+          };
+          listItem2 = item;
+          events.splice(index2, 0, ["enter", item, event[2]]);
+          index2++;
+          length++;
+          firstBlankLineIndex = void 0;
+          atMarker = true;
+        }
+      }
+    }
+    events[start][1]._spread = listSpread;
+    return length;
+  }
+  function opener(create, and) {
+    return open;
+    function open(token) {
+      enter.call(this, create(token), token);
+      if (and) and.call(this, token);
+    }
+  }
+  function buffer() {
+    this.stack.push({
+      type: "fragment",
+      children: []
+    });
+  }
+  function enter(node2, token, errorHandler) {
+    const parent = this.stack[this.stack.length - 1];
+    const siblings = parent.children;
+    siblings.push(node2);
+    this.stack.push(node2);
+    this.tokenStack.push([token, errorHandler || void 0]);
+    node2.position = {
+      start: point2(token.start),
+      // @ts-expect-error: `end` will be patched later.
+      end: void 0
+    };
+  }
+  function closer(and) {
+    return close;
+    function close(token) {
+      if (and) and.call(this, token);
+      exit2.call(this, token);
+    }
+  }
+  function exit2(token, onExitError) {
+    const node2 = this.stack.pop();
+    const open = this.tokenStack.pop();
+    if (!open) {
+      throw new Error("Cannot close `" + token.type + "` (" + stringifyPosition({
+        start: token.start,
+        end: token.end
+      }) + "): it\u2019s not open");
+    } else if (open[0].type !== token.type) {
+      if (onExitError) {
+        onExitError.call(this, token, open[0]);
+      } else {
+        const handler = open[1] || defaultOnError;
+        handler.call(this, token, open[0]);
+      }
+    }
+    node2.position.end = point2(token.end);
+  }
+  function resume() {
+    return toString(this.stack.pop());
+  }
+  function onenterlistordered() {
+    this.data.expectingFirstListItemValue = true;
+  }
+  function onenterlistitemvalue(token) {
+    if (this.data.expectingFirstListItemValue) {
+      const ancestor = this.stack[this.stack.length - 2];
+      ancestor.start = Number.parseInt(this.sliceSerialize(token), 10);
+      this.data.expectingFirstListItemValue = void 0;
+    }
+  }
+  function onexitcodefencedfenceinfo() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.lang = data2;
+  }
+  function onexitcodefencedfencemeta() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.meta = data2;
+  }
+  function onexitcodefencedfence() {
+    if (this.data.flowCodeInside) return;
+    this.buffer();
+    this.data.flowCodeInside = true;
+  }
+  function onexitcodefenced() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.value = data2.replace(/^(\r?\n|\r)|(\r?\n|\r)$/g, "");
+    this.data.flowCodeInside = void 0;
+  }
+  function onexitcodeindented() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.value = data2.replace(/(\r?\n|\r)$/g, "");
+  }
+  function onexitdefinitionlabelstring(token) {
+    const label = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.label = label;
+    node2.identifier = normalizeIdentifier(this.sliceSerialize(token)).toLowerCase();
+  }
+  function onexitdefinitiontitlestring() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.title = data2;
+  }
+  function onexitdefinitiondestinationstring() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.url = data2;
+  }
+  function onexitatxheadingsequence(token) {
+    const node2 = this.stack[this.stack.length - 1];
+    if (!node2.depth) {
+      const depth = this.sliceSerialize(token).length;
+      node2.depth = depth;
+    }
+  }
+  function onexitsetextheadingtext() {
+    this.data.setextHeadingSlurpLineEnding = true;
+  }
+  function onexitsetextheadinglinesequence(token) {
+    const node2 = this.stack[this.stack.length - 1];
+    node2.depth = this.sliceSerialize(token).codePointAt(0) === 61 ? 1 : 2;
+  }
+  function onexitsetextheading() {
+    this.data.setextHeadingSlurpLineEnding = void 0;
+  }
+  function onenterdata(token) {
+    const node2 = this.stack[this.stack.length - 1];
+    const siblings = node2.children;
+    let tail = siblings[siblings.length - 1];
+    if (!tail || tail.type !== "text") {
+      tail = text3();
+      tail.position = {
+        start: point2(token.start),
+        // @ts-expect-error: we’ll add `end` later.
+        end: void 0
+      };
+      siblings.push(tail);
+    }
+    this.stack.push(tail);
+  }
+  function onexitdata(token) {
+    const tail = this.stack.pop();
+    tail.value += this.sliceSerialize(token);
+    tail.position.end = point2(token.end);
+  }
+  function onexitlineending(token) {
+    const context = this.stack[this.stack.length - 1];
+    if (this.data.atHardBreak) {
+      const tail = context.children[context.children.length - 1];
+      tail.position.end = point2(token.end);
+      this.data.atHardBreak = void 0;
+      return;
+    }
+    if (!this.data.setextHeadingSlurpLineEnding && config.canContainEols.includes(context.type)) {
+      onenterdata.call(this, token);
+      onexitdata.call(this, token);
+    }
+  }
+  function onexithardbreak() {
+    this.data.atHardBreak = true;
+  }
+  function onexithtmlflow() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.value = data2;
+  }
+  function onexithtmltext() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.value = data2;
+  }
+  function onexitcodetext() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.value = data2;
+  }
+  function onexitlink() {
+    const node2 = this.stack[this.stack.length - 1];
+    if (this.data.inReference) {
+      const referenceType = this.data.referenceType || "shortcut";
+      node2.type += "Reference";
+      node2.referenceType = referenceType;
+      delete node2.url;
+      delete node2.title;
+    } else {
+      delete node2.identifier;
+      delete node2.label;
+    }
+    this.data.referenceType = void 0;
+  }
+  function onexitimage() {
+    const node2 = this.stack[this.stack.length - 1];
+    if (this.data.inReference) {
+      const referenceType = this.data.referenceType || "shortcut";
+      node2.type += "Reference";
+      node2.referenceType = referenceType;
+      delete node2.url;
+      delete node2.title;
+    } else {
+      delete node2.identifier;
+      delete node2.label;
+    }
+    this.data.referenceType = void 0;
+  }
+  function onexitlabeltext(token) {
+    const string3 = this.sliceSerialize(token);
+    const ancestor = this.stack[this.stack.length - 2];
+    ancestor.label = decodeString(string3);
+    ancestor.identifier = normalizeIdentifier(string3).toLowerCase();
+  }
+  function onexitlabel() {
+    const fragment = this.stack[this.stack.length - 1];
+    const value = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    this.data.inReference = true;
+    if (node2.type === "link") {
+      const children = fragment.children;
+      node2.children = children;
+    } else {
+      node2.alt = value;
+    }
+  }
+  function onexitresourcedestinationstring() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.url = data2;
+  }
+  function onexitresourcetitlestring() {
+    const data2 = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.title = data2;
+  }
+  function onexitresource() {
+    this.data.inReference = void 0;
+  }
+  function onenterreference() {
+    this.data.referenceType = "collapsed";
+  }
+  function onexitreferencestring(token) {
+    const label = this.resume();
+    const node2 = this.stack[this.stack.length - 1];
+    node2.label = label;
+    node2.identifier = normalizeIdentifier(this.sliceSerialize(token)).toLowerCase();
+    this.data.referenceType = "full";
+  }
+  function onexitcharacterreferencemarker(token) {
+    this.data.characterReferenceType = token.type;
+  }
+  function onexitcharacterreferencevalue(token) {
+    const data2 = this.sliceSerialize(token);
+    const type = this.data.characterReferenceType;
+    let value;
+    if (type) {
+      value = decodeNumericCharacterReference(data2, type === "characterReferenceMarkerNumeric" ? 10 : 16);
+      this.data.characterReferenceType = void 0;
+    } else {
+      const result = decodeNamedCharacterReference(data2);
+      value = result;
+    }
+    const tail = this.stack[this.stack.length - 1];
+    tail.value += value;
+  }
+  function onexitcharacterreference(token) {
+    const tail = this.stack.pop();
+    tail.position.end = point2(token.end);
+  }
+  function onexitautolinkprotocol(token) {
+    onexitdata.call(this, token);
+    const node2 = this.stack[this.stack.length - 1];
+    node2.url = this.sliceSerialize(token);
+  }
+  function onexitautolinkemail(token) {
+    onexitdata.call(this, token);
+    const node2 = this.stack[this.stack.length - 1];
+    node2.url = "mailto:" + this.sliceSerialize(token);
+  }
+  function blockQuote2() {
+    return {
+      type: "blockquote",
+      children: []
+    };
+  }
+  function codeFlow() {
+    return {
+      type: "code",
+      lang: null,
+      meta: null,
+      value: ""
+    };
+  }
+  function codeText2() {
+    return {
+      type: "inlineCode",
+      value: ""
+    };
+  }
+  function definition2() {
+    return {
+      type: "definition",
+      identifier: "",
+      label: null,
+      title: null,
+      url: ""
+    };
+  }
+  function emphasis() {
+    return {
+      type: "emphasis",
+      children: []
+    };
+  }
+  function heading() {
+    return {
+      type: "heading",
+      // @ts-expect-error `depth` will be set later.
+      depth: 0,
+      children: []
+    };
+  }
+  function hardBreak() {
+    return {
+      type: "break"
+    };
+  }
+  function html() {
+    return {
+      type: "html",
+      value: ""
+    };
+  }
+  function image() {
+    return {
+      type: "image",
+      title: null,
+      url: "",
+      alt: null
+    };
+  }
+  function link() {
+    return {
+      type: "link",
+      title: null,
+      url: "",
+      children: []
+    };
+  }
+  function list2(token) {
+    return {
+      type: "list",
+      ordered: token.type === "listOrdered",
+      start: null,
+      spread: token._spread,
+      children: []
+    };
+  }
+  function listItem(token) {
+    return {
+      type: "listItem",
+      spread: token._spread,
+      checked: null,
+      children: []
+    };
+  }
+  function paragraph() {
+    return {
+      type: "paragraph",
+      children: []
+    };
+  }
+  function strong() {
+    return {
+      type: "strong",
+      children: []
+    };
+  }
+  function text3() {
+    return {
+      type: "text",
+      value: ""
+    };
+  }
+  function thematicBreak2() {
+    return {
+      type: "thematicBreak"
+    };
+  }
+}
+function point2(d) {
+  return {
+    line: d.line,
+    column: d.column,
+    offset: d.offset
+  };
+}
+function configure(combined, extensions) {
+  let index2 = -1;
+  while (++index2 < extensions.length) {
+    const value = extensions[index2];
+    if (Array.isArray(value)) {
+      configure(combined, value);
+    } else {
+      extension(combined, value);
+    }
+  }
+}
+function extension(combined, extension2) {
+  let key;
+  for (key in extension2) {
+    if (own2.call(extension2, key)) {
+      switch (key) {
+        case "canContainEols": {
+          const right = extension2[key];
+          if (right) {
+            combined[key].push(...right);
+          }
+          break;
+        }
+        case "transforms": {
+          const right = extension2[key];
+          if (right) {
+            combined[key].push(...right);
+          }
+          break;
+        }
+        case "enter":
+        case "exit": {
+          const right = extension2[key];
+          if (right) {
+            Object.assign(combined[key], right);
+          }
+          break;
+        }
+      }
+    }
+  }
+}
+function defaultOnError(left, right) {
+  if (left) {
+    throw new Error("Cannot close `" + left.type + "` (" + stringifyPosition({
+      start: left.start,
+      end: left.end
+    }) + "): a different token (`" + right.type + "`, " + stringifyPosition({
+      start: right.start,
+      end: right.end
+    }) + ") is open");
+  } else {
+    throw new Error("Cannot close document, a token (`" + right.type + "`, " + stringifyPosition({
+      start: right.start,
+      end: right.end
+    }) + ") is still open");
+  }
+}
+
+// src/components/graph-chat/messagePreview.ts
+function messagePreview(text3, budget) {
+  if (text3.length <= budget) return text3;
+  const blocks = fromMarkdown2(text3).children;
+  const end = blocks.find((block) => (block.position?.end.offset ?? 0) >= budget)?.position?.end.offset ?? text3.length;
+  return end >= text3.trimEnd().length ? text3 : text3.slice(0, end).trimEnd();
+}
+
 // src/components/graph-chat/MessageExpansionScope.tsx
 import { createContext as createContext9, useContext as useContext8, useEffect as useEffect30, useState as useState40 } from "react";
 import { jsx as jsx60 } from "react/jsx-runtime";
@@ -15132,23 +22074,23 @@ function MessageExpansionScope({ children }) {
   const [cache] = useState40(() => ({ messages: /* @__PURE__ */ new Map(), live: null }));
   return /* @__PURE__ */ jsx60(ExpansionContext.Provider, { value: cache, children });
 }
-function useMessageExpansion(messageId, text, streaming) {
+function useMessageExpansion(messageId, text3, streaming) {
   const cache = useContext8(ExpansionContext);
   const remembered = messageId ? cache?.messages.get(messageId) : void 0;
-  const inherited = remembered ?? (cache?.live && text.startsWith(cache.live.text) ? cache.live.expanded : false);
+  const inherited = remembered ?? (cache?.live && text3.startsWith(cache.live.text) ? cache.live.expanded : false);
   const [choice, setChoice] = useState40({ messageId, expanded: inherited });
   const expanded = choice.messageId === messageId ? choice.expanded : inherited;
   const setExpanded = (next) => {
     if (messageId) cache?.messages.set(messageId, next);
-    if (cache && messageId === "live-agent-message") cache.live = { text, expanded: next };
+    if (cache && messageId === "live-agent-message") cache.live = { text: text3, expanded: next };
     setChoice({ messageId, expanded: next });
   };
   useEffect30(() => {
     if (!streaming) return;
     if (messageId) cache?.messages.set(messageId, true);
-    if (cache && messageId === "live-agent-message" && text) cache.live = { text, expanded: true };
+    if (cache && messageId === "live-agent-message" && text3) cache.live = { text: text3, expanded: true };
     setChoice((current) => current.messageId === messageId && current.expanded ? current : { messageId, expanded: true });
-  }, [cache, messageId, streaming, text]);
+  }, [cache, messageId, streaming, text3]);
   return [expanded, setExpanded];
 }
 
@@ -15172,8 +22114,8 @@ var EMPHASIS_PATTERN = /(^|[^\w])(?:\*[^*\n]+\*|_[^_\n]+_)(?=[^\w]|$)/;
 var STRIKETHROUGH_PATTERN = /~~[^~\n]+~~/;
 var INLINE_MATH_PATTERN = /(^|[^\\])\$(?!\s)(?:\\.|[^$\n\\])+\$(?!\d)/;
 var BLOCK_MATH_PATTERN = /(^|\n)\s*\$\$[^]*?\$\$\s*(?=\n|$)/;
-function hasLikelyMarkdownSyntax(text) {
-  const trimmed = text.trim();
+function hasLikelyMarkdownSyntax(text3) {
+  const trimmed = text3.trim();
   if (!trimmed) {
     return false;
   }
@@ -15205,63 +22147,63 @@ function basenameFromAssetPath(value) {
   const segments = normalized.split(/[\\/]/).filter(Boolean);
   return segments.at(-1) ?? normalized;
 }
-function tokenizeUserMessageText(text) {
-  if (!text) {
+function tokenizeUserMessageText(text3) {
+  if (!text3) {
     return [];
   }
   const matcher = /\[(PHOTO|FILE)\s+([^\]]+)\]/g;
   const segments = [];
   let cursor = 0;
-  let index = 0;
-  for (const match of text.matchAll(matcher)) {
+  let index2 = 0;
+  for (const match of text3.matchAll(matcher)) {
     const start = match.index ?? 0;
     if (start > cursor) {
       segments.push({
         type: "text",
-        key: `text-${index}`,
-        text: text.slice(cursor, start)
+        key: `text-${index2}`,
+        text: text3.slice(cursor, start)
       });
-      index += 1;
+      index2 += 1;
     }
     const kind = match[1];
     const path = match[2]?.trim() ?? "";
     if (kind === "PHOTO" && path) {
-      segments.push({ type: "photo", key: `photo-${index}`, path });
+      segments.push({ type: "photo", key: `photo-${index2}`, path });
     } else if (kind === "FILE" && path) {
-      segments.push({ type: "file", key: `file-${index}`, path });
+      segments.push({ type: "file", key: `file-${index2}`, path });
     } else {
       segments.push({
         type: "text",
-        key: `text-${index}`,
+        key: `text-${index2}`,
         text: match[0]
       });
     }
-    index += 1;
+    index2 += 1;
     cursor = start + match[0].length;
   }
-  if (cursor < text.length) {
+  if (cursor < text3.length) {
     segments.push({
       type: "text",
-      key: `text-${index}`,
-      text: text.slice(cursor)
+      key: `text-${index2}`,
+      text: text3.slice(cursor)
     });
   }
   return segments;
 }
-function GraphChatLinkifiedPlainText({ text }) {
+function GraphChatLinkifiedPlainText({ text: text3 }) {
   const { locale: i18nLocale } = useI18n();
   const parts = [];
   let cursor = 0;
-  for (const match of text.matchAll(PLAIN_URL_PATTERN)) {
+  for (const match of text3.matchAll(PLAIN_URL_PATTERN)) {
     const rawMatch = match[0];
-    const index = match.index ?? 0;
+    const index2 = match.index ?? 0;
     const trailingPunctuation = rawMatch.match(TRAILING_URL_PUNCTUATION_PATTERN)?.[0] ?? "";
     const urlText = trailingPunctuation ? rawMatch.slice(0, -trailingPunctuation.length) : rawMatch;
     if (!urlText) {
       continue;
     }
-    if (index > cursor) {
-      parts.push(text.slice(cursor, index));
+    if (index2 > cursor) {
+      parts.push(text3.slice(cursor, index2));
     }
     parts.push(
       /* @__PURE__ */ jsx61(
@@ -15273,18 +22215,18 @@ function GraphChatLinkifiedPlainText({ text }) {
           className: "thread-inline-link",
           children: urlText
         },
-        `${index}-${urlText}`
+        `${index2}-${urlText}`
       )
     );
     if (trailingPunctuation) {
       parts.push(trailingPunctuation);
     }
-    cursor = index + rawMatch.length;
+    cursor = index2 + rawMatch.length;
   }
-  if (cursor < text.length) {
-    parts.push(text.slice(cursor));
+  if (cursor < text3.length) {
+    parts.push(text3.slice(cursor));
   }
-  return /* @__PURE__ */ jsx61(Fragment21, { children: parts.length > 0 ? parts : text });
+  return /* @__PURE__ */ jsx61(Fragment21, { children: parts.length > 0 ? parts : text3 });
 }
 function captureToggleAnchor(root, expanded, message, toggle, onBeforeResize) {
   const element = expanded ? toggle ?? message : message;
@@ -15306,7 +22248,7 @@ function restoreToggleAnchor(anchor, hold) {
 var GraphChatMarkdownAwareBody = memo3(
   function GraphChatMarkdownAwareBody2({
     messageId,
-    text,
+    text: text3,
     scrollRootRef,
     streaming = false,
     containerClassName = "",
@@ -15322,12 +22264,16 @@ var GraphChatMarkdownAwareBody = memo3(
     const messageRef = useRef31(null);
     const toggleRef = useRef31(null);
     const scrollAnchorRef = useRef31(null);
-    const [expanded, setExpanded] = useMessageExpansion(messageId, text, streaming);
-    const shouldRenderMarkdown = hasLikelyMarkdownSyntax(text) || /\\\(|\\\[/.test(text) || Boolean(resolveWorkspacePath && hasWorkspacePathSyntax(text));
-    const isLargeText = !streaming && text.length > LARGE_MESSAGE_PREVIEW_CHARS;
-    const displayText = isLargeText && !expanded ? `${text.slice(0, LARGE_MESSAGE_PREVIEW_CHARS).trimEnd()}
+    const [expanded, setExpanded] = useMessageExpansion(messageId, text3, streaming);
+    const shouldRenderMarkdown = hasLikelyMarkdownSyntax(text3) || /\\\(|\\\[/.test(text3) || Boolean(resolveWorkspacePath && hasWorkspacePathSyntax(text3));
+    const preview = useMemo13(
+      () => !streaming && text3.length > LARGE_MESSAGE_PREVIEW_CHARS ? messagePreview(text3, LARGE_MESSAGE_PREVIEW_CHARS) : text3,
+      [text3, streaming]
+    );
+    const isLargeText = preview.length < text3.length;
+    const displayText = isLargeText && !expanded ? `${preview}
 
-...` : text;
+...` : text3;
     const [isActivated, setIsActivated] = useState41(
       streaming || typeof IntersectionObserver === "undefined"
     );
@@ -15342,10 +22288,10 @@ var GraphChatMarkdownAwareBody = memo3(
       return anchor ? restoreToggleAnchor(anchor, hold) : void 0;
     }, [expanded]);
     useLayoutEffect14(() => {
-      const node = messageRef.current;
-      if (isActivated || !node) return;
+      const node2 = messageRef.current;
+      if (isActivated || !node2) return;
       const root = scrollRootRef.current;
-      const box = node.getBoundingClientRect();
+      const box = node2.getBoundingClientRect();
       const view = root ? root.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
       const height = view.bottom - view.top || window.innerHeight;
       const end = root ? view.top - root.scrollTop + root.scrollHeight : document.documentElement.scrollHeight;
@@ -15415,7 +22361,7 @@ var GraphChatMarkdownAwareBody = memo3(
 var GraphChatAgentMessageBody = memo3(
   function GraphChatAgentMessageBody2({
     messageId,
-    text,
+    text: text3,
     scrollRootRef,
     streaming = false,
     onBeforeResize,
@@ -15429,7 +22375,7 @@ var GraphChatAgentMessageBody = memo3(
       GraphChatMarkdownAwareBody,
       {
         messageId,
-        text,
+        text: text3,
         scrollRootRef,
         streaming,
         containerClassName: "thread-graph-message-prose",
@@ -15445,7 +22391,7 @@ var GraphChatAgentMessageBody = memo3(
 var GraphChatUserMessageBody = memo3(
   function GraphChatUserMessageBody2({
     threadId,
-    text,
+    text: text3,
     attachmentPreviewUrls,
     getImageAssetUrl,
     onOpenWorkspaceFile,
@@ -15454,8 +22400,8 @@ var GraphChatUserMessageBody = memo3(
     onBeforeResize
   }) {
     const { locale: i18nLocale } = useI18n();
-    const allSegments = useMemo13(() => tokenizeUserMessageText(text), [text]);
-    const [expanded, setExpanded] = useMessageExpansion(messageId, text, false);
+    const allSegments = useMemo13(() => tokenizeUserMessageText(text3), [text3]);
+    const [expanded, setExpanded] = useMessageExpansion(messageId, text3, false);
     const messageRef = useRef31(null);
     const toggleRef = useRef31(null);
     const scrollAnchor = useRef31(null);
@@ -15538,14 +22484,14 @@ var GraphChatUserMessageBody = memo3(
 var WAKE_HEADER = "[Pockymoe wake: the delegates you registered a wake for have settled]\n";
 var WAKE_FOOTER = "\n\nVerify results before acting on them. Full transcripts:";
 function delegateWakeMessages(turn, context) {
-  const text = turn.items.find((item) => item.kind === "userMessage" && item.peerWork)?.text ?? "";
+  const text3 = turn.items.find((item) => item.kind === "userMessage" && item.peerWork)?.text ?? "";
   const reports = /* @__PURE__ */ new Map();
-  if (text.startsWith(WAKE_HEADER)) {
-    const footer = text.lastIndexOf(WAKE_FOOTER);
-    const body = text.slice(WAKE_HEADER.length, footer < 0 ? void 0 : footer);
+  if (text3.startsWith(WAKE_HEADER)) {
+    const footer = text3.lastIndexOf(WAKE_FOOTER);
+    const body = text3.slice(WAKE_HEADER.length, footer < 0 ? void 0 : footer);
     const entries = [...body.matchAll(/^- .+ \(([0-9a-f-]{36})\): ([^\n]*)$/gmi)];
-    for (const [index, entry] of entries.entries()) {
-      const block = body.slice(entry.index + entry[0].length, entries[index + 1]?.index);
+    for (const [index2, entry] of entries.entries()) {
+      const block = body.slice(entry.index + entry[0].length, entries[index2 + 1]?.index);
       const marker = "\n  closing message: ";
       const start = block.indexOf(marker);
       reports.set(entry[1], {
@@ -15623,12 +22569,12 @@ function markSearchHits(root, query, onFound, attempt = 0) {
   if (!needle || !registry || typeof Highlight === "undefined") return;
   const ranges = [];
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    const text = node.textContent?.toLocaleLowerCase() ?? "";
-    for (let index = text.indexOf(needle); index >= 0; index = text.indexOf(needle, index + needle.length)) {
+  for (let node2 = walker.nextNode(); node2; node2 = walker.nextNode()) {
+    const text3 = node2.textContent?.toLocaleLowerCase() ?? "";
+    for (let index2 = text3.indexOf(needle); index2 >= 0; index2 = text3.indexOf(needle, index2 + needle.length)) {
       const range = document.createRange();
-      range.setStart(node, index);
-      range.setEnd(node, index + needle.length);
+      range.setStart(node2, index2);
+      range.setEnd(node2, index2 + needle.length);
       ranges.push(range);
     }
   }
@@ -15657,11 +22603,11 @@ function peerWorkForTurn(turn) {
 }
 function groupPeerWorkTurns(turns) {
   const groups = [];
-  for (const [index, turn] of turns.entries()) {
+  for (const [index2, turn] of turns.entries()) {
     const context = peerWorkForTurn(turn);
     const parent = groups.at(-1);
     if (context && parent?.turn.id === context.taskTurnId) parent.continuations.push(turn);
-    else groups.push({ turn, continuations: [], index });
+    else groups.push({ turn, continuations: [], index: index2 });
   }
   return groups;
 }
@@ -15768,8 +22714,8 @@ function failureMessage(error) {
   }
   return error.trim();
 }
-function echoesFailure(error, text) {
-  const reply = text.trim();
+function echoesFailure(error, text3) {
+  const reply = text3.trim();
   return reply.length >= 8 && (error.includes(reply) || failureMessage(error).includes(reply));
 }
 
@@ -15791,7 +22737,7 @@ function MessageSenderMark({ sender }) {
   const name = displayName(sender);
   const initial = [...name][0]?.toUpperCase() ?? "?";
   const [open, setOpen] = useState43(false);
-  const [position, setPosition] = useState43(null);
+  const [position2, setPosition] = useState43(null);
   const button = useRef32(null);
   const card = useRef32(null);
   const style = { "--sender-hue": String(senderHue(sender.userId)) };
@@ -15854,7 +22800,7 @@ function MessageSenderMark({ sender }) {
           role: "dialog",
           "aria-label": label,
           className: "thread-message-sender-card",
-          style: { ...style, left: position?.left ?? -9999, top: position?.top ?? -9999, maxWidth: CARD_WIDTH },
+          style: { ...style, left: position2?.left ?? -9999, top: position2?.top ?? -9999, maxWidth: CARD_WIDTH },
           children: [
             /* @__PURE__ */ jsxs55("div", { className: "thread-message-sender-card-head", children: [
               /* @__PURE__ */ jsx63("span", { className: "thread-message-sender-avatar", "aria-hidden": "true", children: initial }),
@@ -15875,13 +22821,13 @@ import { jsx as jsx64, jsxs as jsxs56 } from "react/jsx-runtime";
 var SIDE_ACTIONS_WIDTH = 132;
 function GraphChatRunningDots() {
   const { locale: i18nLocale } = useI18n();
-  return /* @__PURE__ */ jsx64("span", { className: "ml-1.5 inline-flex items-center gap-1", "aria-hidden": "true", children: [0, 1, 2].map((index) => /* @__PURE__ */ jsx64(
+  return /* @__PURE__ */ jsx64("span", { className: "ml-1.5 inline-flex items-center gap-1", "aria-hidden": "true", children: [0, 1, 2].map((index2) => /* @__PURE__ */ jsx64(
     "span",
     {
       className: "h-1.5 w-1.5 animate-pulse rounded-full bg-sky-200/90",
-      style: { animationDelay: `${index * 180}ms` }
+      style: { animationDelay: `${index2 * 180}ms` }
     },
-    index
+    index2
   )) });
 }
 function GraphChatMessageStatusBadge({
@@ -16052,14 +22998,14 @@ var RESUME_PREFIX = "The Supervisor was restarted for device maintenance, interr
 var UUID = /\b([0-9a-f]{8})-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi;
 var LOCAL_SENDER = /^thread ([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
 var ThreadLinkContext = createContext12({});
-function shortIds(text) {
-  return text.replace(UUID, "$1");
+function shortIds(text3) {
+  return text3.replace(UUID, "$1");
 }
-function parsePromptEnvelope(text) {
-  if (text.startsWith(RESUME_PREFIX)) return { type: "notice", notice: "resume", preview: "", body: text };
-  const newline = text.indexOf("\n");
-  const header = (newline < 0 ? text : text.slice(0, newline)).trim();
-  const rest = newline < 0 ? "" : text.slice(newline + 1);
+function parsePromptEnvelope(text3) {
+  if (text3.startsWith(RESUME_PREFIX)) return { type: "notice", notice: "resume", preview: "", body: text3 };
+  const newline = text3.indexOf("\n");
+  const header = (newline < 0 ? text3 : text3.slice(0, newline)).trim();
+  const rest = newline < 0 ? "" : text3.slice(newline + 1);
   if (!header.startsWith("[Pockymoe ") || !header.endsWith("]")) return null;
   const inner = header.slice("[Pockymoe ".length, -1);
   if (inner.startsWith("inbox reminder")) {
@@ -16192,13 +23138,13 @@ function isGraphChatRunningStatus(status) {
 function GraphChatRunningDots2({ tone = "amber" }) {
   const { locale: i18nLocale } = useI18n();
   const dotClassName = tone === "sky" ? "bg-sky-300/90" : "bg-amber-200/90";
-  return /* @__PURE__ */ jsx67("span", { className: "ml-1.5 inline-flex items-center gap-1", "aria-hidden": "true", children: [0, 1, 2].map((index) => /* @__PURE__ */ jsx67(
+  return /* @__PURE__ */ jsx67("span", { className: "ml-1.5 inline-flex items-center gap-1", "aria-hidden": "true", children: [0, 1, 2].map((index2) => /* @__PURE__ */ jsx67(
     "span",
     {
       className: `h-1.5 w-1.5 animate-pulse rounded-full ${dotClassName}`,
-      style: { animationDelay: `${index * 180}ms` }
+      style: { animationDelay: `${index2 * 180}ms` }
     },
-    index
+    index2
   )) });
 }
 var GraphChatCompactMessageItem = memo4(
@@ -16217,7 +23163,7 @@ var GraphChatCompactMessageItem = memo4(
     const [reasoningOpen, setReasoningOpen] = useState46(false);
     const failure = useTurnFailure(item.id);
     const added = useAddedPrompt(item.id) && item.kind === "userMessage";
-    const { presentation, text, showingOriginal, showOriginal } = useMessagePresentation({ item, streaming });
+    const { presentation, text: text3, showingOriginal, showOriginal } = useMessagePresentation({ item, streaming });
     const reasoningItems = item.kind === "agentMessage" ? item.reasoningItems ?? [] : [];
     const reasoningText = reasoningItems.map((entry) => entry.text.trim()).filter(Boolean).join("\n\n");
     const queuedLikeStatus = item.kind === "userMessage" && (item.status === "Steering" || item.status === "Accepted" || item.status === "Awaiting response");
@@ -16226,7 +23172,7 @@ var GraphChatCompactMessageItem = memo4(
       setReasoningOpen((value) => !value);
     }
     const copyLabel = item.kind === "agentMessage" ? translate("chat.agentReply") : "prompt";
-    const copyButton = /* @__PURE__ */ jsx67(CopyButton, { value: text, label: translate("chat.copy_6b0f10", { value1: copyLabel }), className: "thread-graph-message-copy" });
+    const copyButton = /* @__PURE__ */ jsx67(CopyButton, { value: text3, label: translate("chat.copy_6b0f10", { value1: copyLabel }), className: "thread-graph-message-copy" });
     const hasRunningReasoning = reasoningItems.some(
       (entry) => isGraphChatRunningStatus(entry.status)
     );
@@ -16328,7 +23274,7 @@ var GraphChatCompactMessageItem = memo4(
             workspaceRootPath: adapter?.workspaceRootPath,
             resolveWorkspacePath: adapter?.resolveWorkspacePath,
             messageId: item.id,
-            text,
+            text: text3,
             scrollRootRef,
             streaming,
             ...onBeforeMessageResize ? { onBeforeResize: onBeforeMessageResize } : {},
@@ -16574,7 +23520,7 @@ function PendingRequestCard({
         children: [
           /* @__PURE__ */ jsx68("p", { className: "timeline-meta-text text-xs uppercase tracking-[0.2em]", children: question.header }),
           /* @__PURE__ */ jsx68("p", { className: "timeline-primary-text mt-1 text-[13px] leading-5 sm:text-sm", children: question.question }),
-          (request.kind === "planDecision" || isPermissionRequest) && question.options && question.options.length > 0 ? /* @__PURE__ */ jsx68("div", { className: "mt-3 flex flex-wrap gap-2", children: question.options.map((option, index) => {
+          (request.kind === "planDecision" || isPermissionRequest) && question.options && question.options.length > 0 ? /* @__PURE__ */ jsx68("div", { className: "mt-3 flex flex-wrap gap-2", children: question.options.map((option, index2) => {
             const presentation = getOptionPresentation(option.label);
             const isImplement = presentation.displayLabel.toLowerCase() === "implement";
             const isReject = /reject|cancel/i.test(
@@ -16586,7 +23532,7 @@ function PendingRequestCard({
                 type: "button",
                 disabled: busy,
                 onClick: () => respondWithSingleAnswer(option.label),
-                className: `relative rounded-2xl border px-2.5 py-1.5 pr-6 text-[12px] leading-4 transition sm:text-[13px] ${isReject ? "border-stone-700 text-stone-300 hover:bg-stone-800" : index === 0 ? "ui-action-info" : "border-stone-700 text-stone-200 hover:bg-stone-800"} disabled:cursor-not-allowed disabled:opacity-60`,
+                className: `relative rounded-2xl border px-2.5 py-1.5 pr-6 text-[12px] leading-4 transition sm:text-[13px] ${isReject ? "border-stone-700 text-stone-300 hover:bg-stone-800" : index2 === 0 ? "ui-action-info" : "border-stone-700 text-stone-200 hover:bg-stone-800"} disabled:cursor-not-allowed disabled:opacity-60`,
                 title: option.description,
                 children: [
                   presentation.recommended ? /* @__PURE__ */ jsx68(
@@ -16715,7 +23661,7 @@ function AnsweredRequestNote({
   const { locale: i18nLocale } = useI18n();
   return /* @__PURE__ */ jsxs60("div", { className: "timeline-note-card w-full rounded-2xl border px-3 py-2.5", children: [
     /* @__PURE__ */ jsx68("p", { className: "timeline-meta-text text-[11px] uppercase tracking-[0.2em]", children: note.title }),
-    /* @__PURE__ */ jsx68("div", { className: "mt-1 space-y-1", children: note.summaryLines.map((line, index) => /* @__PURE__ */ jsxs60(
+    /* @__PURE__ */ jsx68("div", { className: "mt-1 space-y-1", children: note.summaryLines.map((line, index2) => /* @__PURE__ */ jsxs60(
       "p",
       {
         className: "timeline-primary-text text-[13px] leading-5",
@@ -16725,7 +23671,7 @@ function AnsweredRequestNote({
           line
         ]
       },
-      `${note.id}-${index}`
+      `${note.id}-${index2}`
     )) })
   ] });
 }
@@ -17166,8 +24112,8 @@ function formatTrailingPathLabel(label, maxLength = 42) {
   if (segments.length > 1) {
     const keptSegments = [];
     let currentLength = suffix.length + 4;
-    for (let index = segments.length - 1; index >= 0; index -= 1) {
-      const candidate = segments[index];
+    for (let index2 = segments.length - 1; index2 >= 0; index2 -= 1) {
+      const candidate = segments[index2];
       const nextLength = currentLength + candidate.length + (keptSegments.length > 0 ? 1 : 0);
       if (keptSegments.length > 0 && nextLength > maxLength) {
         break;
@@ -17208,24 +24154,24 @@ function RunningDots2({
 }) {
   const { locale: i18nLocale } = useI18n();
   const dotClassName = tone === "sky" ? "bg-sky-300/90" : "bg-amber-200/90";
-  return /* @__PURE__ */ jsx72("span", { className: "ml-1.5 inline-flex items-center gap-1", "aria-hidden": "true", children: [0, 1, 2].map((index) => /* @__PURE__ */ jsx72(
+  return /* @__PURE__ */ jsx72("span", { className: "ml-1.5 inline-flex items-center gap-1", "aria-hidden": "true", children: [0, 1, 2].map((index2) => /* @__PURE__ */ jsx72(
     "span",
     {
       className: `h-1.5 w-1.5 animate-pulse rounded-full ${dotClassName}`,
-      style: { animationDelay: `${index * 180}ms` }
+      style: { animationDelay: `${index2 * 180}ms` }
     },
-    index
+    index2
   )) });
 }
-function normalizeLines(text) {
-  const lines = text.replace(/\r\n/g, "\n").split("\n");
+function normalizeLines(text3) {
+  const lines = text3.replace(/\r\n/g, "\n").split("\n");
   while (lines.length > 1 && lines.at(-1)?.trim() === "") {
     lines.pop();
   }
   return lines;
 }
-function summarizeInlinePreviewText(text) {
-  const lines = normalizeLines(text);
+function summarizeInlinePreviewText(text3) {
+  const lines = normalizeLines(text3);
   if (lines.length === 1) {
     return {
       firstLine: lines[0] ?? "",
@@ -17937,11 +24883,11 @@ function GraphChatLivePlanCard({ livePlan }) {
       ] })
     ] }),
     livePlan.explanation ? /* @__PURE__ */ jsx73("p", { className: "tlog-plan-note", children: livePlan.explanation }) : null,
-    /* @__PURE__ */ jsx73("ol", { className: "tlog-plan-list", children: steps.map((step, index) => /* @__PURE__ */ jsxs64("li", { className: "thread-graph-plan-step tlog-plan-step", "data-status": step.normalized, children: [
+    /* @__PURE__ */ jsx73("ol", { className: "tlog-plan-list", children: steps.map((step, index2) => /* @__PURE__ */ jsxs64("li", { className: "thread-graph-plan-step tlog-plan-step", "data-status": step.normalized, children: [
       /* @__PURE__ */ jsx73("span", { className: "tlog-plan-mark", "aria-hidden": "true" }),
       /* @__PURE__ */ jsx73("span", { className: "thread-graph-plan-step-text", children: step.step }),
       /* @__PURE__ */ jsx73("span", { className: "sr-only", children: /* @__PURE__ */ jsx73(GraphChatPlanStepStatusLabel, { status: step.status }) })
-    ] }, `${livePlan.turnId}-${index}`)) })
+    ] }, `${livePlan.turnId}-${index2}`)) })
   ] });
 }
 function GraphChatPlanStepStatusLabel({ status }) {
@@ -18041,12 +24987,12 @@ function animates() {
 }
 function Collapse({ open, children }) {
   const [phase, setPhase] = useState49(open ? "open" : "closed");
-  const previous = useRef34(open);
+  const previous2 = useRef34(open);
   const last = useRef34(children);
   if (open) last.current = children;
   useEffect35(() => {
-    if (previous.current === open) return;
-    previous.current = open;
+    if (previous2.current === open) return;
+    previous2.current = open;
     if (!animates()) {
       setPhase(open ? "open" : "closed");
       return;
@@ -18155,10 +25101,10 @@ function TokenSpeedDetails({ speed, value, live = false }) {
             /* @__PURE__ */ jsx76("span", { style: { marginLeft: "auto", fontVariantNumeric: "tabular-nums", fontWeight: 600 }, children: rate(value) })
           ] }),
           /* @__PURE__ */ jsx76("div", { className: "thread-usage-details-total", style: { paddingBottom: 8, marginBottom: split ? 8 : 0, fontSize: 12, opacity: 0.85 }, children: translate("chat.speedCombinedBasis", { tokens: formatCompactTokenCount(speed.outputTokens), time: seconds(modelMs) }) }),
-          split ? /* @__PURE__ */ jsx76("div", { style: { display: "grid", gridTemplateColumns: "16px auto minmax(0, 1fr)", gap: "6px 8px", alignItems: "center", fontVariantNumeric: "tabular-nums" }, children: rows.map(({ icon: Icon, label, value: text }) => /* @__PURE__ */ jsxs66("span", { style: { display: "contents" }, children: [
+          split ? /* @__PURE__ */ jsx76("div", { style: { display: "grid", gridTemplateColumns: "16px auto minmax(0, 1fr)", gap: "6px 8px", alignItems: "center", fontVariantNumeric: "tabular-nums" }, children: rows.map(({ icon: Icon, label, value: text3 }) => /* @__PURE__ */ jsxs66("span", { style: { display: "contents" }, children: [
             /* @__PURE__ */ jsx76(Icon, { size: 14, "aria-hidden": "true" }),
             /* @__PURE__ */ jsx76("span", { children: label }),
-            /* @__PURE__ */ jsx76("span", { style: { textAlign: "right" }, children: text })
+            /* @__PURE__ */ jsx76("span", { style: { textAlign: "right" }, children: text3 })
           ] }, label)) }) : null,
           /* @__PURE__ */ jsxs66("p", { style: { margin: "8px 0 0", fontSize: 11, lineHeight: 1.45, opacity: 0.75 }, children: [
             live ? `${translate("chat.speedLiveNote")} ` : null,
@@ -18181,8 +25127,8 @@ function shortModelName(model) {
   const words = [];
   for (const part of parts.slice(1)) {
     if (/^\d{8}$/.test(part)) continue;
-    const previous = words.at(-1);
-    if (previous && /^\d+(\.\d+)*$/.test(part) && /^\d+(\.\d+)*$/.test(previous)) words[words.length - 1] = `${previous}.${part}`;
+    const previous2 = words.at(-1);
+    if (previous2 && /^\d+(\.\d+)*$/.test(part) && /^\d+(\.\d+)*$/.test(previous2)) words[words.length - 1] = `${previous2}.${part}`;
     else words.push(part);
   }
   return words.length ? words.join(" ") : model;
@@ -18238,10 +25184,10 @@ function TurnModels({ turn }) {
             /* @__PURE__ */ jsx77(Repeat2, { size: 14, "aria-hidden": "true" }),
             /* @__PURE__ */ jsx77("span", { children: translate("chat.turnModelsTitle") })
           ] }),
-          /* @__PURE__ */ jsx77("ol", { style: { display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "4px 12px", margin: 0, padding: 0, listStyle: "none", fontVariantNumeric: "tabular-nums" }, children: runs.map((run, index) => /* @__PURE__ */ jsxs67("li", { style: { display: "contents" }, children: [
+          /* @__PURE__ */ jsx77("ol", { style: { display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: "4px 12px", margin: 0, padding: 0, listStyle: "none", fontVariantNumeric: "tabular-nums" }, children: runs.map((run, index2) => /* @__PURE__ */ jsxs67("li", { style: { display: "contents" }, children: [
             /* @__PURE__ */ jsx77("span", { title: run.model, style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }, children: shortModelName(run.model) }),
             /* @__PURE__ */ jsx77("span", { style: { textAlign: "right" }, children: translate("chat.speedRequestsValue", { count: run.calls }) })
-          ] }, `${index}-${run.model}`)) }),
+          ] }, `${index2}-${run.model}`)) }),
           /* @__PURE__ */ jsx77("p", { style: { margin: "8px 0 0", fontSize: 11, lineHeight: 1.45, opacity: 0.75 }, children: translate("chat.turnModelsNote") })
         ]
       }
@@ -18359,9 +25305,9 @@ function TurnHead({ turn, active, added, onBeforeResize }) {
 function isSubstantiveAnswer(item) {
   if (item.kind !== "agentMessage") return false;
   if (item.responsePhase === "final") return true;
-  const text = item.text.trim();
-  const length = Array.from(text).length;
-  return length >= 600 || length >= 300 && (/^#{1,6}[ \t]/m.test(text) && text.split(/\n\s*\n/).length >= 3 || text.split("\n").filter((line) => /^\|.*\|$/.test(line.trim())).length >= 3);
+  const text3 = item.text.trim();
+  const length = Array.from(text3).length;
+  return length >= 600 || length >= 300 && (/^#{1,6}[ \t]/m.test(text3) && text3.split(/\n\s*\n/).length >= 3 || text3.split("\n").filter((line) => /^\|.*\|$/.test(line.trim())).length >= 3);
 }
 function groupAnswerSections(entries, visibleAgentId) {
   const result = [];
@@ -18515,9 +25461,9 @@ function turnChangedFiles(turn, items) {
   const files = [];
   for (const item of items) {
     if (item.kind !== "fileChange" || logStatus(item.status) === "failed") continue;
-    item.text.split(/,\s+/).filter(Boolean).forEach((path, index) => {
-      const added = index === 0 ? item.addedLines ?? 0 : 0;
-      const removed = index === 0 ? item.removedLines ?? 0 : 0;
+    item.text.split(/,\s+/).filter(Boolean).forEach((path, index2) => {
+      const added = index2 === 0 ? item.addedLines ?? 0 : 0;
+      const removed = index2 === 0 ? item.removedLines ?? 0 : 0;
       const file = files.find((entry) => entry.path === path);
       if (file) {
         file.itemId = item.id;
@@ -18730,8 +25676,8 @@ function useItemDetail(item, enabled) {
       }
     }
     pending.then(
-      (text) => {
-        if (active) setState({ key, text });
+      (text3) => {
+        if (active) setState({ key, text: text3 });
       },
       (error) => {
         if (active) setState({ key, error: error instanceof Error ? error.message : translate("chat.unableToLoadFullToolCallDetails") });
@@ -18757,14 +25703,14 @@ function displayPath(path, root) {
   const base = root?.replace(/\\/g, "/").replace(/\/+$/, "");
   if (base && value.startsWith(`${base}/`)) return value.slice(base.length + 1);
   for (const marker of PATH_MARKERS) {
-    const index = value.indexOf(marker);
-    if (index >= 0) return value.slice(index + 1);
+    const index2 = value.indexOf(marker);
+    if (index2 >= 0) return value.slice(index2 + 1);
   }
   const segments = value.split("/").filter(Boolean);
   return segments.length > 3 ? `\u2026/${segments.slice(-3).join("/")}` : value;
 }
-function firstLine(text) {
-  const lines = text.replace(/\r\n/g, "\n").trim().split("\n");
+function firstLine(text3) {
+  const lines = text3.replace(/\r\n/g, "\n").trim().split("\n");
   return { line: lines[0] ?? "", more: lines.length > 1 };
 }
 function rowTitle(item, root) {
@@ -18794,24 +25740,24 @@ function rowTitle(item, root) {
 }
 var MAX_INLINE_CHARS = 16e3;
 var MAX_DIFF_LINES = 120;
-function clip(text) {
-  if (text.length <= MAX_INLINE_CHARS) return text;
-  return `${text.slice(0, MAX_INLINE_CHARS - 4e3)}
+function clip(text3) {
+  if (text3.length <= MAX_INLINE_CHARS) return text3;
+  return `${text3.slice(0, MAX_INLINE_CHARS - 4e3)}
 \u2026
-${text.slice(-4e3)}`;
+${text3.slice(-4e3)}`;
 }
-function diffForPath(text, path) {
-  const lines = text.replace(/\r\n/g, "\n").split("\n");
-  const starts = lines.flatMap((line, index) => line.startsWith("--- ") && lines[index + 1]?.startsWith("+++ ") ? [index] : []);
-  if (starts.length < 2) return text;
-  const kept = starts.flatMap((start, index) => {
+function diffForPath(text3, path) {
+  const lines = text3.replace(/\r\n/g, "\n").split("\n");
+  const starts = lines.flatMap((line, index2) => line.startsWith("--- ") && lines[index2 + 1]?.startsWith("+++ ") ? [index2] : []);
+  if (starts.length < 2) return text3;
+  const kept = starts.flatMap((start, index2) => {
     const target = lines[start + 1].slice(4).replace(/^b\//, "");
-    return target === path || target.endsWith(`/${path}`) || path.endsWith(`/${target}`) ? lines.slice(start, starts[index + 1] ?? lines.length) : [];
+    return target === path || target.endsWith(`/${path}`) || path.endsWith(`/${target}`) ? lines.slice(start, starts[index2 + 1] ?? lines.length) : [];
   });
-  return kept.length ? kept.join("\n") : text;
+  return kept.length ? kept.join("\n") : text3;
 }
-function inlineDiff(text) {
-  const lines = text.replace(/\r\n/g, "\n").split("\n");
+function inlineDiff(text3) {
+  const lines = text3.replace(/\r\n/g, "\n").split("\n");
   while (lines.length && !lines.at(-1).trim()) lines.pop();
   return { text: lines.slice(0, MAX_DIFF_LINES).join("\n"), hidden: Math.max(0, lines.length - MAX_DIFF_LINES) };
 }
@@ -18858,10 +25804,10 @@ function RowDetail({ item, title, path }) {
     ] });
   }
   if (detail.loading) return /* @__PURE__ */ jsx80("div", { className: "tlog-detail is-loading", role: "status", children: translate("chat.logLoading") });
-  const text = detail.text ?? "";
+  const text3 = detail.text ?? "";
   const viewTitle = item.kind === "fileChange" ? displayPath(path ?? title.full.split("\n")[0] ?? "", workspaceRoot) : title.text.replace(/ …$/, "");
-  if (item.kind === "fileChange" && /^@@ /m.test(text)) {
-    const whole2 = path ? diffForPath(text, path) : text;
+  if (item.kind === "fileChange" && /^@@ /m.test(text3)) {
+    const whole2 = path ? diffForPath(text3, path) : text3;
     const diff = inlineDiff(whole2);
     return /* @__PURE__ */ jsx80("div", { className: "tlog-detail is-diff", children: /* @__PURE__ */ jsx80(
       Viewable,
@@ -18885,11 +25831,11 @@ function RowDetail({ item, title, path }) {
       ] })
     ] });
   }
-  const output = text ? toolResultText(text) : "";
+  const output = text3 ? toolResultText(text3) : "";
   const clipped = clip(output);
   const whole = item.kind === "commandExecution" && title.full ? `$ ${title.full}
 
-${output}` : text || output;
+${output}` : text3 || output;
   return /* @__PURE__ */ jsxs70("div", { className: "tlog-detail", children: [
     command ? /* @__PURE__ */ jsx80("pre", { className: "tlog-command", children: command }) : null,
     textNote,
@@ -18904,8 +25850,8 @@ ${output}` : text || output;
     ) : command ? null : /* @__PURE__ */ jsx80("p", { className: "tlog-empty", children: translate("chat.logNoOutput") })
   ] });
 }
-function CopyCommand({ text }) {
-  return /* @__PURE__ */ jsx80(CopyButton, { value: text, label: translate("chat.logCopyCommand"), className: "tlog-copy" });
+function CopyCommand({ text: text3 }) {
+  return /* @__PURE__ */ jsx80(CopyButton, { value: text3, label: translate("chat.logCopyCommand"), className: "tlog-copy" });
 }
 var LogRow = memo6(function LogRow2({ item, defaultOpen = false, path }) {
   useI18n();
@@ -18962,34 +25908,34 @@ function ReadBatch({ items }) {
 }
 function rowBlocks(items) {
   const blocks = [];
-  let index = 0;
-  while (index < items.length) {
-    const item = items[index];
+  let index2 = 0;
+  while (index2 < items.length) {
+    const item = items[index2];
     if (item.kind === "fileRead") {
-      let end = index;
+      let end = index2;
       while (end < items.length && items[end].kind === "fileRead") end += 1;
-      if (end - index >= 3) {
-        blocks.push({ kind: "reads", items: items.slice(index, end) });
-        index = end;
+      if (end - index2 >= 3) {
+        blocks.push({ kind: "reads", items: items.slice(index2, end) });
+        index2 = end;
         continue;
       }
     }
     blocks.push({ kind: "item", item });
-    index += 1;
+    index2 += 1;
   }
   return blocks;
 }
 function Parts({ parts }) {
-  return /* @__PURE__ */ jsx80(Fragment30, { children: parts.map((part, index) => {
-    const previous = parts[index - 1];
+  return /* @__PURE__ */ jsx80(Fragment30, { children: parts.map((part, index2) => {
+    const previous2 = parts[index2 - 1];
     if (countedPart(part)) {
       return /* @__PURE__ */ jsxs70("span", { className: "tlog-part is-count", children: [
-        previous && !countedPart(previous) ? /* @__PURE__ */ jsx80("span", { className: "tlog-sep", "aria-hidden": "true", children: "\xB7" }) : null,
+        previous2 && !countedPart(previous2) ? /* @__PURE__ */ jsx80("span", { className: "tlog-sep", "aria-hidden": "true", children: "\xB7" }) : null,
         /* @__PURE__ */ jsx80(ActivityCount, { part })
       ] }, part.key);
     }
     return /* @__PURE__ */ jsxs70("span", { className: `tlog-part${part.tone ? ` is-${part.tone}` : ""}`, children: [
-      index > 0 && !part.tone?.match(/add|remove/) ? /* @__PURE__ */ jsx80("span", { className: "tlog-sep", "aria-hidden": "true", children: "\xB7" }) : index > 0 ? " " : null,
+      index2 > 0 && !part.tone?.match(/add|remove/) ? /* @__PURE__ */ jsx80("span", { className: "tlog-sep", "aria-hidden": "true", children: "\xB7" }) : index2 > 0 ? " " : null,
       part.text
     ] }, part.key);
   }) });
@@ -19520,8 +26466,8 @@ var ThreadTurnRow = memo7(function ThreadTurnRow2({
     for (const item of scopeUsageItems({ id: turn.id, items: mergedItems, usageByScope: turn.usageByScope })) {
       const usage = usageEvidence(item);
       if (usage?.scope !== "tool") continue;
-      const previous = tools.get(usage.scopeId);
-      if (!previous || Date.parse(usage.observedAt) >= Date.parse(previous.observedAt)) tools.set(usage.scopeId, usage);
+      const previous2 = tools.get(usage.scopeId);
+      if (!previous2 || Date.parse(usage.observedAt) >= Date.parse(previous2.observedAt)) tools.set(usage.scopeId, usage);
     }
     return prepareTurnItemsForRendering(mergedItems, activeForRendering).filter((item) => (showReasoningSummaries || item.kind !== "reasoning") && (!nestedPeerWork || item.kind !== "userMessage") && item.id !== omitAgentId && !(failedWith && item.kind === "agentMessage" && echoesFailure(failedWith, item.text)) && !(item.kind === "other" && !item.text?.trim() && !item.progress && usageEvidence(item))).map((item) => {
       const progress = progressEvidence(item).data;
@@ -19749,8 +26695,8 @@ var ThreadTurnRow = memo7(function ThreadTurnRow2({
   const currentOperation = useMemo16(() => {
     if (!activeForRendering) return null;
     const narration = visibleSummaryAgent ? mergedItems.findIndex((item) => item.id === visibleSummaryAgent.id) : -1;
-    const index = mergedItems.findLastIndex((item) => isLogItem(item) && item.kind !== "reasoning");
-    return index > narration ? mergedItems[index] : null;
+    const index2 = mergedItems.findLastIndex((item) => isLogItem(item) && item.kind !== "reasoning");
+    return index2 > narration ? mergedItems[index2] : null;
   }, [activeForRendering, mergedItems, visibleSummaryAgent]);
   const logEntries = leadingUserCount < 0 ? [] : groupedItems.slice(leadingUserCount);
   const finalAnswer = isTerminalTurnStatus(turn.status) && visibleSummaryAgent ? visibleSummaryAgent : null;
@@ -20007,12 +26953,12 @@ function TimelineHistoryEntries({
   const lastKey = blocks.at(-1)?.key;
   const lastRunKey = blocks.findLast((block) => block.kind === "run")?.key;
   const soleRun = openSoleRun && blocks.length === 1 && blocks[0].kind === "run";
-  return /* @__PURE__ */ jsx82(Fragment32, { children: blocks.map((block, index) => {
+  return /* @__PURE__ */ jsx82(Fragment32, { children: blocks.map((block, index2) => {
     if (block.kind === "item") {
       return isLogItem(block.item) ? /* @__PURE__ */ jsx82("div", { className: "tlog-single", children: /* @__PURE__ */ jsx82(LogRow, { item: block.item, defaultOpen: autoOpenLatestToolDetails && block.key === lastKey && opensDiff(block.item) }) }, block.key) : renderItem(block.item, block.key);
     }
     const live = autoOpenLatestToolDetails && block.key === lastKey;
-    const next = blocks[index + 1];
+    const next = blocks[index2 + 1];
     const opened = openRunBefore === null ? block.key === lastRunKey : openRunBefore !== void 0 && (next?.kind === "item" ? next.item.id === openRunBefore : block.key === lastRunKey && !blocks.some((other) => other.kind === "item" && other.item.id === openRunBefore));
     const expanded = expandedGroups[block.key] ?? expandedGroups[block.parentKey] ?? (live || opened || soleRun);
     return /* @__PURE__ */ jsx82(
@@ -20034,12 +26980,12 @@ function entryItems(entry) {
 }
 function foldedAnswerBlocks(sections, segments, finalId) {
   const blocks = [];
-  let previous = null;
+  let previous2 = null;
   let work = [];
   let workEntries = [];
   const gap = (before) => {
-    if (previous === null) return;
-    const stretch = stretchBetween(segments, previous, before) ?? stretchFromItems(work, before);
+    if (previous2 === null) return;
+    const stretch = stretchBetween(segments, previous2, before) ?? stretchFromItems(work, before);
     if (stretch) blocks.push({ kind: "gap", before, stretch, work: workEntries });
   };
   for (const entry of sections) {
@@ -20051,7 +26997,7 @@ function foldedAnswerBlocks(sections, segments, finalId) {
     gap(entry.item.id);
     if (entry.item.id === finalId) return blocks;
     blocks.push({ kind: "answer", entry });
-    previous = entry.item.id;
+    previous2 = entry.item.id;
     work = [];
     workEntries = [];
   }
@@ -20142,12 +27088,12 @@ function buildSyntheticLiveTurn(turnId, items) {
 
 // src/components/timeline/useDeferredHistoryDetail.ts
 import { useCallback as useCallback16, useEffect as useEffect39, useRef as useRef39, useState as useState57 } from "react";
-function inlineDetail(item, title, text) {
+function inlineDetail(item, title, text3) {
   return {
     id: item.id,
     kind: item.kind,
     title,
-    text
+    text: text3
   };
 }
 function useDeferredHistoryDetail({
@@ -20167,9 +27113,9 @@ function useDeferredHistoryDetail({
     detailCacheRef.current.clear();
     setExpandedText(null);
   }, [loadHistoryItemDetail]);
-  const openExpandedText = useCallback16((title, text, kind) => {
+  const openExpandedText = useCallback16((title, text3, kind) => {
     requestIdRef.current += 1;
-    setExpandedText({ title, text, ...kind ? { kind } : {} });
+    setExpandedText({ title, text: text3, ...kind ? { kind } : {} });
   }, []);
   const resolveDetail = useCallback16(
     (item, detail, useSelectionCallback) => {
@@ -20307,7 +27253,7 @@ function useChangeRevision(inputs) {
   const previousInputsRef = useRef40(null);
   const revisionRef = useRef40(0);
   const previousInputs = previousInputsRef.current;
-  const changed = previousInputs === null || previousInputs.length !== inputs.length || inputs.some((input, index) => !Object.is(input, previousInputs[index]));
+  const changed = previousInputs === null || previousInputs.length !== inputs.length || inputs.some((input, index2) => !Object.is(input, previousInputs[index2]));
   if (changed) {
     revisionRef.current += 1;
     previousInputsRef.current = inputs;
@@ -20667,8 +27613,8 @@ function useTimelineScroll({
   }, [contentRevision, isTailVisible, scrollToBottom, scrollRequestKey]);
   useEffect40(() => {
     const container = scrollContainerRef.current;
-    const content = scrollContentRef.current;
-    if (!container || !content || typeof ResizeObserver === "undefined") {
+    const content3 = scrollContentRef.current;
+    if (!container || !content3 || typeof ResizeObserver === "undefined") {
       return;
     }
     lastObservedScrollHeightRef.current = container.scrollHeight;
@@ -20695,7 +27641,7 @@ function useTimelineScroll({
         if (!userScrolledAwayFromTailRef.current) scrollToBottom();
       });
     });
-    observer.observe(content);
+    observer.observe(content3);
     let lastClientHeight = container.clientHeight;
     const viewportObserver = new ResizeObserver(() => {
       const nextClientHeight = container.clientHeight;
@@ -21011,8 +27957,8 @@ function ThreadTimelineComponent({
     preserveScrollPositionForResize();
     const frame = requestAnimationFrame(() => {
       const container = scrollContainerRef.current;
-      const turn = Array.from(container?.querySelectorAll("[data-turn-id]") ?? []).find((node) => node.dataset.turnId === searchTarget.turnId);
-      const message = Array.from(turn?.querySelectorAll("[data-message-id]") ?? []).find((node) => node.dataset.messageId === searchTarget.itemId);
+      const turn = Array.from(container?.querySelectorAll("[data-turn-id]") ?? []).find((node2) => node2.dataset.turnId === searchTarget.turnId);
+      const message = Array.from(turn?.querySelectorAll("[data-message-id]") ?? []).find((node2) => node2.dataset.messageId === searchTarget.itemId);
       const target = message ?? turn;
       if (!container || !target) return;
       lastSearchKeyRef.current = searchTarget.key;
@@ -21223,8 +28169,8 @@ function ThreadTimelineComponent({
     updateNavigationAvailability();
   }, [handleScroll, updateNavigationAvailability]);
   useEffect41(() => {
-    const previous = navigationResetRef.current;
-    if (previous.threadId === threadId && previous.scrollRequestKey === scrollRequestKey && previous.searchKey === searchTarget?.key) return;
+    const previous2 = navigationResetRef.current;
+    if (previous2.threadId === threadId && previous2.scrollRequestKey === scrollRequestKey && previous2.searchKey === searchTarget?.key) return;
     navigationResetRef.current = { threadId, scrollRequestKey, searchKey: searchTarget?.key };
     resetNavigation();
   }, [threadId, scrollRequestKey, searchTarget?.key, resetNavigation]);
@@ -22375,7 +29321,7 @@ function getVisibleTerminalText(hostNode) {
   if (!hostNode) {
     return "";
   }
-  const rows = Array.from(hostNode.querySelectorAll(".xterm-rows > div")).map((row) => row.textContent ?? "").filter((line, index, items) => line.length > 0 || index < items.length - 1);
+  const rows = Array.from(hostNode.querySelectorAll(".xterm-rows > div")).map((row) => row.textContent ?? "").filter((line, index2, items) => line.length > 0 || index2 < items.length - 1);
   return rows.join("\n").trimEnd();
 }
 
@@ -23058,7 +30004,7 @@ function TerminalMenu({
   children
 }) {
   const ref = useRef42(null);
-  const [position, setPosition] = useState60(null);
+  const [position2, setPosition] = useState60(null);
   const close = useRef42(onClose);
   close.current = onClose;
   useLayoutEffect17(() => {
@@ -23099,14 +30045,14 @@ function TerminalMenu({
       role: "menu",
       "aria-label": label,
       className: "terminal-menu",
-      style: position ? { left: position.left, top: position.top } : { visibility: "hidden" },
+      style: position2 ? { left: position2.left, top: position2.top } : { visibility: "hidden" },
       onKeyDown: (event) => {
         if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
         const items = [...ref.current?.querySelectorAll('[role^="menuitem"]:not(:disabled)') ?? []];
         if (!items.length) return;
         event.preventDefault();
-        const index = items.indexOf(document.activeElement);
-        items[(index + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length]?.focus();
+        const index2 = items.indexOf(document.activeElement);
+        items[(index2 + (event.key === "ArrowDown" ? 1 : -1) + items.length) % items.length]?.focus();
       },
       children
     }
@@ -23123,15 +30069,15 @@ function bufferText(terminal) {
   for (let row = 0; row < buffer.length; row += 1) {
     const line = buffer.getLine(row);
     if (!line) continue;
-    const text = line.translateToString(true);
-    if (line.isWrapped && lines.length) lines[lines.length - 1] += text;
-    else lines.push(text);
+    const text3 = line.translateToString(true);
+    if (line.isWrapped && lines.length) lines[lines.length - 1] += text3;
+    else lines.push(text3);
     if (row === buffer.viewportY) topLine = lines.length - 1;
   }
   while (lines.length > 1 && lines[lines.length - 1] === "") lines.pop();
   return { lines, topLine: Math.min(topLine, lines.length - 1) };
 }
-function TerminalSelection({ terminal, host, point, onCopy, onClose }) {
+function TerminalSelection({ terminal, host, point: point3, onCopy, onClose }) {
   useI18n();
   const { lines, topLine } = useMemo18(() => bufferText(terminal), [terminal]);
   const metrics = useMemo18(() => {
@@ -23143,18 +30089,18 @@ function TerminalSelection({ terminal, host, point, onCopy, onClose }) {
   const body = useRef43(null);
   const [selected, setSelected] = useState61("");
   useLayoutEffect18(() => {
-    const node = body.current;
-    const top = node?.children[topLine];
-    if (node && top) node.scrollTop = top.offsetTop - (metrics?.top ?? 0);
-    if (!point || !node) return;
-    const range = document.caretRangeFromPoint?.(point.x, point.y);
-    if (!range || !node.contains(range.startContainer)) return;
+    const node2 = body.current;
+    const top = node2?.children[topLine];
+    if (node2 && top) node2.scrollTop = top.offsetTop - (metrics?.top ?? 0);
+    if (!point3 || !node2) return;
+    const range = document.caretRangeFromPoint?.(point3.x, point3.y);
+    if (!range || !node2.contains(range.startContainer)) return;
     const selection = window.getSelection();
     selection?.removeAllRanges();
     selection?.addRange(range);
     selection?.modify?.("move", "backward", "word");
     selection?.modify?.("extend", "forward", "word");
-  }, [metrics, point, topLine]);
+  }, [metrics, point3, topLine]);
   useEffect44(() => {
     const update = () => {
       const selection = window.getSelection();
@@ -23210,7 +30156,7 @@ function TerminalSelection({ terminal, host, point, onCopy, onClose }) {
             ref: body,
             className: "terminal-selection-text",
             style: metrics ? { lineHeight: `${metrics.rowHeight}px`, paddingTop: metrics.top, paddingLeft: metrics.left } : void 0,
-            children: lines.map((line, index) => /* @__PURE__ */ jsx85("div", { children: line || "\xA0" }, index))
+            children: lines.map((line, index2) => /* @__PURE__ */ jsx85("div", { children: line || "\xA0" }, index2))
           }
         )
       ]
@@ -23288,8 +30234,8 @@ var ShellPane = forwardRef(
     const [pasteField, setPasteField] = useState62(false);
     const onFeedbackRef = useRef44(onFeedback);
     onFeedbackRef.current = onFeedback;
-    const copyFeedback = useCallback19(async (text) => {
-      const copied = await copyText(text);
+    const copyFeedback = useCallback19(async (text3) => {
+      const copied = await copyText(text3);
       onFeedbackRef.current?.(copied ? "done" : "failed", translate(copied ? "files.copied" : "files.copyFailed"));
       return copied;
     }, []);
@@ -23300,24 +30246,24 @@ var ShellPane = forwardRef(
       terminal.clearSelection();
       return true;
     }, [copyFeedback]);
-    const pasteText = useCallback19((text) => {
+    const pasteText = useCallback19((text3) => {
       const terminal = terminalRef.current;
-      if (!terminal || !text) return;
-      if (terminalPreferences().pasteWarning && isRiskyPaste(text, terminal.modes.bracketedPasteMode)) {
-        setPendingPaste(text);
+      if (!terminal || !text3) return;
+      if (terminalPreferences().pasteWarning && isRiskyPaste(text3, terminal.modes.bracketedPasteMode)) {
+        setPendingPaste(text3);
         return;
       }
-      terminal.paste(text);
+      terminal.paste(text3);
       terminal.focus();
     }, []);
     const pasteFromClipboard = useCallback19(async () => {
-      const text = await readClipboardText();
-      if (text === null) {
+      const text3 = await readClipboardText();
+      if (text3 === null) {
         if (isMobileShellRef.current || window.matchMedia?.("(pointer: coarse)").matches) setPasteField(true);
         else onFeedbackRef.current?.("failed", translate("files.terminalClipboardBlocked"));
         return;
       }
-      pasteText(text);
+      pasteText(text3);
     }, [pasteText]);
     const clipboardRef = useRef44({ copySelection, pasteFromClipboard });
     clipboardRef.current = { copySelection, pasteFromClipboard };
@@ -23609,11 +30555,11 @@ var ShellPane = forwardRef(
       if (!host) return;
       const paste = (event) => {
         const terminal = terminalRef.current;
-        const text = event.clipboardData?.getData("text/plain") ?? "";
-        if (!terminal || !terminalPreferences().pasteWarning || !isRiskyPaste(text, terminal.modes.bracketedPasteMode)) return;
+        const text3 = event.clipboardData?.getData("text/plain") ?? "";
+        if (!terminal || !terminalPreferences().pasteWarning || !isRiskyPaste(text3, terminal.modes.bracketedPasteMode)) return;
         event.preventDefault();
         event.stopPropagation();
-        setPendingPaste(text);
+        setPendingPaste(text3);
       };
       const mouseUp = (event) => {
         if (event.button !== 0) return;
@@ -23975,7 +30921,7 @@ var ShellPane = forwardRef(
               terminal: terminalRef.current,
               host: terminalHostNode,
               point: selecting.point,
-              onCopy: (text) => void copyFeedback(text),
+              onCopy: (text3) => void copyFeedback(text3),
               onClose: () => setSelecting(null)
             }
           ),
@@ -24027,9 +30973,9 @@ var ShellPane = forwardRef(
               terminal?.focus();
             }, children: translate("files.terminalPasteAnyway") })
           ] }),
-          pasteField && /* @__PURE__ */ jsx86(TerminalPasteField, { onSend: (text) => {
+          pasteField && /* @__PURE__ */ jsx86(TerminalPasteField, { onSend: (text3) => {
             setPasteField(false);
-            pasteText(text);
+            pasteText(text3);
           }, onCancel: () => setPasteField(false) })
         ]
       }
@@ -24038,16 +30984,16 @@ var ShellPane = forwardRef(
 );
 function TerminalPasteField({ onSend, onCancel }) {
   useI18n();
-  const [text, setText] = useState62("");
+  const [text3, setText] = useState62("");
   return /* @__PURE__ */ jsxs74("form", { className: "terminal-paste-field", onSubmit: (event) => {
     event.preventDefault();
-    if (text) onSend(text);
+    if (text3) onSend(text3);
   }, children: [
     /* @__PURE__ */ jsx86(
       "textarea",
       {
         autoFocus: true,
-        value: text,
+        value: text3,
         rows: 3,
         "aria-label": translate("files.terminalPasteField"),
         placeholder: translate("files.terminalPasteField"),
@@ -24059,7 +31005,7 @@ function TerminalPasteField({ onSend, onCancel }) {
     ),
     /* @__PURE__ */ jsxs74("div", { children: [
       /* @__PURE__ */ jsx86("button", { type: "button", onClick: onCancel, children: translate("files.cancel") }),
-      /* @__PURE__ */ jsx86("button", { type: "submit", className: "is-primary", disabled: !text, children: translate("files.terminalPasteSend") })
+      /* @__PURE__ */ jsx86("button", { type: "submit", className: "is-primary", disabled: !text3, children: translate("files.terminalPasteSend") })
     ] })
   ] });
 }
@@ -24103,9 +31049,9 @@ var TERMINAL_TABS_NARROW = 46;
 var TERMINAL_TABS_DEFAULT = 148;
 var TERMINAL_TABS_MAX = 500;
 var TERMINAL_TABS_MIDPOINT = 63;
-function splitPrefix(index, count) {
+function splitPrefix(index2, count) {
   if (count < 2) return "";
-  return index === 0 ? "\u250C" : index === count - 1 ? "\u2514" : "\u251C";
+  return index2 === 0 ? "\u250C" : index2 === count - 1 ? "\u2514" : "\u251C";
 }
 function TerminalStatusDot({ status }) {
   const label = status === "connected" ? translate("workbench.terminalStatusConnected") : status === "connecting" ? translate("workbench.terminalConnecting") : status === "running" ? statusLabel2("running") : translate("workbench.terminalDisconnected");
@@ -24129,30 +31075,30 @@ function TerminalTabs({
   onContextMenu,
   canSplit
 }) {
-  const list = useRef45(null);
+  const list2 = useRef45(null);
   const hasText = width >= TERMINAL_TABS_MIDPOINT;
   const order = layout.groups.flatMap((group) => group.shellIds);
   const moveFocus2 = (id, direction) => {
     const next = order[(order.indexOf(id) + direction + order.length) % order.length];
     if (!next) return;
     onSelect(next);
-    list.current?.querySelector(`[data-shell-id="${next}"]`)?.focus();
+    list2.current?.querySelector(`[data-shell-id="${next}"]`)?.focus();
   };
   return /* @__PURE__ */ jsx88(
     "div",
     {
-      ref: list,
+      ref: list2,
       role: "tablist",
       "aria-orientation": "vertical",
       "aria-label": translate("workbench.terminalTabs"),
       className: `terminal-tabs ${hasText ? "has-text" : "is-narrow"}`,
       "data-testid": "terminal-tabs",
-      children: layout.groups.flatMap((group) => group.shellIds.map((id, index) => {
+      children: layout.groups.flatMap((group) => group.shellIds.map((id, index2) => {
         const entry = entries.get(id);
         if (!entry) return null;
         const active = layout.activeShellId === id;
-        const prefix = splitPrefix(index, group.shellIds.length);
-        const accessibleName = group.shellIds.length > 1 ? translate("workbench.terminalSplitPosition", { value1: entry.label, value2: index + 1, value3: group.shellIds.length }) : entry.label;
+        const prefix = splitPrefix(index2, group.shellIds.length);
+        const accessibleName = group.shellIds.length > 1 ? translate("workbench.terminalSplitPosition", { value1: entry.label, value2: index2 + 1, value3: group.shellIds.length }) : entry.label;
         return /* @__PURE__ */ jsxs76(
           "div",
           {
@@ -24272,7 +31218,7 @@ function reconcileTerminalLayout(layout, liveShellIds) {
   const placed = /* @__PURE__ */ new Set();
   const groups = [];
   for (const group of layout.groups) {
-    const kept = group.shellIds.flatMap((id, index) => live.has(id) && !placed.has(id) ? [[id, group.sizes[index] ?? 0]] : []);
+    const kept = group.shellIds.flatMap((id, index2) => live.has(id) && !placed.has(id) ? [[id, group.sizes[index2] ?? 0]] : []);
     if (!kept.length) continue;
     kept.forEach(([id]) => placed.add(id));
     groups.push({ shellIds: kept.map(([id]) => id), sizes: normalizeSizes(kept.map(([, size]) => size), kept.length) });
@@ -24300,9 +31246,9 @@ function activeTerminalGroup(layout) {
 }
 function splitTerminal(layout, targetShellId, newShellId) {
   const groups = layout.groups.map((group) => {
-    const index = group.shellIds.indexOf(targetShellId);
-    if (index < 0) return group;
-    const shellIds = [...group.shellIds.slice(0, index + 1), newShellId, ...group.shellIds.slice(index + 1)];
+    const index2 = group.shellIds.indexOf(targetShellId);
+    if (index2 < 0) return group;
+    const shellIds = [...group.shellIds.slice(0, index2 + 1), newShellId, ...group.shellIds.slice(index2 + 1)];
     return { shellIds, sizes: evenSizes(shellIds.length) };
   });
   return { ...layout, groups, activeShellId: newShellId };
@@ -24316,17 +31262,17 @@ function removeTerminal(layout, shellId) {
 function adjacentTerminal(layout, direction) {
   const group = activeTerminalGroup(layout);
   if (!group || group.shellIds.length < 2 || !layout.activeShellId) return null;
-  const index = group.shellIds.indexOf(layout.activeShellId);
-  return group.shellIds[(index + direction + group.shellIds.length) % group.shellIds.length] ?? null;
+  const index2 = group.shellIds.indexOf(layout.activeShellId);
+  return group.shellIds[(index2 + direction + group.shellIds.length) % group.shellIds.length] ?? null;
 }
-function resizeTerminalPanes(sizes, index, delta, total) {
-  if (index < 0 || index >= sizes.length - 1 || total <= 0) return sizes;
+function resizeTerminalPanes(sizes, index2, delta, total) {
+  if (index2 < 0 || index2 >= sizes.length - 1 || total <= 0) return sizes;
   const min = Math.min(TERMINAL_PANE_MIN_SIZE / total, 0.5);
-  const pair = sizes[index] + sizes[index + 1];
-  const first = Math.max(min, Math.min(pair - min, sizes[index] + delta / total));
+  const pair = sizes[index2] + sizes[index2 + 1];
+  const first = Math.max(min, Math.min(pair - min, sizes[index2] + delta / total));
   const next = [...sizes];
-  next[index] = first;
-  next[index + 1] = pair - first;
+  next[index2] = first;
+  next[index2 + 1] = pair - first;
   return next;
 }
 function isLayout(value) {
@@ -24455,9 +31401,9 @@ var ThreadShellPanel = forwardRef2(function ThreadShellPanel2({
   const vertical = compact || groupsSize.width > 0 && groupsSize.width < 520;
   const showTabs = !compact && liveShells.length >= 2;
   const status = shellState?.state ?? "not_created";
-  const labels2 = useMemo20(() => new Map(liveShells.map((shell, index) => [
+  const labels2 = useMemo20(() => new Map(liveShells.map((shell, index2) => [
     shell.id,
-    shell.label?.trim() || translate("workbench.terminalDefaultName", { value1: layout.numbers?.[shell.id] ?? index + 1 })
+    shell.label?.trim() || translate("workbench.terminalDefaultName", { value1: layout.numbers?.[shell.id] ?? index2 + 1 })
   ])), [layout.numbers, liveShells, locale]);
   const terminalStatus = useCallback20((shell) => {
     const state = runtime[shell.id];
@@ -24478,8 +31424,8 @@ var ThreadShellPanel = forwardRef2(function ThreadShellPanel2({
   useEffect46(() => {
     if (shellState) saveTerminalLayout(layoutKey, layout);
   }, [layout, layoutKey, shellState]);
-  const showFeedback = useCallback20((_tone, text) => {
-    setFeedback(text);
+  const showFeedback = useCallback20((_tone, text3) => {
+    setFeedback(text3);
     if (feedbackTimer.current !== null) window.clearTimeout(feedbackTimer.current);
     feedbackTimer.current = window.setTimeout(() => {
       setFeedback(null);
@@ -24659,13 +31605,13 @@ var ThreadShellPanel = forwardRef2(function ThreadShellPanel2({
     return () => query.removeEventListener("change", update);
   }, []);
   useEffect46(() => {
-    const node = groupsRef.current;
-    if (!node) return;
+    const node2 = groupsRef.current;
+    if (!node2) return;
     const observer = new ResizeObserver((entries2) => {
       const { width, height } = entries2[0].contentRect;
       setGroupsSize((current) => current.width === width && current.height === height ? current : { width, height });
     });
-    observer.observe(node);
+    observer.observe(node2);
     return () => observer.disconnect();
   }, []);
   const axisSize = vertical ? groupsSize.height : groupsSize.width;
@@ -24749,11 +31695,11 @@ var ThreadShellPanel = forwardRef2(function ThreadShellPanel2({
     target.addEventListener("pointerup", end);
     target.addEventListener("pointercancel", end);
   };
-  const paneSashes = activeGroup && activeGroup.shellIds.length > 1 ? activeGroup.shellIds.slice(0, -1).map((shellId, index) => {
+  const paneSashes = activeGroup && activeGroup.shellIds.length > 1 ? activeGroup.shellIds.slice(0, -1).map((shellId, index2) => {
     const total = axisSize - SASH_SIZE * (activeGroup.shellIds.length - 1);
     const resize = (delta, from = activeGroup.sizes) => updateLayout((current) => ({
       ...current,
-      groups: current.groups.map((group) => group.shellIds.includes(shellId) ? { ...group, sizes: resizeTerminalPanes(from, index, delta, total) } : group)
+      groups: current.groups.map((group) => group.shellIds.includes(shellId) ? { ...group, sizes: resizeTerminalPanes(from, index2, delta, total) } : group)
     }));
     return /* @__PURE__ */ jsx89(
       "div",
@@ -24764,10 +31710,10 @@ var ThreadShellPanel = forwardRef2(function ThreadShellPanel2({
         "aria-orientation": vertical ? "horizontal" : "vertical",
         "aria-valuemin": 0,
         "aria-valuemax": 100,
-        "aria-valuenow": Math.round((activeGroup.sizes[index] ?? 0) * 100),
+        "aria-valuenow": Math.round((activeGroup.sizes[index2] ?? 0) * 100),
         className: "terminal-pane-sash",
         "data-testid": "terminal-pane-sash",
-        style: { order: index * 2 + 1 },
+        style: { order: index2 * 2 + 1 },
         onPointerDown: (event) => {
           const from = activeGroup.sizes;
           startDrag(event, (delta) => resize(delta, from));
@@ -24849,10 +31795,10 @@ var ThreadShellPanel = forwardRef2(function ThreadShellPanel2({
       cancelRename();
       setMenu(null);
     }, children: [
-      layout.groups.flatMap((group) => group.shellIds.map((shellId, index) => {
+      layout.groups.flatMap((group) => group.shellIds.map((shellId, index2) => {
         const entry = entries.get(shellId);
         if (!entry) return null;
-        const prefix = group.shellIds.length > 1 ? index === 0 ? "\u250C " : index === group.shellIds.length - 1 ? "\u2514 " : "\u251C " : "";
+        const prefix = group.shellIds.length > 1 ? index2 === 0 ? "\u250C " : index2 === group.shellIds.length - 1 ? "\u2514 " : "\u251C " : "";
         return /* @__PURE__ */ jsx89("div", { className: "terminal-menu-row", "data-shell-id": shellId, children: renamingId === shellId ? /* @__PURE__ */ jsxs77("form", { className: "terminal-menu-rename", onSubmit: (event) => {
           event.preventDefault();
           void submitRename();
@@ -24968,15 +31914,15 @@ var ThreadShellPanel = forwardRef2(function ThreadShellPanel2({
               },
               children: [
                 liveShells.map((shell) => {
-                  const index = activeGroup?.shellIds.indexOf(shell.id) ?? -1;
+                  const index2 = activeGroup?.shellIds.indexOf(shell.id) ?? -1;
                   const active = layout.activeShellId === shell.id;
                   const state = statusText(shell);
                   return /* @__PURE__ */ jsxs77(
                     "div",
                     {
                       className: `terminal-pane ${active ? "is-active" : ""} ${(activeGroup?.shellIds.length ?? 0) > 1 ? "is-split" : ""}`,
-                      hidden: index < 0,
-                      style: { order: index * 2, flexGrow: activeGroup?.sizes[index] ?? 1 },
+                      hidden: index2 < 0,
+                      style: { order: index2 * 2, flexGrow: activeGroup?.sizes[index2] ?? 1 },
                       "data-shell-id": shell.id,
                       "data-testid": "terminal-pane",
                       onPointerDownCapture: () => activate(shell.id),
@@ -24989,7 +31935,7 @@ var ThreadShellPanel = forwardRef2(function ThreadShellPanel2({
                             paneId: shell.id,
                             shell,
                             isActive: active,
-                            isVisible: panelVisible && index >= 0,
+                            isVisible: panelVisible && index2 >= 0,
                             autoFocus: focusArmed,
                             inputTransform: transformInput,
                             isMobileShell,
@@ -25126,7 +32072,7 @@ function ThreadGraphWorkspaceLoadingFallback() {
   useI18n();
   return /* @__PURE__ */ jsxs78("div", { className: "workspace-loading-skeleton flex h-full min-h-0 flex-1 flex-col", role: "status", "aria-label": translate("files.loadingWorkspace"), children: [
     /* @__PURE__ */ jsx90("div", { className: "workspace-loading-skeleton-bar" }),
-    /* @__PURE__ */ jsx90("div", { className: "flex-1 space-y-1 px-3 py-2", children: [0, 1, 2, 3, 4].map((index) => /* @__PURE__ */ jsx90("div", { className: "h-7 animate-pulse rounded bg-[var(--theme-surface-strong)] motion-reduce:animate-none", style: { width: `${72 - index * 6}%` } }, index)) })
+    /* @__PURE__ */ jsx90("div", { className: "flex-1 space-y-1 px-3 py-2", children: [0, 1, 2, 3, 4].map((index2) => /* @__PURE__ */ jsx90("div", { className: "h-7 animate-pulse rounded bg-[var(--theme-surface-strong)] motion-reduce:animate-none", style: { width: `${72 - index2 * 6}%` } }, index2)) })
   ] });
 }
 function ThreadGraphWorkspacePanel(props) {
@@ -25715,7 +32661,7 @@ function ThreadRelationBar({ parentThreadId, parent, currentWorkspaceId, href, o
     event.preventDefault();
     onOpen(parentThreadId);
   };
-  const link = (className, content, label) => href ? /* @__PURE__ */ jsx93("a", { className, href, onClick: open, title: label ?? title, ...label ? { "aria-label": label } : {}, children: content }) : /* @__PURE__ */ jsx93("button", { type: "button", className, onClick: open, title: label ?? title, ...label ? { "aria-label": label } : {}, children: content });
+  const link = (className, content3, label) => href ? /* @__PURE__ */ jsx93("a", { className, href, onClick: open, title: label ?? title, ...label ? { "aria-label": label } : {}, children: content3 }) : /* @__PURE__ */ jsx93("button", { type: "button", className, onClick: open, title: label ?? title, ...label ? { "aria-label": label } : {}, children: content3 });
   return /* @__PURE__ */ jsx93("div", { className: "thread-relation-bar", "data-loading": parent === void 0 ? "" : void 0, children: /* @__PURE__ */ jsxs81("div", { className: "thread-relation-row", children: [
     /* @__PURE__ */ jsx93(GitBranch, { className: "thread-relation-icon", "aria-hidden": "true" }),
     /* @__PURE__ */ jsxs81("span", { className: "thread-relation-lead", children: [
@@ -25886,34 +32832,34 @@ function GraphChatThreadChatPanel({
     };
   }, []);
   useLayoutEffect19(() => {
-    const node = internalComposerHostRef.current;
-    if (!node || !isMobileViewport && !floatingDesktopComposer) {
+    const node2 = internalComposerHostRef.current;
+    if (!node2 || !isMobileViewport && !floatingDesktopComposer) {
       setMobileComposerHeight(0);
       return;
     }
     const updateHeight = () => {
-      setMobileComposerHeight(Math.ceil(node.getBoundingClientRect().height));
+      setMobileComposerHeight(Math.ceil(node2.getBoundingClientRect().height));
     };
     updateHeight();
     if (typeof ResizeObserver === "undefined") {
       return;
     }
     const observer = new ResizeObserver(updateHeight);
-    observer.observe(node);
+    observer.observe(node2);
     return () => {
       observer.disconnect();
     };
   }, [isMobileViewport, floatingDesktopComposer, composerProps, hasPendingRequests]);
   useLayoutEffect19(() => {
-    const node = internalComposerHostRef.current;
-    if (!node || !isMobileViewport && !floatingDesktopComposer) {
+    const node2 = internalComposerHostRef.current;
+    if (!node2 || !isMobileViewport && !floatingDesktopComposer) {
       setMobileComposerOverlap(0);
       return;
     }
     const updateOverlap = () => {
-      const rect = node.getBoundingClientRect();
+      const rect = node2.getBoundingClientRect();
       const root = panelRootRef.current;
-      const navigation = node.querySelector(".thread-jump-latest-cluster");
+      const navigation = node2.querySelector(".thread-jump-latest-cluster");
       const top = navigation ? Math.min(rect.top, navigation.getBoundingClientRect().top) : rect.top;
       const bottom = useFloatingMobileComposer || !root ? window.innerHeight : Math.min(window.innerHeight, root.getBoundingClientRect().bottom);
       setPanelBottomGap(Math.max(0, Math.round(window.innerHeight - bottom)));
@@ -25928,8 +32874,8 @@ function GraphChatThreadChatPanel({
     let observer = null;
     if (typeof ResizeObserver !== "undefined") {
       observer = new ResizeObserver(updateOverlap);
-      observer.observe(node);
-      const navigation = node.querySelector(".thread-jump-latest-cluster");
+      observer.observe(node2);
+      const navigation = node2.querySelector(".thread-jump-latest-cluster");
       if (navigation) observer.observe(navigation);
       if (panelRootRef.current) observer.observe(panelRootRef.current);
     }
@@ -25974,10 +32920,10 @@ function GraphChatThreadChatPanel({
     };
   }, [isMobileViewport]);
   const setComposerHostRefs = useCallback21(
-    (node) => {
-      internalComposerHostRef.current = node;
+    (node2) => {
+      internalComposerHostRef.current = node2;
       if (composerHostRef) {
-        composerHostRef.current = node;
+        composerHostRef.current = node2;
       }
     },
     [composerHostRef]
@@ -26591,7 +33537,7 @@ function PluginProvider({
   );
   const setPluginDefaultEnabled = useCallback22(
     async (pluginId, defaultEnabled) => {
-      const previous = plugins.find((plugin) => plugin.id === pluginId)?.defaultEnabled;
+      const previous2 = plugins.find((plugin) => plugin.id === pluginId)?.defaultEnabled;
       setError(null);
       setPlugins((current) => current.map((plugin) => plugin.id === pluginId ? { ...plugin, defaultEnabled } : plugin));
       if (!adapter.updatePlugin) return;
@@ -26599,7 +33545,7 @@ function PluginProvider({
         const updated = await adapter.updatePlugin(pluginId, { defaultEnabled });
         setPlugins((current) => current.map((plugin) => plugin.id === updated.id ? updated : plugin));
       } catch (err) {
-        setPlugins((current) => current.map((plugin) => plugin.id === pluginId && plugin.defaultEnabled === defaultEnabled ? { ...plugin, defaultEnabled: previous } : plugin));
+        setPlugins((current) => current.map((plugin) => plugin.id === pluginId && plugin.defaultEnabled === defaultEnabled ? { ...plugin, defaultEnabled: previous2 } : plugin));
         setError(err instanceof Error ? err.message : translate("workbench.unableToUpdatePlugin"));
         throw err;
       }
@@ -26901,12 +33847,12 @@ function ThreadPluginScope({
     if (loaded.status !== "ready") return device.plugins;
     const scoped = new Map(loaded.plugins.map((plugin) => [plugin.id, plugin]));
     const merged = device.plugins.map((plugin) => {
-      const own = scoped.get(plugin.id);
-      if (!own) return plugin;
+      const own3 = scoped.get(plugin.id);
+      if (!own3) return plugin;
       return {
         ...plugin,
-        ...own,
-        enabled: gateByDevice ? plugin.enabled && own.enabled : own.enabled
+        ...own3,
+        enabled: gateByDevice ? plugin.enabled && own3.enabled : own3.enabled
       };
     });
     const known2 = new Set(device.plugins.map((plugin) => plugin.id));
@@ -26960,7 +33906,7 @@ function PluginSettingsButton({ plugin, className }) {
   const { t: t2 } = useI18n();
   const plugins = useDevicePlugins();
   const trigger = useRef52(null);
-  const content = useRef52(null);
+  const content3 = useRef52(null);
   const [open, setOpen] = useState68(false);
   const [theme, setTheme] = useState68({});
   const sections = plugins.getSettingsSections(plugin.id);
@@ -26979,7 +33925,7 @@ function PluginSettingsButton({ plugin, className }) {
     /* @__PURE__ */ jsxs85(
       DialogContent,
       {
-        ref: content,
+        ref: content3,
         "data-theme-effective": theme.effective,
         "data-theme-mode": theme.mode,
         "data-testid": "pluginSettingsDialog",
@@ -26987,7 +33933,7 @@ function PluginSettingsButton({ plugin, className }) {
         overlayClassName: "plugin-settings-overlay",
         onOpenAutoFocus: (event) => {
           event.preventDefault();
-          content.current?.focus();
+          content3.current?.focus();
         },
         children: [
           /* @__PURE__ */ jsxs85(DialogHeader, { className: "plugin-settings-dialog-header", children: [
@@ -27860,9 +34806,9 @@ function buildThreadMap(devices, rootLabel) {
     into.tokens += from.tokens;
   };
   const deviceNodes = devices.map((device) => {
-    const node = { ...blank, children: [], id: `device:${device.id}`, kind: "device", label: device.name, device };
+    const node2 = { ...blank, children: [], id: `device:${device.id}`, kind: "device", label: device.name, device };
     for (const workspace of device.workspaces) {
-      const space = { ...blank, children: [], id: `workspace:${device.id}:${workspace.id}`, kind: "workspace", label: workspace.label, parent: node, workspace, device };
+      const space = { ...blank, children: [], id: `workspace:${device.id}:${workspace.id}`, kind: "workspace", label: workspace.label, parent: node2, workspace, device };
       for (const thread of workspace.threads) {
         const live = Boolean(thread.running || thread.children?.some((child) => child.running));
         const leaf = {
@@ -27887,22 +34833,22 @@ function buildThreadMap(devices, rootLabel) {
       }
       if (!space.children.length) continue;
       space.children.sort(byWeight);
-      node.children.push(space);
-      add(node, space);
+      node2.children.push(space);
+      add(node2, space);
     }
-    node.children.sort(byWeight);
-    return node;
+    node2.children.sort(byWeight);
+    return node2;
   });
-  const listed = deviceNodes.reduce((sum, node) => sum + node.weight, 0);
-  for (const node of deviceNodes) if (!node.weight) node.weight = Math.max(1, listed * 0.06);
+  const listed = deviceNodes.reduce((sum, node2) => sum + node2.weight, 0);
+  for (const node2 of deviceNodes) if (!node2.weight) node2.weight = Math.max(1, listed * 0.06);
   if (deviceNodes.length === 1 && deviceNodes[0].device.state === "ready") {
     const only = deviceNodes[0];
     only.kind = "root";
     return only;
   }
-  for (const node of deviceNodes) {
-    node.parent = root;
-    add(root, node);
+  for (const node2 of deviceNodes) {
+    node2.parent = root;
+    add(root, node2);
   }
   root.children = deviceNodes.sort((a, b) => Number(b.device.state === "ready") - Number(a.device.state === "ready") || byWeight(a, b));
   return root;
@@ -27911,9 +34857,9 @@ function indexMap(root) {
   const nodes = /* @__PURE__ */ new Map();
   const stack = [root];
   while (stack.length) {
-    const node = stack.pop();
-    nodes.set(node.id, node);
-    stack.push(...node.children);
+    const node2 = stack.pop();
+    nodes.set(node2.id, node2);
+    stack.push(...node2.children);
   }
   return nodes;
 }
@@ -27980,12 +34926,12 @@ function ago(at, now = Date.now()) {
 function promptLine(prompt) {
   return prompt.replace(/\[PHOTO\s+[^\]]*\]/g, ` ${translate("workbench.threadMapPhoto")} `).replace(/\[FILE\s+[^\]]*\]/g, ` ${translate("workbench.threadMapFile")} `).replace(/\s+/g, " ").trim();
 }
-function threadDetails(node, hours) {
-  const thread = node.thread;
+function threadDetails(node2, hours) {
+  const thread = node2.thread;
   const who = [
     thread.agent ? thread.agentName ?? themeAgentName(thread.agent) : null,
     thread.model,
-    node.parent && node.parent.kind !== "root" ? node.parent.label : null,
+    node2.parent && node2.parent.kind !== "root" ? node2.parent.label : null,
     thread.from ? translate("workbench.threadMapFrom", { title: thread.from }) : null
   ].filter(Boolean).join(" \xB7 ");
   const figures = [
@@ -28003,7 +34949,7 @@ function threadDetails(node, hours) {
     thread.running ? translate("workbench.threadMapRunning") : thread.lastActiveAt ? translate("workbench.threadMapActiveAgo", { ago: ago(thread.lastActiveAt) }) : null,
     thread.failed ? translate("workbench.threadMapFailedTurn") : null
   ].filter(Boolean).join(" \xB7 ");
-  return [node.label, who, figures, spend, dates].filter(Boolean);
+  return [node2.label, who, figures, spend, dates].filter(Boolean);
 }
 function AgeGlyph({ tier }) {
   const fraction = (tier + 1) / 5;
@@ -28044,11 +34990,11 @@ function Usage({ thread }) {
     ] }) : null
   ] });
 }
-function ThreadTile({ node, box, hours, current, onOpen, hover, onShowChildren }) {
-  const thread = node.thread;
+function ThreadTile({ node: node2, box, hours, current, onOpen, hover, onShowChildren }) {
+  const thread = node2.thread;
   const { width: w, height: h } = box;
   const tier = tileTier(box);
-  const details = threadDetails(node, hours);
+  const details = threadDetails(node2, hours);
   const age = ageTier(thread.createdAt);
   const chip = /* @__PURE__ */ jsx103(AgentChip, { agent: thread.agent });
   const titled = tier !== "icon" && tier !== "dot";
@@ -28107,10 +35053,10 @@ function ThreadTile({ node, box, hours, current, onOpen, hover, onShowChildren }
     "div",
     {
       className: "thread-map-tile",
-      "data-map-id": node.id,
+      "data-map-id": node2.id,
       "data-size": tier,
       "data-heat": heatLevel(thread.activeMs),
-      "data-running": thread.running || node.running > 0 || void 0,
+      "data-running": thread.running || node2.running > 0 || void 0,
       "data-failed": thread.failed || void 0,
       "data-current": current || void 0,
       style: { left: box.x, top: box.y, width: w, height: h, "--lines": lines, "--prompt-lines": promptLines, "--spark-h": `${sparkHeight}px` },
@@ -28189,17 +35135,17 @@ function squarify(items, weight, bounds) {
   };
   const result = [];
   let box = { ...bounds };
-  let index = 0;
-  while (index < areas.length) {
+  let index2 = 0;
+  while (index2 < areas.length) {
     const side = Math.min(box.width, box.height);
-    const row = [areas[index++]];
-    while (index < areas.length && worst([...row, areas[index]], side) <= worst(row, side)) row.push(areas[index++]);
+    const row = [areas[index2++]];
+    while (index2 < areas.length && worst([...row, areas[index2]], side) <= worst(row, side)) row.push(areas[index2++]);
     const sum = row.reduce((s, entry) => s + entry.area, 0);
     const vertical = box.width >= box.height;
-    const thickness = index >= areas.length ? vertical ? box.width : box.height : Math.min(vertical ? box.width : box.height, sum / side);
+    const thickness = index2 >= areas.length ? vertical ? box.width : box.height : Math.min(vertical ? box.width : box.height, sum / side);
     let offset = 0;
-    row.forEach((entry, position) => {
-      const length = position === row.length - 1 ? side - offset : entry.area / thickness;
+    row.forEach((entry, position2) => {
+      const length = position2 === row.length - 1 ? side - offset : entry.area / thickness;
       result.push({
         item: entry.item,
         rect: vertical ? { x: box.x, y: box.y + offset, width: thickness, height: length } : { x: box.x + offset, y: box.y, width: length, height: thickness }
@@ -28214,17 +35160,17 @@ function squarify(items, weight, bounds) {
 // src/components/threadMap/ThreadMap.tsx
 import { Fragment as Fragment39, jsx as jsx104, jsxs as jsxs90 } from "react/jsx-runtime";
 var HEADER = 26;
-function describe(node, hours) {
-  if (node.thread) return threadDetails(node, hours);
-  const state = node.device?.state;
-  if (node.kind === "device" && state && state !== "ready") {
-    return [node.label, translate(state === "offline" ? "workbench.threadMapOffline" : state === "loading" ? "workbench.threadMapLoading" : "workbench.threadMapFailed")];
+function describe(node2, hours) {
+  if (node2.thread) return threadDetails(node2, hours);
+  const state = node2.device?.state;
+  if (node2.kind === "device" && state && state !== "ready") {
+    return [node2.label, translate(state === "offline" ? "workbench.threadMapOffline" : state === "loading" ? "workbench.threadMapLoading" : "workbench.threadMapFailed")];
   }
-  return [node.label, [
-    translate("workbench.threadMapThreads", { count: node.threads }),
-    node.running ? translate("workbench.threadMapRunningCount", { count: node.running }) : null,
-    node.activeMs > 0 ? translate("workbench.threadMapRan", { hours, duration: formatRunTime(node.activeMs) }) : null,
-    node.usd > 0 ? translate("workbench.threadMapCost", { usd: formatCompactUsd(node.usd) }) : null
+  return [node2.label, [
+    translate("workbench.threadMapThreads", { count: node2.threads }),
+    node2.running ? translate("workbench.threadMapRunningCount", { count: node2.running }) : null,
+    node2.activeMs > 0 ? translate("workbench.threadMapRan", { hours, duration: formatRunTime(node2.activeMs) }) : null,
+    node2.usd > 0 ? translate("workbench.threadMapCost", { usd: formatCompactUsd(node2.usd) }) : null
   ].filter(Boolean).join(" \xB7 ")];
 }
 function inset(rect, gap) {
@@ -28256,12 +35202,12 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
   const [size, setSize] = useState71({ width: 0, height: 0 });
   const [tip, setTip] = useState71(null);
   useEffect53(() => {
-    const node = canvas.current;
-    if (!node) return;
-    const measure = () => setSize({ width: node.clientWidth, height: node.clientHeight });
+    const node2 = canvas.current;
+    if (!node2) return;
+    const measure = () => setSize({ width: node2.clientWidth, height: node2.clientHeight });
     measure();
     const observer = new ResizeObserver(measure);
-    observer.observe(node);
+    observer.observe(node2);
     return () => observer.disconnect();
   }, []);
   useLayoutEffect20(() => {
@@ -28271,9 +35217,9 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
     }
   });
   const chain = [];
-  for (let node = current; node; node = node.parent) chain.unshift(node);
-  const navigate = (node, from, plan) => {
-    const target = node ?? root;
+  for (let node2 = current; node2; node2 = node2.parent) chain.unshift(node2);
+  const navigate = (node2, from, plan) => {
+    const target = node2 ?? root;
     if (target === current) return;
     const box = canvas.current?.getBoundingClientRect();
     from ??= target.parent === current ? byMapId(stage.current, target.id) : null;
@@ -28316,11 +35262,11 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
   const gesture = useRef55({ navigate, current, root, nodes, onDismiss });
   gesture.current = { navigate, current, root, nodes, onDismiss };
   useEffect53(() => {
-    const node = canvas.current;
-    if (!node) return;
+    const node2 = canvas.current;
+    if (!node2) return;
     let pinch = null;
     let drag = null;
-    const sheet = () => node.closest(".thread-map-dialog");
+    const sheet = () => node2.closest(".thread-map-dialog");
     const spread = (touches) => Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
     const settleSheet = () => {
       const dialog = sheet();
@@ -28336,7 +35282,7 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
       if (event.touches.length === 2) {
         if (drag?.active) settleSheet();
         drag = null;
-        const box = node.getBoundingClientRect();
+        const box = node2.getBoundingClientRect();
         pinch = {
           d0: spread(event.touches) || 1,
           ratio: 1,
@@ -28378,15 +35324,15 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
         pinch = null;
         drag = null;
         if (stage.current) stage.current.style.transform = "";
-        const { navigate: go, current: at, root: top, nodes: all } = gesture.current;
+        const { navigate: go, current: at, root: top, nodes: all2 } = gesture.current;
         if (ratio < 0.8 && at !== top) {
           go(at.parent, null, { kind: "fade" });
           return;
         }
         if (ratio > 1.25) {
-          const box = node.getBoundingClientRect();
+          const box = node2.getBoundingClientRect();
           const target = document.elementFromPoint(box.left + x, box.top + y)?.closest("[data-zoomable]");
-          const next = target?.dataset.mapId ? all.get(target.dataset.mapId) : void 0;
+          const next = target?.dataset.mapId ? all2.get(target.dataset.mapId) : void 0;
           if (next) {
             go(next, target);
             return;
@@ -28410,15 +35356,15 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
         window.setTimeout(() => gesture.current.onDismiss?.(), dialog ? 150 : 0);
       } else settleSheet();
     };
-    node.addEventListener("touchstart", start, { passive: true });
-    node.addEventListener("touchmove", move, { passive: false });
-    node.addEventListener("touchend", end);
-    node.addEventListener("touchcancel", end);
+    node2.addEventListener("touchstart", start, { passive: true });
+    node2.addEventListener("touchmove", move, { passive: false });
+    node2.addEventListener("touchend", end);
+    node2.addEventListener("touchcancel", end);
     return () => {
-      node.removeEventListener("touchstart", start);
-      node.removeEventListener("touchmove", move);
-      node.removeEventListener("touchend", end);
-      node.removeEventListener("touchcancel", end);
+      node2.removeEventListener("touchstart", start);
+      node2.removeEventListener("touchmove", move);
+      node2.removeEventListener("touchend", end);
+      node2.removeEventListener("touchcancel", end);
     };
   }, []);
   const open = (thread) => (event) => {
@@ -28447,9 +35393,9 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
     onFocus: (event) => showTip(lines, event.currentTarget),
     onBlur: () => setTip(null)
   });
-  const fits = (node, inner, depth) => {
-    if (depth > 2 || inner.width < 64 || inner.height < 40 || !node.children.length) return false;
-    return node.children.length <= inner.width * inner.height / (node.children[0].kind === "thread" ? 90 : 900);
+  const fits = (node2, inner, depth) => {
+    if (depth > 2 || inner.width < 64 || inner.height < 40 || !node2.children.length) return false;
+    return node2.children.length <= inner.width * inner.height / (node2.children[0].kind === "thread" ? 90 : 900);
   };
   const group = (item, box, depth) => {
     const thread = item.thread;
@@ -28519,7 +35465,7 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
     );
   };
   let rendered = 0;
-  const runningLeaves = (node) => node.kind === "thread" ? node.running ? [node] : [] : node.children.flatMap(runningLeaves);
+  const runningLeaves = (node2) => node2.kind === "thread" ? node2.running ? [node2] : [] : node2.children.flatMap(runningLeaves);
   const render = (items, bounds2, depth) => squarify(items, (item) => item.weight, bounds2).map(({ item, rect }) => {
     rendered++;
     const box = inset(rect, depth ? 1.5 : 2.5);
@@ -28541,7 +35487,7 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
       );
     }
     const lines = describe(item, hours);
-    const text = lines.join(" \xB7 ");
+    const text3 = lines.join(" \xB7 ");
     const state = item.device?.state;
     const unlisted = item.kind === "device" && state !== "ready";
     const inner = { x: 3, y: HEADER, width: Math.max(0, box.width - 6), height: Math.max(0, box.height - HEADER - 3) };
@@ -28574,7 +35520,7 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
         "data-heat": preview || live.length ? void 0 : heatLevel(item.activeMs),
         "data-running": !preview && !live.length && item.running ? true : void 0,
         "data-zoomable": zoomable || void 0,
-        "aria-label": text,
+        "aria-label": text3,
         style: { left: box.x, top: box.y, width: box.width, height: box.height },
         children: [
           (preview || live.length > 0) && zoomable ? /* @__PURE__ */ jsx104(
@@ -28582,7 +35528,7 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
             {
               type: "button",
               className: "thread-map-section-head",
-              "aria-label": translate("workbench.threadMapExplore", { name: text }),
+              "aria-label": translate("workbench.threadMapExplore", { name: text3 }),
               onClick: zoom,
               ...hover(lines),
               children: head
@@ -28597,7 +35543,7 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
             {
               type: "button",
               className: "thread-map-zoom",
-              "aria-label": translate("workbench.threadMapExplore", { name: text }),
+              "aria-label": translate("workbench.threadMapExplore", { name: text3 }),
               onClick: zoom,
               ...hover(lines)
             }
@@ -28607,7 +35553,7 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
             {
               type: "button",
               className: "thread-map-zoom",
-              "aria-label": `${translate("workbench.threadMapRetry")} \xB7 ${text}`,
+              "aria-label": `${translate("workbench.threadMapRetry")} \xB7 ${text3}`,
               onClick: () => onRetry(item.device.id),
               ...hover(lines)
             }
@@ -28638,25 +35584,25 @@ function ThreadMap({ devices, currentKey, hours = 24, heading, actions, onOpen, 
     ] }),
     /* @__PURE__ */ jsxs90("div", { className: "thread-map-bar thread-map-path", children: [
       /* @__PURE__ */ jsx104("button", { type: "button", className: "thread-map-icon-button", "aria-label": translate("workbench.threadMapBack"), disabled: current === root, onClick: () => navigate(current.parent), children: /* @__PURE__ */ jsx104(ArrowLeft4, { "aria-hidden": "true" }) }),
-      /* @__PURE__ */ jsx104("nav", { ref: crumbs, tabIndex: -1, className: "thread-map-crumbs", "aria-label": translate("workbench.threadMapPath"), children: chain.map((node, index) => /* @__PURE__ */ jsxs90("span", { className: "thread-map-crumb", children: [
-        index > 0 && /* @__PURE__ */ jsx104(ChevronRight9, { "aria-hidden": "true" }),
-        /* @__PURE__ */ jsx104("button", { type: "button", "aria-current": node === current ? "location" : void 0, onClick: () => navigate(node), title: node.label, children: node.label })
-      ] }, node.id)) }),
+      /* @__PURE__ */ jsx104("nav", { ref: crumbs, tabIndex: -1, className: "thread-map-crumbs", "aria-label": translate("workbench.threadMapPath"), children: chain.map((node2, index2) => /* @__PURE__ */ jsxs90("span", { className: "thread-map-crumb", children: [
+        index2 > 0 && /* @__PURE__ */ jsx104(ChevronRight9, { "aria-hidden": "true" }),
+        /* @__PURE__ */ jsx104("button", { type: "button", "aria-current": node2 === current ? "location" : void 0, onClick: () => navigate(node2), title: node2.label, children: node2.label })
+      ] }, node2.id)) }),
       children.length > 0 && /* @__PURE__ */ jsxs90("label", { className: "thread-map-goto", title: translate("workbench.threadMapGoTo"), children: [
         /* @__PURE__ */ jsx104(List, { "aria-hidden": "true" }),
         /* @__PURE__ */ jsxs90("select", { "aria-label": translate("workbench.threadMapGoTo"), value: "", onChange: (event) => {
-          const node = nodes.get(event.target.value);
-          if (node?.thread) onOpen(node.thread);
-          else if (node) navigate(node);
+          const node2 = nodes.get(event.target.value);
+          if (node2?.thread) onOpen(node2.thread);
+          else if (node2) navigate(node2);
         }, children: [
           /* @__PURE__ */ jsx104("option", { value: "", children: translate("workbench.threadMapGoTo") }),
-          children.map((node) => /* @__PURE__ */ jsx104("option", { value: node.id, disabled: node.kind === "device" && node.device?.state !== "ready", children: describe(node, hours).join(" \xB7 ") }, node.id))
+          children.map((node2) => /* @__PURE__ */ jsx104("option", { value: node2.id, disabled: node2.kind === "device" && node2.device?.state !== "ready", children: describe(node2, hours).join(" \xB7 ") }, node2.id))
         ] })
       ] })
     ] }),
     /* @__PURE__ */ jsxs90("div", { ref: canvas, className: "thread-map-canvas", role: "group", "aria-label": current.label, children: [
       children.length ? /* @__PURE__ */ jsx104("div", { ref: stage, className: "thread-map-stage", children: size.width > 0 && render(children, bounds, 0) }) : /* @__PURE__ */ jsx104("p", { className: "thread-map-empty", role: "status", children: devices.some((device) => device.state === "loading") ? translate("workbench.threadMapLoading") : translate("workbench.threadMapEmpty") }),
-      tip && /* @__PURE__ */ jsx104("div", { className: "thread-map-tip", role: "tooltip", style: { left: tip.x, top: tip.y }, "data-above": tip.above || void 0, children: tip.lines.map((line, index) => index ? /* @__PURE__ */ jsx104("span", { children: line }, index) : /* @__PURE__ */ jsx104("b", { children: line }, index)) })
+      tip && /* @__PURE__ */ jsx104("div", { className: "thread-map-tip", role: "tooltip", style: { left: tip.x, top: tip.y }, "data-above": tip.above || void 0, children: tip.lines.map((line, index2) => index2 ? /* @__PURE__ */ jsx104("span", { children: line }, index2) : /* @__PURE__ */ jsx104("b", { children: line }, index2)) })
     ] }),
     /* @__PURE__ */ jsxs90("div", { className: "thread-map-legend", children: [
       /* @__PURE__ */ jsx104("span", { children: translate("workbench.threadMapLegendSize") }),
@@ -28745,14 +35691,14 @@ function transcriptSnapshot(title, turns, theme) {
 }
 function PublicTranscript({ snapshot }) {
   useI18n();
-  const message = (item, index) => /* @__PURE__ */ jsx106(
+  const message = (item, index2) => /* @__PURE__ */ jsx106(
     GraphChatMessageFrame,
     {
       kind: item.role === "user" ? "userMessage" : "agentMessage",
       timeLabel: item.createdAt ? formatMessageTimestamp(item.createdAt) : void 0,
       children: item.role === "user" ? /* @__PURE__ */ jsx106(GraphChatUserMessageBody, { text: item.text, attachmentPreviewUrls: snapshot.images }) : /* @__PURE__ */ jsx106("div", { className: "thread-graph-message-prose", children: /* @__PURE__ */ jsx106(GraphChatMessageContent, { readOnly: true, content: item.text, resolveHref: (href) => snapshot.images?.[href] ?? href }) })
     },
-    index
+    index2
   );
   return /* @__PURE__ */ jsx106("main", { className: "public-transcript thread-ui-shell", "data-theme-effective": snapshot.theme ?? "dark", children: /* @__PURE__ */ jsxs91("div", { className: "public-transcript-content", children: [
     /* @__PURE__ */ jsxs91("header", { className: "public-transcript-header", children: [
@@ -28767,8 +35713,8 @@ function PublicTranscript({ snapshot }) {
       ] }),
       snapshot.stale && /* @__PURE__ */ jsx106("p", { role: "status", children: translate("sharing.theDeviceIsUnavailableShowingTheLast") })
     ] }),
-    snapshot.turns.map((turn, index) => {
-      const displayTurn = { id: `snapshot-${index}`, status: "completed", error: null, items: [], startedAt: turn.startedAt ?? null, completedAt: turn.completedAt ?? null, model: turn.model ?? null, reasoningEffort: turn.reasoningEffort ?? null, tokenUsage: turn.tokenUsage ?? null, priceEstimate: turn.priceEstimate ?? null };
+    snapshot.turns.map((turn, index2) => {
+      const displayTurn = { id: `snapshot-${index2}`, status: "completed", error: null, items: [], startedAt: turn.startedAt ?? null, completedAt: turn.completedAt ?? null, model: turn.model ?? null, reasoningEffort: turn.reasoningEffort ?? null, tokenUsage: turn.tokenUsage ?? null, priceEstimate: turn.priceEstimate ?? null };
       return /* @__PURE__ */ jsxs91("section", { className: "thread-graph-turn public-transcript-turn", children: [
         turn.messages.filter((item) => item.role === "user").map(message),
         /* @__PURE__ */ jsxs91("div", { className: "thread-graph-worked-summary flex w-full items-center gap-2 py-2 text-sm", "aria-label": translate("sharing.turnSummary"), children: [
@@ -28778,7 +35724,7 @@ function PublicTranscript({ snapshot }) {
           /* @__PURE__ */ jsx106("span", { className: "thread-graph-worked-rule h-px min-w-0 flex-1", "aria-hidden": "true" })
         ] }),
         turn.messages.filter((item) => item.role === "assistant").map(message)
-      ] }, index);
+      ] }, index2);
     })
   ] }) });
 }
@@ -28843,11 +35789,11 @@ function ConversationSearchScopePicker({ value, onChange, labels: labels2, allow
     )) })
   ] });
 }
-function searchHighlightParts(text, query) {
+function searchHighlightParts(text3, query) {
   const foldedQuery = query.trim().toLowerCase();
-  const found = foldedQuery ? text.toLowerCase().indexOf(foldedQuery) : -1;
-  if (found < 0) return { before: text, match: "", after: "" };
-  const chars = Array.from(text);
+  const found = foldedQuery ? text3.toLowerCase().indexOf(foldedQuery) : -1;
+  if (found < 0) return { before: text3, match: "", after: "" };
+  const chars = Array.from(text3);
   let folded = 0, first = -1, last = 0;
   for (let i = 0; i < chars.length; i++) {
     const next = folded + chars[i].toLowerCase().length;
@@ -28863,8 +35809,8 @@ function searchHighlightParts(text, query) {
     after: `${chars.slice(last, finish).join("")}${finish < chars.length ? "\u2026" : ""}`
   };
 }
-function ConversationSearchExcerpt({ text, query }) {
-  const parts = searchHighlightParts(text, query);
+function ConversationSearchExcerpt({ text: text3, query }) {
+  const parts = searchHighlightParts(text3, query);
   return /* @__PURE__ */ jsxs92("p", { children: [
     parts.before,
     parts.match && /* @__PURE__ */ jsx107("mark", { children: parts.match }),
@@ -28896,14 +35842,14 @@ function normalizePresentation(members, arrangement) {
 }
 function read(scope) {
   if (!scope) return defaultPresentation;
-  const parse = (suffix) => {
+  const parse2 = (suffix) => {
     try {
       return JSON.parse(localStorage.getItem(`${scope}.${suffix}`) ?? "null");
     } catch {
       return null;
     }
   };
-  const saved = normalizePresentation(parse("members"), parse("arrangement"));
+  const saved = normalizePresentation(parse2("members"), parse2("arrangement"));
   return saved.mode === "files" ? { ...saved, mode: saved.referenceId ? "thread" : "focus" } : saved;
 }
 function write(scope, value, patch) {
@@ -28949,23 +35895,23 @@ function useWorkbenchPresentation(scope, contextKey = null) {
     if (!scope || stored.generation !== generation || !stored.pending) return;
     const storageFailed = write(scope, stored.value, stored.pending);
     setStored(
-      (previous) => previous === stored ? { ...previous, pending: null, storageFailed } : previous
+      (previous2) => previous2 === stored ? { ...previous2, pending: null, storageFailed } : previous2
     );
   }, [scope, stored, generation]);
   const update = useCallback24(
     (patch) => {
       if (owner.current !== generation) return;
-      setStored((previous) => {
-        if (owner.current !== generation) return previous;
+      setStored((previous2) => {
+        if (owner.current !== generation) return previous2;
         const next = {
-          ...previous.generation === generation ? previous.value : read(scope),
+          ...previous2.generation === generation ? previous2.value : read(scope),
           ...patch
         };
         return {
           generation,
           value: next,
           storageFailed: scope ? write(scope, next, patch) : false,
-          pending: scope ? null : { ...previous.pending, ...patch }
+          pending: scope ? null : { ...previous2.pending, ...patch }
         };
       });
     },

@@ -9,7 +9,7 @@ import { MessageExpansionScope } from './MessageExpansionScope';
 let root: Root | undefined;
 let container: HTMLDivElement | undefined;
 afterEach(() => { flushSync(() => root?.unmount()); container?.remove(); });
-const text = 'A detailed explanation. '.repeat(200);
+const text = 'A detailed explanation.\n\n'.repeat(200);
 function fixture() {
   container = document.createElement('div'); document.body.append(container);
   root = createRoot(container);

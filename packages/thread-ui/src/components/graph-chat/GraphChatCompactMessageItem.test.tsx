@@ -48,7 +48,7 @@ describe("GraphChatCompactMessageItem", () => {
     const digest = mockDigest();
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockResolvedValue(undefined) } });
     const { container, root } = mount();
-    const reply = polishedReply('Polished line. '.repeat(250));
+    const reply = polishedReply('Polished line.\n\n'.repeat(250));
     const onBeforeMessageResize = vi.fn();
     const adapter = { fetchPlugins: () => [{ ...contentQualityPlugin.manifest, enabled: true, available: true }] };
     await act(async () => root.render(<PluginProvider adapter={adapter} builtinPlugins={[contentQualityPlugin]}>

@@ -6,5 +6,5 @@ export function messagePreview(text: string, budget: number): string {
   const blocks = fromMarkdown(text).children;
   const end = blocks.find(block => (block.position?.end.offset ?? 0) >= budget)
     ?.position?.end.offset ?? text.length;
-  return text.slice(0, end).trimEnd();
+  return end >= text.trimEnd().length ? text : text.slice(0, end).trimEnd();
 }
