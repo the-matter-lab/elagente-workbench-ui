@@ -14,6 +14,7 @@ import {
   type RefObject,
 } from 'react';
 
+import { messagePreview } from './messagePreview';
 import { useMessageExpansion } from './MessageExpansionScope';
 import { ScrollAnchorContext } from '../timeline/scrollAnchor';
 import { MessageAttachment } from '../attachments/AttachmentTile';
@@ -202,11 +203,14 @@ export const GraphChatMarkdownAwareBody = memo(
     const scrollAnchorRef = useRef<ScrollAnchor | null>(null);
     const [expanded, setExpanded] = useMessageExpansion(messageId, text, streaming);
     const shouldRenderMarkdown = hasLikelyMarkdownSyntax(text) || /\\\(|\\\[/.test(text) || Boolean(resolveWorkspacePath && hasWorkspacePathSyntax(text));
-    const isLargeText = !streaming && text.length > LARGE_MESSAGE_PREVIEW_CHARS;
-    const displayText =
-      isLargeText && !expanded
-        ? `${text.slice(0, LARGE_MESSAGE_PREVIEW_CHARS).trimEnd()}\n\n...`
-        : text;
+    const preview = useMemo(
+      () => !streaming && text.length > LARGE_MESSAGE_PREVIEW_CHARS
+        ? messagePreview(text, LARGE_MESSAGE_PREVIEW_CHARS)
+        : text,
+      [text, streaming],
+    );
+    const isLargeText = preview.length < text.length;
+    const displayText = isLargeText && !expanded ? `${preview}\n\n...` : text;
     const [isActivated, setIsActivated] = useState(
       streaming || typeof IntersectionObserver === 'undefined',
     );
