@@ -35,6 +35,10 @@ function render(node: ReactNode) {
   return container;
 }
 
+function openFileActions(element: HTMLElement) {
+  act(() => element.querySelector<HTMLButtonElement>('button[aria-label="File actions"]')!.click());
+}
+
 afterEach(() => {
   if (root) {
     act(() => {
@@ -427,12 +431,17 @@ describe('copy preview contents', () => {
     return execCommand;
   }
 
-  it('copies the entire raw Markdown source directly from the file bar and visibly confirms it', async () => {
+  it('copies the entire raw Markdown source from file actions and visibly confirms it', async () => {
     const writeText = vi.fn(async () => undefined);
     clipboard(writeText);
     const element = render(<GraphWorkspacePreviewPane {...props()} />);
-    expect(element.querySelector('.workspace-file-toolbar')?.contains(copyButton(element))).toBe(true);
+    expect(copyButton(element)).toBeNull();
     expect(element.querySelector('.workspace-file-actions')).toBeNull();
+    openFileActions(element);
+    expect(element.querySelector('.workspace-file-actions')?.contains(copyButton(element))).toBe(true);
+    expect(element.querySelector('.workspace-file-toolbar')?.contains(copyButton(element))).toBe(false);
+    expect(element.querySelectorAll('button[aria-label="Copy contents"]')).toHaveLength(1);
+    expect(element.querySelector('[aria-label="Copy path"]')).toBeNull();
     await act(async () => copyButton(element).click());
     expect(writeText).toHaveBeenCalledExactlyOnceWith(source);
     expect(element.querySelector('[role="status"]')?.textContent).toBe('Contents copied');
@@ -444,7 +453,10 @@ describe('copy preview contents', () => {
     clipboard(writeText);
     const element = render(<GraphWorkspacePreviewPane {...props({ activeFilePath: node.path, fileTabs: [{ path: node.path, name: node.name, pinned: true }], onCloseFileTab: vi.fn(), onSelectFileTab: vi.fn() })} />);
     expect(element.querySelector('[role="tablist"]')).not.toBeNull();
-    expect(element.querySelector('.thread-graph-editor-tabs-action')?.contains(copyButton(element))).toBe(true);
+    expect(copyButton(element)).toBeNull();
+    openFileActions(element);
+    expect(element.querySelector('.workspace-file-actions')?.contains(copyButton(element))).toBe(true);
+    expect(element.querySelector('.thread-graph-editor-tabs-action')?.contains(copyButton(element))).toBe(false);
     await act(async () => copyButton(element).click());
     expect(writeText).toHaveBeenCalledWith(source);
     expect(element.textContent).toContain('Contents copied');
@@ -456,6 +468,7 @@ describe('copy preview contents', () => {
     const detail = JSON.stringify({ id: 'event-1', kind: 'message', text: 'Full event content '.repeat(100), extra: { nested: true } }, null, 2);
     const event: WorkspaceTreeNode = { id: 'event-1', name: '001-message.json', path: 'thread-events:/turn/001-message.json', kind: 'event', children: [], detail, preview: 'Full event content' };
     const element = render(<GraphWorkspacePreviewPane {...props({ selectedTarget: { kind: 'event', node: event } })} />);
+    openFileActions(element);
     await act(async () => copyButton(element).click());
     expect(writeText).toHaveBeenCalledExactlyOnceWith(detail);
     expect(element.textContent).toContain('Contents copied');
@@ -465,6 +478,7 @@ describe('copy preview contents', () => {
     const writeText = vi.fn(async () => undefined);
     clipboard(writeText);
     const element = render(<GraphWorkspacePreviewPane {...props({ previewFile: { ...preview, truncated: true, size: source.length * 2 } })} />);
+    openFileActions(element);
     await act(async () => copyButton(element).click());
     expect(writeText).toHaveBeenCalledExactlyOnceWith(source);
   });
@@ -475,14 +489,38 @@ describe('copy preview contents', () => {
     const draft = editDraft(newDraft('draft-key', { ...preview, workspaceRevision: '1', fileIdentity: 'file-1', contentHash: 'hash', encoding: 'utf-8', bom: false, eol: 'lf', readOnlyReason: null }), 'Unsaved draft\n');
     const documents: WorkspaceDocuments = { documents: new Map([[node.path, draft]]), source: 'copy-test', load: vi.fn(), change: vi.fn(), setEditing: vi.fn(), discard: vi.fn(), save: vi.fn(), reconcile: vi.fn(), adoptDisk: vi.fn(), checkDisk: vi.fn(), acceptVerifiedDisk: vi.fn() };
     const element = render(<GraphWorkspacePreviewPane {...props({ documents })} />);
+    openFileActions(element);
     await act(async () => copyButton(element).click());
     expect(writeText).toHaveBeenCalledExactlyOnceWith('Unsaved draft\n');
+  });
+
+  it('keeps copy, refresh and download attached to the preview file during directory navigation', async () => {
+    const writeText = vi.fn(async () => undefined);
+    clipboard(writeText);
+    const draft = newDraft('draft-key', { ...preview, workspaceRevision: '1', fileIdentity: 'file-1', contentHash: 'hash', encoding: 'utf-8', bom: false, eol: 'lf', readOnlyReason: null });
+    const documents: WorkspaceDocuments = { documents: new Map([[node.path, draft]]), source: 'copy-test', load: vi.fn(), change: vi.fn(), setEditing: vi.fn(), discard: vi.fn(), save: vi.fn(), reconcile: vi.fn(), adoptDisk: vi.fn(), checkDisk: vi.fn(), acceptVerifiedDisk: vi.fn() };
+    const directory: WorkspaceTreeNode = { id: 'directory', path: 'docs/guides', name: 'guides', kind: 'directory', children: [] };
+    const onDownloadFile = vi.fn();
+    const element = render(<GraphWorkspacePreviewPane {...props({ documents, breadcrumbNode: directory, onShowTree: vi.fn(), onDownloadFile })} />);
+    expect(element.querySelector('[aria-current="page"]')?.textContent).toBe('guides');
+    expect(element.querySelector('h1')?.textContent).toBe('Raw contents');
+    openFileActions(element);
+    const shelf = element.querySelector('.workspace-file-actions')!;
+    expect(shelf.querySelectorAll('[aria-label="Copy contents"]')).toHaveLength(1);
+    expect(shelf.querySelector('[aria-label="Copy path"]')).toBeNull();
+    await act(async () => copyButton(element).click());
+    expect(writeText).toHaveBeenCalledExactlyOnceWith(source);
+    await act(async () => shelf.querySelector<HTMLButtonElement>('button[aria-label="Reload from disk"]')!.click());
+    expect(documents.checkDisk).toHaveBeenCalledExactlyOnceWith(node.path);
+    act(() => shelf.querySelector<HTMLButtonElement>('button[aria-label="Download file"]')!.click());
+    expect(onDownloadFile).toHaveBeenCalledTimes(1);
   });
 
   it('copies an empty file successfully', async () => {
     const writeText = vi.fn(async () => undefined);
     clipboard(writeText);
     const element = render(<GraphWorkspacePreviewPane {...props({ previewFile: { ...preview, content: '', size: 0, nextOffset: 0 } })} />);
+    openFileActions(element);
     await act(async () => copyButton(element).click());
     expect(writeText).toHaveBeenCalledExactlyOnceWith('');
     expect(element.textContent).toContain('Contents copied');
@@ -492,6 +530,7 @@ describe('copy preview contents', () => {
     clipboard(availability === 'rejected' ? vi.fn(async () => { throw new Error('Permission denied'); }) : undefined);
     const execCommand = fallback(true);
     const element = render(<GraphWorkspacePreviewPane {...props()} />);
+    openFileActions(element);
     copyButton(element).focus();
     const text = element.querySelector('h1')!.firstChild!;
     const range = document.createRange();
@@ -518,6 +557,7 @@ describe('copy preview contents', () => {
     clipboard(vi.fn(async () => { throw new Error('Permission denied'); }));
     fallback(failure);
     const element = render(<GraphWorkspacePreviewPane {...props()} />);
+    openFileActions(element);
     await act(async () => copyButton(element).click());
     expect(element.querySelector('[role="alert"]')?.textContent).toBe('Could not copy contents. Try again or select and copy the text.');
     expect(element.textContent).not.toContain('Contents copied');
@@ -535,6 +575,7 @@ describe('copy preview contents', () => {
     clipboard(undefined);
     Object.defineProperty(document, 'execCommand', { configurable: true, value: undefined });
     const element = render(<GraphWorkspacePreviewPane {...props()} />);
+    openFileActions(element);
     await act(async () => copyButton(element).click());
     expect(element.querySelector('[role="alert"]')?.textContent).toContain('Could not copy contents.');
     expect(document.querySelector('textarea')).toBeNull();
@@ -545,6 +586,7 @@ describe('copy preview contents', () => {
     const writeText = vi.fn(() => new Promise<void>(resolve => { finish = resolve; }));
     clipboard(writeText);
     const element = render(<GraphWorkspacePreviewPane {...props()} />);
+    openFileActions(element);
     act(() => copyButton(element).click());
     expect(copyButton(element).getAttribute('aria-disabled')).toBe('true');
     expect(element.textContent).toContain('Copying contents…');
@@ -554,17 +596,58 @@ describe('copy preview contents', () => {
     act(() => root!.render(<GraphWorkspacePreviewPane {...props({ selectedTarget: { kind: 'workspace-file', node: next }, previewFile: { ...preview, path: next.path, name: next.name } })} />));
     await act(async () => finish());
     expect(element.textContent).not.toContain('Contents copied');
-    expect(copyButton(element).disabled).toBe(false);
+    expect(copyButton(element)).toBeNull();
+    openFileActions(element);
+    expect(copyButton(element).getAttribute('aria-disabled')).toBe('false');
   });
 
   it.each([{ previewLoading: true }, { downloadOnly: true }, { imageUrl: '/image.png' }, { pdfUrl: '/report.pdf' }, { previewFile: null }])('omits content copy when text is unavailable: %j', (extra) => {
     const element = render(<GraphWorkspacePreviewPane {...props(extra)} />);
+    openFileActions(element);
     expect(copyButton(element)).toBeNull();
   });
 });
 
 describe('preview directory breadcrumbs', () => {
   const node: WorkspaceTreeNode = { id: 'docs-file', path: '/workspace/demo/docs/guides/setup.md', name: 'setup.md', kind: 'file', children: [] };
+
+  it.each([
+    { path: 'docs/guides', name: 'guides', ancestors: ['demo', 'docs'], current: 'guides', targets: [undefined, 'docs'] },
+    { path: '/workspace/demo/docs/guides', name: 'guides', ancestors: ['demo', 'docs'], current: 'guides', targets: [undefined, 'docs'] },
+    { path: 'thread-events:/turn-123', name: 'turn-123', ancestors: ['demo', 'thread-events'], current: 'turn-123', targets: [undefined, 'thread-events:'] },
+    { path: 'thread-events:', name: 'thread-events', ancestors: ['demo'], current: 'thread-events', targets: [undefined] },
+    { path: 'artifacts:', name: 'artifacts', ancestors: ['demo'], current: 'artifacts', targets: [undefined] },
+    { path: 'live:/turn-123', name: 'turn-123', ancestors: ['demo', 'live'], current: 'turn-123', targets: [undefined, 'live:'] },
+    { path: '', name: 'demo', ancestors: [], current: 'demo', targets: [] },
+    { path: '/workspace/demo', name: 'demo', ancestors: [], current: 'demo', targets: [] },
+  ])('shows the navigated directory as the current breadcrumb: $path', ({ path, name, ancestors, current, targets }) => {
+    const onShowTree = vi.fn();
+    const breadcrumbNode: WorkspaceTreeNode = { id: 'directory', kind: 'directory', path, name, children: [] };
+    const element = render(<GraphWorkspacePreviewPane plugins={createDefaultPluginContextValue()}
+      selectedTarget={{ kind: 'workspace-file', node }} breadcrumbNode={breadcrumbNode} workspaceRootPath="/workspace/demo" onShowTree={onShowTree} />);
+    const breadcrumbs = element.querySelector('.workspace-file-breadcrumbs')!;
+    const buttons = [...breadcrumbs.querySelectorAll('button')];
+    expect(buttons.map(button => button.textContent)).toEqual(ancestors);
+    expect(breadcrumbs.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
+    expect(breadcrumbs.querySelector('[aria-current="page"]')?.textContent).toBe(current);
+    expect(breadcrumbs.textContent).not.toContain('setup.md');
+    buttons.forEach((button, index) => {
+      act(() => button.click());
+      if (targets[index] === undefined) expect(onShowTree).toHaveBeenLastCalledWith();
+      else expect(onShowTree).toHaveBeenLastCalledWith(targets[index]);
+    });
+  });
+
+  it('shows directory breadcrumbs when no preview file is selected', () => {
+    const breadcrumbNode: WorkspaceTreeNode = { id: 'directory', kind: 'directory', path: 'docs/guides', name: 'guides', children: [] };
+    const element = render(<GraphWorkspacePreviewPane plugins={createDefaultPluginContextValue()}
+      selectedTarget={null} breadcrumbNode={breadcrumbNode} workspaceRootPath="/workspace/demo" onShowTree={vi.fn()} />);
+    expect(element.querySelector('[aria-current="page"]')?.textContent).toBe('guides');
+    openFileActions(element);
+    expect(element.querySelector('.workspace-file-actions')).toBeNull();
+    expect(element.querySelector('[aria-label="Copy contents"]')).toBeNull();
+  });
+
   it.each([false, true])('reveals root and parent directories without opening them as files (tabs: %s)', (withTabs) => {
     const onShowTree = vi.fn();
     const onOpenWorkspaceFile = vi.fn();
@@ -608,7 +691,9 @@ describe('preview directory breadcrumbs', () => {
     expect(onShowTree).toHaveBeenLastCalledWith('thread-events:');
     act(() => buttons[2].click());
     expect(onShowTree).toHaveBeenLastCalledWith('thread-events:/turn-123');
-    expect(element.querySelector('[aria-label="Copy contents"]')).not.toBeNull();
+    expect(element.querySelector('[aria-label="Copy contents"]')).toBeNull();
+    openFileActions(element);
+    expect(element.querySelector('.workspace-file-actions [aria-label="Copy contents"]')).not.toBeNull();
   });
 
   it('supports directory breadcrumbs through the existing file-open callback when no tree callback exists', () => {
@@ -647,7 +732,9 @@ describe('preview navigation controls', () => {
     expect(element.querySelector('[data-icon="back"]')).toBeNull();
     expect(element.querySelector('[aria-label="Show Explorer"]')).toBeNull();
     expect(element.querySelector('[aria-label="Hide Editor"]')).toBeNull();
-    expect(element.querySelector('[aria-label="Copy contents"]')).not.toBeNull();
+    expect(element.querySelector('[aria-label="Copy contents"]')).toBeNull();
+    openFileActions(element);
+    expect(element.querySelector('.workspace-file-actions [aria-label="Copy contents"]')).not.toBeNull();
     expect(element.querySelector('[aria-label="File actions"]')).not.toBeNull();
   });
 });

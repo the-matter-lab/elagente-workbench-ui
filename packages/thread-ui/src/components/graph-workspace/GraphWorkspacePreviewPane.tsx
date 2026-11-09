@@ -563,6 +563,7 @@ function MissingLinkedFile({ path }: { path: string }) {
 
 export function GraphWorkspacePreviewPane({
   activeFilePath,
+  breadcrumbNode,
   dirtyFilePaths = new Set(),
   error,
   missingPath = null,
@@ -597,6 +598,8 @@ export function GraphWorkspacePreviewPane({
   workspaceRootPath,
 }: {
   activeFilePath?: string | null;
+  /** Directory navigation changes breadcrumbs without changing the preview's file actions. */
+  breadcrumbNode?: WorkspaceTreeNode | null;
   dirtyFilePaths?: ReadonlySet<string>;
   error?: string | null;
   /** A linked file or folder that is not on this device. */
@@ -796,43 +799,49 @@ export function GraphWorkspacePreviewPane({
   const documentMetadata = document ? `${documentState} · ${document.snapshot.encoding==='utf-8' ? 'UTF-8' : translate('files.safeUnknownEncoding')}${document.snapshot.bom ? ' BOM' : ''} · ${document.snapshot.eol.toUpperCase()}` : undefined;
   const inlineStatus = document && <span role="status" data-testid="workspace-document-status" className="sr-only" data-phase={document.phase}>{documentState}</span>;
   const backLabel = previousFilePath ? translate('files.backToDocument', { name: previousFilePath.split('/').pop() ?? previousFilePath }) : translate('workbench.goBack');
-  const copyPath = activeNode?.path && !/^(?:\/|[a-z]:[\\/])/i.test(activeNode.path) && workspaceRootPath ? `${workspaceRootPath.replace(/[\\/]+$/, '')}/${activeNode.path}` : activeNode?.path ?? '';
-  const fileActions = activeNode && <WorkspaceFileActions path={copyPath} relativePath={workspaceRootPath ? relativeWorkspacePath(copyPath, workspaceRootPath) : null} key={activeNode.path} {...((documentMetadata || filePanel?.label) ? { metadata:[filePanel?.label, documentMetadata].filter(Boolean).join(' · ') } : {})}
+  const fileActions = activeNode && <WorkspaceFileActions key={activeNode.path} {...((documentMetadata || filePanel?.label) ? { metadata:[filePanel?.label, documentMetadata].filter(Boolean).join(' · ') } : {})}
     {...(document ? {onDownload:()=>{ if (!isProtected(document) && onDownloadFile) void onDownloadFile(); else downloadDraft(document); }, onRefresh: async () => {
       const previous = document.snapshot.contentHash;
       await documents?.checkDisk(document.snapshot.path);
       const current = documents?.documents.get(document.snapshot.path);
       if (current?.error) throw new Error(current.error);
       return translate(current?.phase==='conflict' ? 'files.safePhase.conflict' : current?.snapshot.contentHash===previous ? 'files.fileAlreadyCurrent' : 'files.fileReloaded');
-    }} : onDownloadFile ? {onDownload:()=>void onDownloadFile()} : {})}>{fileToolbar}{inlineStatus}</WorkspaceFileActions>;
+    }} : onDownloadFile ? {onDownload:()=>void onDownloadFile()} : {})}>
+    {fileToolbar}{inlineStatus}
+    {copyContents !== null && <PreviewContentsCopyButton key={`${resourceScopeKey}:${selectedTarget?.kind}:${activeNode.path}`} content={copyContents} />}
+  </WorkspaceFileActions>;
   const previewNavigation = (onNavigateBack || onNavigateForward) && <>
     {onNavigateBack && <button type="button" className="workspace-preview-back" onClick={onNavigateBack} aria-label={backLabel} title={backLabel}><ArrowLeft data-icon="back" size={18}/></button>}
     {onNavigateForward && <button type="button" className="thread-graph-editor-toolbar-button" onClick={onNavigateForward} aria-label={translate('files.goForward')} title={translate('files.goForward')}><ArrowRight data-icon="forward" size={16}/></button>}
   </>;
   const previewActions = <>
-    {copyContents !== null && <PreviewContentsCopyButton key={`${resourceScopeKey}:${selectedTarget?.kind}:${activeNode?.path}`} content={copyContents} />}
     <button ref={actionTrigger} type="button" className="thread-graph-editor-toolbar-button workspace-file-more" aria-label={translate('files.fileActions')} title={translate('files.fileActions')} aria-expanded={actionsOpen} onClick={() => setActionsOpen(open => !open)}><MoreHorizontal data-icon="more" size={18}/></button>
   </>;
-  const virtualPrefix = activeNode?.path.match(/^([a-z][a-z-]+:)\//)?.[1];
-  const breadcrumbPath = virtualPrefix ? activeNode!.path.slice(virtualPrefix.length + 1)
-    : selectedTarget?.kind === 'workspace-file' && activeNode ? relativeWorkspacePath(activeNode.path, workspaceRootPath ?? '') : null;
+  const navigationNode = breadcrumbNode ?? activeNode;
+  const virtualPrefix = navigationNode?.path.match(/^([a-z][a-z-]+:)(?:\/|$)/)?.[1];
+  const breadcrumbPath = virtualPrefix ? navigationNode!.path.slice(virtualPrefix.length).replace(/^\//, '')
+    : navigationNode && (navigationNode.kind === 'file' || navigationNode.kind === 'directory') ? relativeWorkspacePath(navigationNode.path, workspaceRootPath ?? '') : null;
   const breadcrumbParts = breadcrumbPath?.split('/').filter(Boolean) ?? [];
+  const isRootBreadcrumb = navigationNode?.kind === 'directory' && !virtualPrefix && breadcrumbPath === '';
+  const breadcrumbTitle = navigationNode?.path || navigationNode?.name;
   const directoryBreadcrumb = onShowTree ?? onOpenWorkspaceFile;
   const rootBreadcrumbLabel = workspaceRootPath?.replace(/[\\/]+$/, '').split(/[\\/]/).at(-1) || translate('files.workspace');
   const breadcrumbs = directoryBreadcrumb && <nav className="workspace-file-breadcrumbs" aria-label={translate('files.workspaceRoot')}>
-    {onShowTree ? <button type="button" className="workspace-file-breadcrumb" aria-label={translate('files.workspaceRoot')}
+    {isRootBreadcrumb ? <span className="workspace-file-breadcrumb-current" aria-current="page" title={workspaceRootPath || breadcrumbTitle}>{navigationNode.name || rootBreadcrumbLabel}</span>
+      : onShowTree ? <button type="button" className="workspace-file-breadcrumb" aria-label={translate('files.workspaceRoot')}
       title={workspaceRootPath || translate('files.workspaceRoot')} onClick={() => onShowTree()}>
       {rootBreadcrumbLabel}
     </button> : <span className="workspace-file-breadcrumb">{rootBreadcrumbLabel}</span>}
     {virtualPrefix && <span className="workspace-file-breadcrumb-segment"><ChevronRight aria-hidden="true" size={12} />
-      <button type="button" className="workspace-file-breadcrumb" title={virtualPrefix} onClick={() => directoryBreadcrumb?.(virtualPrefix)}>{virtualPrefix.slice(0, -1)}</button>
+      {breadcrumbParts.length ? <button type="button" className="workspace-file-breadcrumb" title={virtualPrefix} onClick={() => directoryBreadcrumb?.(virtualPrefix)}>{virtualPrefix.slice(0, -1)}</button>
+        : <span className="workspace-file-breadcrumb-current" aria-current="page" title={virtualPrefix}>{navigationNode?.name || virtualPrefix.slice(0, -1)}</span>}
     </span>}
     {breadcrumbParts.length ? breadcrumbParts.map((part, index) => <span className="workspace-file-breadcrumb-segment" key={index}>
       <ChevronRight aria-hidden="true" size={12} />
-      {index === breadcrumbParts.length - 1 ? <span className="workspace-file-breadcrumb-current" aria-current="page" title={activeNode?.path}>{part}</span>
+      {index === breadcrumbParts.length - 1 ? <span className="workspace-file-breadcrumb-current" aria-current="page" title={navigationNode?.path}>{part}</span>
         : <button type="button" className="workspace-file-breadcrumb" title={`${virtualPrefix ? `${virtualPrefix}/` : ''}${breadcrumbParts.slice(0, index + 1).join('/')}`}
           onClick={() => directoryBreadcrumb?.(`${virtualPrefix ? `${virtualPrefix}/` : ''}${breadcrumbParts.slice(0, index + 1).join('/')}`)}>{part}</button>}
-    </span>) : title ? <span className="workspace-file-breadcrumb-segment"><ChevronRight aria-hidden="true" size={12} /><span className="workspace-file-breadcrumb-current" title={title}>{title}</span></span> : null}
+    </span>) : !isRootBreadcrumb && !virtualPrefix && breadcrumbTitle ? <span className="workspace-file-breadcrumb-segment"><ChevronRight aria-hidden="true" size={12} /><span className="workspace-file-breadcrumb-current" aria-current="page" title={breadcrumbTitle}>{breadcrumbTitle}</span></span> : null}
   </nav>;
 
   return (

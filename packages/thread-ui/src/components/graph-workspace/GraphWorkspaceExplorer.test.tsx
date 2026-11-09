@@ -20,6 +20,7 @@ vi.mock('./GraphWorkspacePreviewPane', () => ({
   ) => (node ? { kind: node.kind, node } : null),
   GraphWorkspacePreviewPane: ({
     focusLine,
+    breadcrumbNode,
     mobileNavigation,
     onCollapse,
     onExpandExplorer,
@@ -31,6 +32,7 @@ vi.mock('./GraphWorkspacePreviewPane', () => ({
     error,
     missingPath,
   }: {
+    breadcrumbNode?: { path: string; kind: string } | null;
     error?: string | null;
     missingPath?: string | null;
     downloadOnly?: boolean;
@@ -43,7 +45,7 @@ vi.mock('./GraphWorkspacePreviewPane', () => ({
     onExpandExplorer?: () => void;
     previewFile?: ThreadWorkspaceFilePreview | null;
   }) => (
-    <div data-testid="preview-file" data-focus-line={focusLine ?? undefined} data-pdf-url={pdfUrl ?? undefined}
+    <div data-testid="preview-file" data-breadcrumb-path={breadcrumbNode?.path} data-focus-line={focusLine ?? undefined} data-pdf-url={pdfUrl ?? undefined}
       data-download-only={downloadOnly ? 'true' : undefined} data-download-reason={downloadReason ?? undefined}
       data-missing-path={missingPath ?? undefined} data-error={error ?? undefined}>
       {previewFile?.path ?? 'none'}
@@ -734,6 +736,28 @@ describe('GraphWorkspaceExplorer', () => {
     host!.querySelector('[data-testid="preview-file"]')!.append(editor);
     await act(async () => editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', metaKey: true, bubbles: true })));
     expect(host?.querySelector('[role="tree"]')).toBeNull();
+  });
+
+  it('updates directory breadcrumbs on selection and expansion, then returns to the file path', async () => {
+    const { adapter, listTree } = createAdapter();
+    listTree.mockImplementation(async () => directory('', [file('README.md'), directory('src', [
+      file('src/index.ts'), directory('src/nested', [file('src/nested/deep.txt')]),
+    ])]));
+    await renderExplorer(adapter);
+    const path = () => host!.querySelector('[data-testid="preview-file"]')?.getAttribute('data-breadcrumb-path');
+    await act(async () => buttonNamed('README.md')!.click());
+    expect(path()).toBe('README.md');
+    await act(async () => host!.querySelector<HTMLButtonElement>('[aria-label="Expand src"]')!.click());
+    expect(path()).toBe('src');
+    expect(host!.querySelector('[data-testid="preview-file"]')?.textContent).toContain('README.md');
+    await act(async () => buttonNamed('nested')!.click());
+    expect(path()).toBe('src/nested');
+    await act(async () => host!.querySelector<HTMLButtonElement>('[aria-label="Expand nested"]')!.click());
+    expect(path()).toBe('src/nested');
+    await act(async () => buttonNamed('deep.txt')!.click());
+    expect(path()).toBe('src/nested/deep.txt');
+    await act(async () => host!.querySelector<HTMLButtonElement>('[data-explorer-path=""] button')!.click());
+    expect(path()).toBe('');
   });
 
   it('collapses folders and filters across loaded descendants', async () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { workspaceRelativeFocusPath, workspaceTreeNodeToGraphNode } from './workspaceTree';
+import { compareWorkspaceNodes, workspaceRelativeFocusPath, workspaceTreeNodeToGraphNode } from './workspaceTree';
 
 describe('workspaceTreeNodeToGraphNode', () => {
   it('aligns dot-prefixed API paths with link focus and subtree keys', () => {
@@ -42,5 +42,19 @@ describe('workspaceRelativeFocusPath', () => {
     expect(
       workspaceRelativeFocusPath('docs/architecture.md', '/home/u/treer'),
     ).toBe('docs/architecture.md');
+  });
+});
+
+describe('workspace ordering', () => {
+  it('places only the virtual thread-events directory after real files and directories', () => {
+    const entries = [
+      { id: 'thread-events', path: 'thread-events:', name: 'thread-events', kind: 'directory' as const },
+      { id: 'workspace:z.xyz', path: 'z.xyz', name: 'z.xyz', kind: 'file' as const },
+      { id: 'workspace:thread-events', path: 'thread-events', name: 'thread-events', kind: 'directory' as const },
+      { id: 'workspace:a.txt', path: 'a.txt', name: 'a.txt', kind: 'file' as const },
+    ];
+    expect(entries.sort(compareWorkspaceNodes).map(node => node.id)).toEqual([
+      'workspace:thread-events', 'workspace:a.txt', 'workspace:z.xyz', 'thread-events',
+    ]);
   });
 });

@@ -57,7 +57,7 @@ import {
   shellThemeProps,
   useDocumentThemeRevision,
   useThemeFeature
-} from "./chunk-33EIBEUA.js";
+} from "./chunk-F65JBLOS.js";
 import {
   DEFAULT_LOCALE,
   I18nProvider,

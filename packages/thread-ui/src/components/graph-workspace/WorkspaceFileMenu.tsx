@@ -1,15 +1,11 @@
 import { Download, RefreshCw } from 'lucide-react';
-import { CopyButton } from '../copy/CopyButton';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { translate, useI18n } from '../../i18n';
 
 /** An inline icon shelf inherits the viewer's theme and takes layout space. */
-export function WorkspaceFileActions({ children, metadata, path, relativePath, onDownload, onRefresh }: {
+export function WorkspaceFileActions({ children, metadata, onDownload, onRefresh }: {
   children?: ReactNode;
   metadata?: string;
-  path: string;
-  /** Copied instead of `path`, like the chat's file links; absent outside the workspace. */
-  relativePath?: string | null | undefined;
   onDownload?: () => void;
   onRefresh?: () => Promise<string>;
 }) {
@@ -29,7 +25,6 @@ export function WorkspaceFileActions({ children, metadata, path, relativePath, o
       finally { if (current === generation.current) setBusy(false); }
     }}><RefreshCw size={15} className={busy ? 'animate-spin motion-reduce:animate-none' : ''}/></button>}
     {onDownload && <button type="button" className="thread-graph-editor-toolbar-button" title={translate('files.downloadFile')} aria-label={translate('files.downloadFile')} onClick={onDownload}><Download size={15}/></button>}
-    <CopyButton value={relativePath || path} label={translate('common.copyPath')} />
     {feedback && <span role="status" className="workspace-file-action-feedback" title={feedback}>{feedback}</span>}
     {error && <span role="alert" className="workspace-file-action-feedback is-error" title={error}>{error}</span>}
   </div>;

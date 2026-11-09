@@ -15,7 +15,7 @@ import type {
 import type { ThreadWorkspaceAdapter } from '../../adapters';
 import type { WorkspaceExplorerAdapter } from './explorer/workspaceExplorerTypes';
 import type { PluginContextValue } from '../../plugins/plugin-context';
-import { type WorkspaceTreeNode } from './workspaceTree';
+import { flattenWorkspaceNodes, type WorkspaceTreeNode } from './workspaceTree';
 import { useWorkspaceExplorerController } from './explorer/useWorkspaceExplorerController';
 import { useWorkspaceExplorerActions } from './explorer/useWorkspaceExplorerActions';
 import { WorkspaceTrashDialog } from './explorer/WorkspaceTrashDialog';
@@ -109,6 +109,11 @@ export function GraphWorkspaceExplorer({
   const documents = useWorkspaceDocuments(workspaceAdapter, workspaceIdentity);
   const readingPositions = useMemo(() => new Map<string, number>(), [documents.source]);
   const [navigation, setNavigation] = useState<{ scope: string; paths: string[]; index: number }>({ scope: documents.source, paths: [], index: -1 });
+  const [browsedDirectoryPath, setBrowsedDirectoryPath] = useState<string | null>(null);
+  const breadcrumbNode = useMemo(() => browsedDirectoryPath === null ? activeNode
+    : [...flattenWorkspaceNodes(tree).values()].find(node => node.kind === 'directory' && node.path === browsedDirectoryPath) ?? activeNode,
+    [activeNode, browsedDirectoryPath, tree]);
+  useLayoutEffect(() => { setBrowsedDirectoryPath(null); }, [activeNode?.id, documents.source]);
   const selectedFilePath = activeNode?.kind === 'file' ? activeNode.path : null;
   // The tree opens at least TREE_MIN_PX wide, so its names and toolbar fit;
   // the reader can still drag it narrower.
@@ -596,6 +601,7 @@ export function GraphWorkspaceExplorer({
       onPreview={handlePreview}
       onPin={handlePin}
       onSelect={(nodeId) => {
+        setBrowsedDirectoryPath(null);
         setSelectedNodeId(nodeId);
       }}
       onSelectNode={(node) => {
@@ -607,6 +613,7 @@ export function GraphWorkspaceExplorer({
         }
       }}
       onToggle={(path) => {
+        setBrowsedDirectoryPath(path);
         toggleDirectory(path);
         setFocusedLine(null);
       }}
@@ -624,6 +631,7 @@ export function GraphWorkspaceExplorer({
       readingPositions={readingPositions}
       {...(navigation.index > 0 ? { onNavigateBack: () => navigatePreview(-1), previousFilePath: navigation.paths[navigation.index - 1] } : {})}
       {...(navigation.index < navigation.paths.length - 1 ? { onNavigateForward: () => navigatePreview(1) } : {})}
+      breadcrumbNode={breadcrumbNode}
       activeFilePath={activeNode?.kind === 'file' ? activeNode.path : null}
       dirtyFilePaths={dirtyFilePaths}
       error={workspaceError ?? capabilityError}
@@ -638,6 +646,7 @@ export function GraphWorkspaceExplorer({
       loadingMore={loadingMore}
       focusLine={focusedLine}
       onShowTree={(path?: string) => {
+        setBrowsedDirectoryPath(path ?? '');
         setCollapsedPanel(isMobileViewport ? 'viewer' : null);
         if (path && /^(?:thread-events|live|artifacts):(?:\/|$)/.test(path)) {
           const parts = path.split('/');
@@ -658,6 +667,7 @@ export function GraphWorkspaceExplorer({
       {...(workspaceAdapter?.textRangeRead ? { onLoadMore: handleLoadMore } : {})}
       onCloseFileTab={handleCloseTab}
       onSelectFileTab={(path) => {
+        setBrowsedDirectoryPath(null);
         setNavigation(current => ({ ...current, paths: [], index: -1 }));
         void focusWorkspacePath(path);
       }}

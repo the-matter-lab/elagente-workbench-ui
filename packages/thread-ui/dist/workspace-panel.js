@@ -1,6 +1,5 @@
 import {
   ConfirmDialog,
-  CopyButton,
   Dialog,
   DialogClose,
   DialogContent,
@@ -46,7 +45,7 @@ import {
   isBinaryPreview,
   isDownloadOnlyPath,
   isDrawioPath
-} from "./chunk-5RORCV7Y.js";
+} from "./chunk-CZSYXIW4.js";
 import {
   IMAGE_EXTENSIONS,
   MOLECULAR_EXTENSIONS,
@@ -70,7 +69,7 @@ import {
   useThemeFeature,
   workspaceRelativeFocusPath,
   workspaceTreeNodeToGraphNode
-} from "./chunk-33EIBEUA.js";
+} from "./chunk-F65JBLOS.js";
 import {
   en,
   getLocale,
@@ -2258,13 +2257,7 @@ function sortedChildIds(model, childIds) {
     if (!left || !right) {
       return left ? -1 : right ? 1 : 0;
     }
-    if (left.kind === "directory" && right.kind !== "directory") {
-      return -1;
-    }
-    if (left.kind !== "directory" && right.kind === "directory") {
-      return 1;
-    }
-    return left.name.localeCompare(right.name);
+    return compareWorkspaceNodes(left.source, right.source);
   });
 }
 function projectWorkspaceExplorerRows(model, expandedPaths, options = {}) {
@@ -3904,7 +3897,7 @@ import {
 import { Download as Download3, RefreshCw as RefreshCw2 } from "lucide-react";
 import { useEffect as useEffect7, useRef as useRef7, useState as useState7 } from "react";
 import { jsx as jsx8, jsxs as jsxs7 } from "react/jsx-runtime";
-function WorkspaceFileActions({ children, metadata, path, relativePath, onDownload, onRefresh }) {
+function WorkspaceFileActions({ children, metadata, onDownload, onRefresh }) {
   useI18n();
   const [busy, setBusy] = useState7(false);
   const [feedback, setFeedback] = useState7(null);
@@ -3930,7 +3923,6 @@ function WorkspaceFileActions({ children, metadata, path, relativePath, onDownlo
       }
     }, children: /* @__PURE__ */ jsx8(RefreshCw2, { size: 15, className: busy ? "animate-spin motion-reduce:animate-none" : "" }) }),
     onDownload && /* @__PURE__ */ jsx8("button", { type: "button", className: "thread-graph-editor-toolbar-button", title: translate("files.downloadFile"), "aria-label": translate("files.downloadFile"), onClick: onDownload, children: /* @__PURE__ */ jsx8(Download3, { size: 15 }) }),
-    /* @__PURE__ */ jsx8(CopyButton, { value: relativePath || path, label: translate("common.copyPath") }),
     feedback && /* @__PURE__ */ jsx8("span", { role: "status", className: "workspace-file-action-feedback", title: feedback, children: feedback }),
     error && /* @__PURE__ */ jsx8("span", { role: "alert", className: "workspace-file-action-feedback is-error", title: error, children: error })
   ] });
@@ -4145,7 +4137,7 @@ function WorkspaceFileTabs({
 // src/components/graph-workspace/GraphWorkspacePreviewPane.tsx
 import { Fragment as Fragment6, jsx as jsx12, jsxs as jsxs10 } from "react/jsx-runtime";
 var GraphWorkspaceMonacoEditor = lazy(
-  () => import("./GraphWorkspaceMonacoEditor-H36CPXTV.js")
+  () => import("./GraphWorkspaceMonacoEditor-DQFSRKAW.js")
 );
 var isHostFilePath = (path) => path.startsWith("/") || /^[a-z]:[\\/]/i.test(path);
 function fileSizeLabel(size) {
@@ -4244,7 +4236,7 @@ function translateReadOnly(reason) {
   const key = `files.safeReason.${reason}`;
   return Object.hasOwn(en, key) ? translate(key) : reason;
 }
-var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-5WICFZDE.js"));
+var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-DMOFSGDR.js"));
 var SMALL_TEXT_FILE_MAX_BYTES = 50 * 1024;
 var SMALL_TEXT_FILE_MAX_LINES = 1e3;
 var MARKDOWN_EXTENSIONS = /* @__PURE__ */ new Set(["md", "markdown"]);
@@ -4581,6 +4573,7 @@ function MissingLinkedFile({ path }) {
 }
 function GraphWorkspacePreviewPane({
   activeFilePath,
+  breadcrumbNode,
   dirtyFilePaths = /* @__PURE__ */ new Set(),
   error,
   missingPath = null,
@@ -4756,12 +4749,9 @@ function GraphWorkspacePreviewPane({
   const documentMetadata = document2 ? `${documentState} \xB7 ${document2.snapshot.encoding === "utf-8" ? "UTF-8" : translate("files.safeUnknownEncoding")}${document2.snapshot.bom ? " BOM" : ""} \xB7 ${document2.snapshot.eol.toUpperCase()}` : void 0;
   const inlineStatus = document2 && /* @__PURE__ */ jsx12("span", { role: "status", "data-testid": "workspace-document-status", className: "sr-only", "data-phase": document2.phase, children: documentState });
   const backLabel = previousFilePath ? translate("files.backToDocument", { name: previousFilePath.split("/").pop() ?? previousFilePath }) : translate("workbench.goBack");
-  const copyPath = activeNode?.path && !/^(?:\/|[a-z]:[\\/])/i.test(activeNode.path) && workspaceRootPath ? `${workspaceRootPath.replace(/[\\/]+$/, "")}/${activeNode.path}` : activeNode?.path ?? "";
   const fileActions = activeNode && /* @__PURE__ */ jsxs10(
     WorkspaceFileActions,
     {
-      path: copyPath,
-      relativePath: workspaceRootPath ? relativeWorkspacePath(copyPath, workspaceRootPath) : null,
       ...documentMetadata || filePanel?.label ? { metadata: [filePanel?.label, documentMetadata].filter(Boolean).join(" \xB7 ") } : {},
       ...document2 ? { onDownload: () => {
         if (!isProtected(document2) && onDownloadFile) void onDownloadFile();
@@ -4775,7 +4765,8 @@ function GraphWorkspacePreviewPane({
       } } : onDownloadFile ? { onDownload: () => void onDownloadFile() } : {},
       children: [
         fileToolbar,
-        inlineStatus
+        inlineStatus,
+        copyContents !== null && /* @__PURE__ */ jsx12(PreviewContentsCopyButton, { content: copyContents }, `${resourceScopeKey}:${selectedTarget?.kind}:${activeNode.path}`)
       ]
     },
     activeNode.path
@@ -4784,17 +4775,17 @@ function GraphWorkspacePreviewPane({
     onNavigateBack && /* @__PURE__ */ jsx12("button", { type: "button", className: "workspace-preview-back", onClick: onNavigateBack, "aria-label": backLabel, title: backLabel, children: /* @__PURE__ */ jsx12(ArrowLeft, { "data-icon": "back", size: 18 }) }),
     onNavigateForward && /* @__PURE__ */ jsx12("button", { type: "button", className: "thread-graph-editor-toolbar-button", onClick: onNavigateForward, "aria-label": translate("files.goForward"), title: translate("files.goForward"), children: /* @__PURE__ */ jsx12(ArrowRight, { "data-icon": "forward", size: 16 }) })
   ] });
-  const previewActions = /* @__PURE__ */ jsxs10(Fragment6, { children: [
-    copyContents !== null && /* @__PURE__ */ jsx12(PreviewContentsCopyButton, { content: copyContents }, `${resourceScopeKey}:${selectedTarget?.kind}:${activeNode?.path}`),
-    /* @__PURE__ */ jsx12("button", { ref: actionTrigger, type: "button", className: "thread-graph-editor-toolbar-button workspace-file-more", "aria-label": translate("files.fileActions"), title: translate("files.fileActions"), "aria-expanded": actionsOpen, onClick: () => setActionsOpen((open) => !open), children: /* @__PURE__ */ jsx12(MoreHorizontal3, { "data-icon": "more", size: 18 }) })
-  ] });
-  const virtualPrefix = activeNode?.path.match(/^([a-z][a-z-]+:)\//)?.[1];
-  const breadcrumbPath = virtualPrefix ? activeNode.path.slice(virtualPrefix.length + 1) : selectedTarget?.kind === "workspace-file" && activeNode ? relativeWorkspacePath(activeNode.path, workspaceRootPath ?? "") : null;
+  const previewActions = /* @__PURE__ */ jsx12(Fragment6, { children: /* @__PURE__ */ jsx12("button", { ref: actionTrigger, type: "button", className: "thread-graph-editor-toolbar-button workspace-file-more", "aria-label": translate("files.fileActions"), title: translate("files.fileActions"), "aria-expanded": actionsOpen, onClick: () => setActionsOpen((open) => !open), children: /* @__PURE__ */ jsx12(MoreHorizontal3, { "data-icon": "more", size: 18 }) }) });
+  const navigationNode = breadcrumbNode ?? activeNode;
+  const virtualPrefix = navigationNode?.path.match(/^([a-z][a-z-]+:)(?:\/|$)/)?.[1];
+  const breadcrumbPath = virtualPrefix ? navigationNode.path.slice(virtualPrefix.length).replace(/^\//, "") : navigationNode && (navigationNode.kind === "file" || navigationNode.kind === "directory") ? relativeWorkspacePath(navigationNode.path, workspaceRootPath ?? "") : null;
   const breadcrumbParts = breadcrumbPath?.split("/").filter(Boolean) ?? [];
+  const isRootBreadcrumb = navigationNode?.kind === "directory" && !virtualPrefix && breadcrumbPath === "";
+  const breadcrumbTitle = navigationNode?.path || navigationNode?.name;
   const directoryBreadcrumb = onShowTree ?? onOpenWorkspaceFile;
   const rootBreadcrumbLabel = workspaceRootPath?.replace(/[\\/]+$/, "").split(/[\\/]/).at(-1) || translate("files.workspace");
   const breadcrumbs = directoryBreadcrumb && /* @__PURE__ */ jsxs10("nav", { className: "workspace-file-breadcrumbs", "aria-label": translate("files.workspaceRoot"), children: [
-    onShowTree ? /* @__PURE__ */ jsx12(
+    isRootBreadcrumb ? /* @__PURE__ */ jsx12("span", { className: "workspace-file-breadcrumb-current", "aria-current": "page", title: workspaceRootPath || breadcrumbTitle, children: navigationNode.name || rootBreadcrumbLabel }) : onShowTree ? /* @__PURE__ */ jsx12(
       "button",
       {
         type: "button",
@@ -4807,11 +4798,11 @@ function GraphWorkspacePreviewPane({
     ) : /* @__PURE__ */ jsx12("span", { className: "workspace-file-breadcrumb", children: rootBreadcrumbLabel }),
     virtualPrefix && /* @__PURE__ */ jsxs10("span", { className: "workspace-file-breadcrumb-segment", children: [
       /* @__PURE__ */ jsx12(ChevronRight2, { "aria-hidden": "true", size: 12 }),
-      /* @__PURE__ */ jsx12("button", { type: "button", className: "workspace-file-breadcrumb", title: virtualPrefix, onClick: () => directoryBreadcrumb?.(virtualPrefix), children: virtualPrefix.slice(0, -1) })
+      breadcrumbParts.length ? /* @__PURE__ */ jsx12("button", { type: "button", className: "workspace-file-breadcrumb", title: virtualPrefix, onClick: () => directoryBreadcrumb?.(virtualPrefix), children: virtualPrefix.slice(0, -1) }) : /* @__PURE__ */ jsx12("span", { className: "workspace-file-breadcrumb-current", "aria-current": "page", title: virtualPrefix, children: navigationNode?.name || virtualPrefix.slice(0, -1) })
     ] }),
     breadcrumbParts.length ? breadcrumbParts.map((part, index) => /* @__PURE__ */ jsxs10("span", { className: "workspace-file-breadcrumb-segment", children: [
       /* @__PURE__ */ jsx12(ChevronRight2, { "aria-hidden": "true", size: 12 }),
-      index === breadcrumbParts.length - 1 ? /* @__PURE__ */ jsx12("span", { className: "workspace-file-breadcrumb-current", "aria-current": "page", title: activeNode?.path, children: part }) : /* @__PURE__ */ jsx12(
+      index === breadcrumbParts.length - 1 ? /* @__PURE__ */ jsx12("span", { className: "workspace-file-breadcrumb-current", "aria-current": "page", title: navigationNode?.path, children: part }) : /* @__PURE__ */ jsx12(
         "button",
         {
           type: "button",
@@ -4821,9 +4812,9 @@ function GraphWorkspacePreviewPane({
           children: part
         }
       )
-    ] }, index)) : title ? /* @__PURE__ */ jsxs10("span", { className: "workspace-file-breadcrumb-segment", children: [
+    ] }, index)) : !isRootBreadcrumb && !virtualPrefix && breadcrumbTitle ? /* @__PURE__ */ jsxs10("span", { className: "workspace-file-breadcrumb-segment", children: [
       /* @__PURE__ */ jsx12(ChevronRight2, { "aria-hidden": "true", size: 12 }),
-      /* @__PURE__ */ jsx12("span", { className: "workspace-file-breadcrumb-current", title, children: title })
+      /* @__PURE__ */ jsx12("span", { className: "workspace-file-breadcrumb-current", "aria-current": "page", title: breadcrumbTitle, children: breadcrumbTitle })
     ] }) : null
   ] });
   return /* @__PURE__ */ jsxs10(
@@ -5119,6 +5110,14 @@ function GraphWorkspaceExplorer({
   const documents = useWorkspaceDocuments(workspaceAdapter, workspaceIdentity);
   const readingPositions = useMemo7(() => /* @__PURE__ */ new Map(), [documents.source]);
   const [navigation, setNavigation] = useState10({ scope: documents.source, paths: [], index: -1 });
+  const [browsedDirectoryPath, setBrowsedDirectoryPath] = useState10(null);
+  const breadcrumbNode = useMemo7(
+    () => browsedDirectoryPath === null ? activeNode : [...flattenWorkspaceNodes(tree).values()].find((node) => node.kind === "directory" && node.path === browsedDirectoryPath) ?? activeNode,
+    [activeNode, browsedDirectoryPath, tree]
+  );
+  useLayoutEffect3(() => {
+    setBrowsedDirectoryPath(null);
+  }, [activeNode?.id, documents.source]);
   const selectedFilePath = activeNode?.kind === "file" ? activeNode.path : null;
   const workspacePanelRef = useRef10(null);
   const treePanelRef = useRef10(null);
@@ -5589,6 +5588,7 @@ function GraphWorkspaceExplorer({
       onPreview: handlePreview,
       onPin: handlePin,
       onSelect: (nodeId) => {
+        setBrowsedDirectoryPath(null);
         setSelectedNodeId(nodeId);
       },
       onSelectNode: (node) => {
@@ -5600,6 +5600,7 @@ function GraphWorkspaceExplorer({
         }
       },
       onToggle: (path) => {
+        setBrowsedDirectoryPath(path);
         toggleDirectory(path);
         setFocusedLine(null);
       },
@@ -5616,6 +5617,7 @@ function GraphWorkspaceExplorer({
       readingPositions,
       ...navigation.index > 0 ? { onNavigateBack: () => navigatePreview(-1), previousFilePath: navigation.paths[navigation.index - 1] } : {},
       ...navigation.index < navigation.paths.length - 1 ? { onNavigateForward: () => navigatePreview(1) } : {},
+      breadcrumbNode,
       activeFilePath: activeNode?.kind === "file" ? activeNode.path : null,
       dirtyFilePaths,
       error: workspaceError ?? capabilityError,
@@ -5628,6 +5630,7 @@ function GraphWorkspaceExplorer({
       loadingMore,
       focusLine: focusedLine,
       onShowTree: (path) => {
+        setBrowsedDirectoryPath(path ?? "");
         setCollapsedPanel(isMobileViewport ? "viewer" : null);
         if (path && /^(?:thread-events|live|artifacts):(?:\/|$)/.test(path)) {
           const parts = path.split("/");
@@ -5646,6 +5649,7 @@ function GraphWorkspaceExplorer({
       ...workspaceAdapter?.textRangeRead ? { onLoadMore: handleLoadMore } : {},
       onCloseFileTab: handleCloseTab,
       onSelectFileTab: (path) => {
+        setBrowsedDirectoryPath(null);
         setNavigation((current) => ({ ...current, paths: [], index: -1 }));
         void focusWorkspacePath(path);
       },

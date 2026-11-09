@@ -58,6 +58,24 @@ describe('projectWorkspaceExplorerRows', () => {
     expect(projection.indexById.get('workspace:src/z.ts')).toBe(3);
   });
 
+  it('keeps the virtual event directory after every workspace entry, without reparenting files', () => {
+    const events: WorkspaceTreeNode = { ...node('thread-events:', 'directory', [
+      { ...node('thread-events:/turn-1/event.json', 'file'), kind: 'event' },
+    ]), id: 'thread-events', name: 'thread-events' };
+    const root = node('', 'directory', [events, node('z.xyz', 'file'),
+      node('thread-events', 'directory', [node('thread-events/real.txt', 'file')]),
+      node('results', 'directory', [node('results/output.xyz', 'file')]), node('a.txt', 'file')]);
+    for (const showEvents of [true, false]) {
+      const model = createWorkspaceExplorerModel({ ...root, children: root.children.filter(child => showEvents || child.id !== 'thread-events') });
+      const projection = projectWorkspaceExplorerRows(model, new Set(['thread-events:']));
+      expect(projection.rows.map(row => row.node.path)).toEqual(['', 'results', 'thread-events', 'a.txt', 'z.xyz',
+        ...(showEvents ? ['thread-events:', 'thread-events:/turn-1/event.json'] : [])]);
+      const file = projection.rows.find(row => row.node.path === 'z.xyz')!;
+      expect(file.depth).toBe(1);
+      expect(file.node.parentId).toBe(model.rootId);
+    }
+  });
+
   it('omits descendants of collapsed directories', () => {
     const model = createWorkspaceExplorerModel(
       node('', 'directory', [
