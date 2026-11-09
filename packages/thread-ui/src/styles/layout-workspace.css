@@ -715,9 +715,11 @@
 .thread-ui-shell .workspace-preview-back:hover { background: var(--theme-hover); color: var(--theme-fg); }
 .thread-ui-shell .workspace-file-toolbar .thread-graph-editor-tabs-action { padding: 0; border-left: 1px solid var(--theme-border); }
 .thread-ui-shell .workspace-file-more[aria-expanded="true"] { color: var(--theme-accent-strong); background: var(--theme-accent-soft); }
+.thread-ui-shell .workspace-preview-body { position: relative; }
 .thread-ui-shell .workspace-file-actions {
-  display: flex; align-self: flex-end; flex: none; min-width: 0; max-width: calc(100% - 8px); align-items: center; gap: 2px;
-  height: 28px; margin: 3px 4px; padding: 0 3px; border: 1px solid var(--theme-border); border-radius: 6px;
+  position: absolute; top: 3px; right: 4px; z-index: 20;
+  display: flex; min-width: 0; max-width: calc(100% - 8px); align-items: center; gap: 2px;
+  height: 28px; margin: 0; padding: 0 3px; border: 1px solid var(--theme-border); border-radius: 6px;
   background: var(--theme-surface); color: var(--theme-fg-soft);
 }
 .thread-ui-shell .workspace-file-actions button { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; }

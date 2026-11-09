@@ -468,6 +468,7 @@ describe('copy preview contents', () => {
     const detail = JSON.stringify({ id: 'event-1', kind: 'message', text: 'Full event content '.repeat(100), extra: { nested: true } }, null, 2);
     const event: WorkspaceTreeNode = { id: 'event-1', name: '001-message.json', path: 'thread-events:/turn/001-message.json', kind: 'event', children: [], detail, preview: 'Full event content' };
     const element = render(<GraphWorkspacePreviewPane {...props({ selectedTarget: { kind: 'event', node: event } })} />);
+    expect(element.querySelector('.thread-graph-file-preview-header')).toBeNull();
     openFileActions(element);
     await act(async () => copyButton(element).click());
     expect(writeText).toHaveBeenCalledExactlyOnceWith(detail);

@@ -2,7 +2,7 @@ import { Download, RefreshCw } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { translate, useI18n } from '../../i18n';
 
-/** An inline icon shelf inherits the viewer's theme and takes layout space. */
+/** An icon shelf floats over the preview without changing its layout or scroll position. */
 export function WorkspaceFileActions({ children, metadata, onDownload, onRefresh }: {
   children?: ReactNode;
   metadata?: string;

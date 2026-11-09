@@ -874,8 +874,8 @@ export function GraphWorkspacePreviewPane({
           trailingAction={previewActions}
         />
       ) : null}
-      {actionsOpen && fileActions}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="workspace-preview-body flex min-h-0 flex-1 flex-col overflow-hidden">
+        {actionsOpen && fileActions}
         {error ? (
           <div role="alert" className="workspace-file-alert flex items-center gap-3 border-b border-[color-mix(in_srgb,#e11d48_30%,var(--theme-border))] bg-[color-mix(in_srgb,#e11d48_8%,var(--theme-panel))] text-sm text-[color-mix(in_srgb,#e11d48_58%,var(--theme-fg))] px-5 py-3">
             <span className="min-w-0 flex-1">{translateReadOnly(error)}</span>
@@ -1039,9 +1039,9 @@ export function GraphWorkspacePreviewPane({
           </div>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="thread-graph-file-preview-header border-b px-4 py-3 text-xs uppercase tracking-[0.12em]">
+            {selectedTarget.kind !== 'event' && <div className="thread-graph-file-preview-header border-b px-4 py-3 text-xs uppercase tracking-[0.12em]">
               {selectedTarget.node.kind}
-            </div>
+            </div>}
             <GraphWorkspaceCodePreview
               content={
                 selectedTarget.node.detail ??
