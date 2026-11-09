@@ -22,19 +22,22 @@ import {
   ArrowRight,
   BookOpen,
   Code2,
+  Check,
+  ChevronRight,
+  Copy,
   Download,
   ExternalLink,
   FileQuestion,
   FileText,
   Pencil,
-  PanelLeftOpen,
   MoreHorizontal,
-  PanelRightClose,
   Save,
+  TriangleAlert,
   X,
 } from 'lucide-react';
 import { useFilePanel } from '../workbench/FilePanelContext';
 import { WorkspaceFileActions } from './WorkspaceFileMenu';
+import { copyWorkspacePreviewContents } from './workspacePreviewClipboard';
 import ReactMarkdown, { defaultUrlTransform, type Components } from 'react-markdown';
 import { localFileHref, relativeWorkspacePath, normalizeFileSystemPath } from '../workspacePaths';
 import { confirmAsync } from '../menu/confirmAsync';
@@ -503,6 +506,44 @@ const GraphWorkspaceMarkdownPreview = memo(
   },
 );
 
+function PreviewContentsCopyButton({ content }: { content: string }) {
+  useI18n();
+  const [state, setState] = useState<'idle' | 'copying' | 'copied' | 'failed'>('idle');
+  const pending = useRef(false);
+  const generation = useRef(0);
+  useEffect(() => {
+    generation.current++;
+    pending.current = false;
+    setState('idle');
+    return () => { generation.current++; };
+  }, [content]);
+  const message = state === 'copied' ? translate('files.contentsCopied')
+    : state === 'failed' ? translate('files.copyContentsFailed')
+    : state === 'copying' ? translate('files.copyingContents') : null;
+  return <>
+    <button type="button" className="thread-graph-editor-toolbar-button workspace-file-copy-contents"
+      aria-label={translate('files.copyContents')} title={message ?? translate('files.copyContents')} aria-disabled={state === 'copying'} aria-busy={state === 'copying'}
+      onClick={async () => {
+        if (pending.current) return;
+        pending.current = true;
+        const current = generation.current;
+        setState('copying');
+        try {
+          const copied = await copyWorkspacePreviewContents(content);
+          if (current === generation.current) setState(copied ? 'copied' : 'failed');
+        } catch {
+          if (current === generation.current) setState('failed');
+        } finally { if (current === generation.current) pending.current = false; }
+      }}>
+      {state === 'copied' ? <Check aria-hidden="true" size={16} />
+        : state === 'failed' ? <TriangleAlert aria-hidden="true" size={16} />
+        : <Copy aria-hidden="true" size={16} />}
+    </button>
+    {message ? <span role={state === 'failed' ? 'alert' : 'status'}
+      className={`workspace-file-action-feedback${state === 'failed' ? ' is-error' : ''}`}>{message}</span> : null}
+  </>;
+}
+
 /** A link's target that is not on this device: what and where, and its path to copy. */
 function MissingLinkedFile({ path }: { path: string }) {
   const [copied, setCopied] = useState(false);
@@ -522,6 +563,7 @@ function MissingLinkedFile({ path }: { path: string }) {
 
 export function GraphWorkspacePreviewPane({
   activeFilePath,
+  breadcrumbNode,
   dirtyFilePaths = new Set(),
   error,
   missingPath = null,
@@ -536,7 +578,7 @@ export function GraphWorkspacePreviewPane({
   resourceScopeKey,
   canSaveDocument,
   onSaveAndClose,
-  onReturnToFiles,
+  onShowTree,
   onCloseFileTab,
   onDirtyChange,
   mobileNavigation = false,
@@ -544,11 +586,9 @@ export function GraphWorkspacePreviewPane({
   onNavigateBack,
   previousFilePath,
   onNavigateForward,
-  onExpandExplorer,
   onOpenWorkspaceFile,
   onLoadMore,
   onSelectFileTab,
-  onCollapse,
   pdfUrl,
   previewFile,
   previewLoading,
@@ -558,6 +598,8 @@ export function GraphWorkspacePreviewPane({
   workspaceRootPath,
 }: {
   activeFilePath?: string | null;
+  /** Directory navigation changes breadcrumbs without changing the preview's file actions. */
+  breadcrumbNode?: WorkspaceTreeNode | null;
   dirtyFilePaths?: ReadonlySet<string>;
   error?: string | null;
   /** A linked file or folder that is not on this device. */
@@ -574,7 +616,8 @@ export function GraphWorkspacePreviewPane({
   resourceScopeKey?: string;
   canSaveDocument?: boolean;
   onSaveAndClose?: (path: string) => Promise<void>;
-  onReturnToFiles?: () => void;
+  /** Reveal the tree, optionally focusing a directory breadcrumb. */
+  onShowTree?: (path?: string) => void;
   onCloseFileTab?: (path: string) => void;
   onDirtyChange?: (path: string, dirty: boolean) => void;
   mobileNavigation?: boolean;
@@ -582,11 +625,9 @@ export function GraphWorkspacePreviewPane({
   onNavigateBack?: () => void;
   previousFilePath?: string;
   onNavigateForward?: () => void;
-  onExpandExplorer?: () => void;
   onOpenWorkspaceFile?: (path: string) => void;
   onLoadMore?: () => void;
   onSelectFileTab?: (path: string) => void;
-  onCollapse?: () => void;
   pdfUrl?: string | null;
   previewFile?: ThreadWorkspaceFilePreview | null;
   previewLoading?: boolean;
@@ -644,6 +685,12 @@ export function GraphWorkspacePreviewPane({
   const isLiveArtifactPreview = selectedTarget?.kind === 'live-molecule';
   const isArtifactPreview = Boolean(activeNode?.artifact && renderedArtifact);
   const isMoleculePreview = Boolean(moleculeSnapshot) || isArtifactPreview;
+  // Copy source text, never rendered HTML, line numbers, or the event's short
+  // tree preview. Document content also preserves unsaved edits.
+  const copyContents = selectedTarget?.kind === 'workspace-file'
+    ? !previewLoading && !downloadOnly && !imageUrl && !pdfUrl && previewFile && previewFile.path === activeNode?.path
+      ? document?.content ?? previewFile.content : null
+    : activeNode?.detail ?? (activeNode?.item ? JSON.stringify(activeNode.item, null, 2) : activeNode?.preview ?? null);
 
   useEffect(() => {
     if (typeof window.matchMedia !== 'function') {
@@ -752,44 +799,50 @@ export function GraphWorkspacePreviewPane({
   const documentMetadata = document ? `${documentState} · ${document.snapshot.encoding==='utf-8' ? 'UTF-8' : translate('files.safeUnknownEncoding')}${document.snapshot.bom ? ' BOM' : ''} · ${document.snapshot.eol.toUpperCase()}` : undefined;
   const inlineStatus = document && <span role="status" data-testid="workspace-document-status" className="sr-only" data-phase={document.phase}>{documentState}</span>;
   const backLabel = previousFilePath ? translate('files.backToDocument', { name: previousFilePath.split('/').pop() ?? previousFilePath }) : translate('workbench.goBack');
-  const navigationControls = <>
-    {onNavigateForward && <button type="button" onClick={onNavigateForward} aria-label={translate('files.goForward')} title={translate('files.goForward')} className="thread-graph-editor-toolbar-button flex h-6 w-6 shrink-0 items-center justify-center rounded"><ArrowRight data-icon="forward" size={14} /></button>}
-  </>;
-  const copyPath = activeNode?.path && !/^(?:\/|[a-z]:[\\/])/i.test(activeNode.path) && workspaceRootPath ? `${workspaceRootPath.replace(/[\\/]+$/, '')}/${activeNode.path}` : activeNode?.path ?? '';
-  const fileActions = activeNode && <WorkspaceFileActions path={copyPath} relativePath={workspaceRootPath ? relativeWorkspacePath(copyPath, workspaceRootPath) : null} key={activeNode.path} {...((documentMetadata || filePanel?.label) ? { metadata:[filePanel?.label, documentMetadata].filter(Boolean).join(' · ') } : {})}
+  const fileActions = activeNode && <WorkspaceFileActions key={activeNode.path} {...((documentMetadata || filePanel?.label) ? { metadata:[filePanel?.label, documentMetadata].filter(Boolean).join(' · ') } : {})}
     {...(document ? {onDownload:()=>{ if (!isProtected(document) && onDownloadFile) void onDownloadFile(); else downloadDraft(document); }, onRefresh: async () => {
       const previous = document.snapshot.contentHash;
       await documents?.checkDisk(document.snapshot.path);
       const current = documents?.documents.get(document.snapshot.path);
       if (current?.error) throw new Error(current.error);
       return translate(current?.phase==='conflict' ? 'files.safePhase.conflict' : current?.snapshot.contentHash===previous ? 'files.fileAlreadyCurrent' : 'files.fileReloaded');
-    }} : onDownloadFile ? {onDownload:()=>void onDownloadFile()} : {})}>{fileToolbar}{inlineStatus}{navigationControls}</WorkspaceFileActions>;
-  const viewerPaneToggle = onExpandExplorer ? (
-    <button
-      type="button"
-      onClick={onExpandExplorer}
-      data-testid="expand-explorer"
-      className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-[var(--theme-fg-muted)] transition hover:bg-[var(--theme-hover)] hover:text-[var(--theme-fg)]"
-      title={translate("files.showExplorer")}
-      aria-label={translate("files.showExplorer")}
-    >
-      <PanelLeftOpen data-icon="expand-explorer" className="h-3.5 w-3.5" />
-    </button>
-  ) : onCollapse ? (
-    <button
-      type="button"
-      onClick={onCollapse}
-      data-testid="collapse-viewer"
-      className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-[var(--theme-fg-muted)] transition hover:bg-[var(--theme-hover)] hover:text-[var(--theme-fg)]"
-      title={translate("files.hideEditor")}
-      aria-label={translate("files.hideEditor")}
-    >
-      <PanelRightClose data-icon="collapse-viewer" className="h-3.5 w-3.5" />
-    </button>
-  ) : null;
-
-  const previewNavigation = (onNavigateBack || onReturnToFiles || onExpandExplorer) && <button type="button" className="workspace-preview-back" onClick={onNavigateBack ?? onReturnToFiles ?? onExpandExplorer} aria-label={onNavigateBack ? backLabel : translate('files.backToFiles')} title={onNavigateBack ? backLabel : translate('files.backToFiles')} data-testid="expand-explorer"><ArrowLeft data-icon="back" size={18}/></button>;
-  const previewActions = <button ref={actionTrigger} type="button" className="thread-graph-editor-toolbar-button workspace-file-more" aria-label={translate('files.fileActions')} title={translate('files.fileActions')} aria-expanded={actionsOpen} onClick={() => setActionsOpen(open => !open)}><MoreHorizontal data-icon="more" size={18}/></button>;
+    }} : onDownloadFile ? {onDownload:()=>void onDownloadFile()} : {})}>
+    {fileToolbar}{inlineStatus}
+    {copyContents !== null && <PreviewContentsCopyButton key={`${resourceScopeKey}:${selectedTarget?.kind}:${activeNode.path}`} content={copyContents} />}
+  </WorkspaceFileActions>;
+  const previewNavigation = (onNavigateBack || onNavigateForward) && <>
+    {onNavigateBack && <button type="button" className="workspace-preview-back" onClick={onNavigateBack} aria-label={backLabel} title={backLabel}><ArrowLeft data-icon="back" size={18}/></button>}
+    {onNavigateForward && <button type="button" className="thread-graph-editor-toolbar-button" onClick={onNavigateForward} aria-label={translate('files.goForward')} title={translate('files.goForward')}><ArrowRight data-icon="forward" size={16}/></button>}
+  </>;
+  const previewActions = <>
+    <button ref={actionTrigger} type="button" className="thread-graph-editor-toolbar-button workspace-file-more" aria-label={translate('files.fileActions')} title={translate('files.fileActions')} aria-expanded={actionsOpen} onClick={() => setActionsOpen(open => !open)}><MoreHorizontal data-icon="more" size={18}/></button>
+  </>;
+  const navigationNode = breadcrumbNode ?? activeNode;
+  const virtualPrefix = navigationNode?.path.match(/^([a-z][a-z-]+:)(?:\/|$)/)?.[1];
+  const breadcrumbPath = virtualPrefix ? navigationNode!.path.slice(virtualPrefix.length).replace(/^\//, '')
+    : navigationNode && (navigationNode.kind === 'file' || navigationNode.kind === 'directory') ? relativeWorkspacePath(navigationNode.path, workspaceRootPath ?? '') : null;
+  const breadcrumbParts = breadcrumbPath?.split('/').filter(Boolean) ?? [];
+  const isRootBreadcrumb = navigationNode?.kind === 'directory' && !virtualPrefix && breadcrumbPath === '';
+  const breadcrumbTitle = navigationNode?.path || navigationNode?.name;
+  const directoryBreadcrumb = onShowTree ?? onOpenWorkspaceFile;
+  const rootBreadcrumbLabel = workspaceRootPath?.replace(/[\\/]+$/, '').split(/[\\/]/).at(-1) || translate('files.workspace');
+  const breadcrumbs = directoryBreadcrumb && <nav className="workspace-file-breadcrumbs" aria-label={translate('files.workspaceRoot')}>
+    {isRootBreadcrumb ? <span className="workspace-file-breadcrumb-current" aria-current="page" title={workspaceRootPath || breadcrumbTitle}>{navigationNode.name || rootBreadcrumbLabel}</span>
+      : onShowTree ? <button type="button" className="workspace-file-breadcrumb" aria-label={translate('files.workspaceRoot')}
+      title={workspaceRootPath || translate('files.workspaceRoot')} onClick={() => onShowTree()}>
+      {rootBreadcrumbLabel}
+    </button> : <span className="workspace-file-breadcrumb">{rootBreadcrumbLabel}</span>}
+    {virtualPrefix && <span className="workspace-file-breadcrumb-segment"><ChevronRight aria-hidden="true" size={12} />
+      {breadcrumbParts.length ? <button type="button" className="workspace-file-breadcrumb" title={virtualPrefix} onClick={() => directoryBreadcrumb?.(virtualPrefix)}>{virtualPrefix.slice(0, -1)}</button>
+        : <span className="workspace-file-breadcrumb-current" aria-current="page" title={virtualPrefix}>{navigationNode?.name || virtualPrefix.slice(0, -1)}</span>}
+    </span>}
+    {breadcrumbParts.length ? breadcrumbParts.map((part, index) => <span className="workspace-file-breadcrumb-segment" key={index}>
+      <ChevronRight aria-hidden="true" size={12} />
+      {index === breadcrumbParts.length - 1 ? <span className="workspace-file-breadcrumb-current" aria-current="page" title={navigationNode?.path}>{part}</span>
+        : <button type="button" className="workspace-file-breadcrumb" title={`${virtualPrefix ? `${virtualPrefix}/` : ''}${breadcrumbParts.slice(0, index + 1).join('/')}`}
+          onClick={() => directoryBreadcrumb?.(`${virtualPrefix ? `${virtualPrefix}/` : ''}${breadcrumbParts.slice(0, index + 1).join('/')}`)}>{part}</button>}
+    </span>) : !isRootBreadcrumb && !virtualPrefix && breadcrumbTitle ? <span className="workspace-file-breadcrumb-segment"><ChevronRight aria-hidden="true" size={12} /><span className="workspace-file-breadcrumb-current" aria-current="page" title={breadcrumbTitle}>{breadcrumbTitle}</span></span> : null}
+  </nav>;
 
   return (
     <section
@@ -797,16 +850,16 @@ export function GraphWorkspacePreviewPane({
       className="thread-graph-viewer flex h-full min-h-0 flex-col overflow-hidden rounded-md"
       data-preview-target-kind={selectedTarget?.kind ?? 'none'}
     >
-      {!mobileNavigation && selectedTarget?.kind !== 'workspace-file' ? (
+      {!mobileNavigation && selectedTarget?.kind !== 'workspace-file' && (!breadcrumbs || selectedTarget?.kind === 'artifact' || selectedTarget?.kind === 'live-molecule') ? (
         <div className="thread-graph-viewer-header flex h-9 shrink-0 items-center justify-between gap-2 border-b px-2.5">
           <span className="min-w-0 truncate text-xs font-medium text-[var(--theme-fg)]">
             {title ?? translate("files.preview_f1fbb2")}
           </span>
-          {viewerPaneToggle}
         </div>
       ) : null}
+      {fileTabs.length > 0 && breadcrumbs}
       {fileTabs.length === 0 && <div className="workspace-file-toolbar flex min-h-9 shrink-0 items-center justify-between border-b px-1">
-        <div className="workspace-file-navigation flex items-center">{previewNavigation}</div><span className="min-w-0 flex-1 truncate text-xs" title={filePanel?.label}>{title}</span><div className="flex shrink-0 items-center">{previewActions}</div>
+        <div className="workspace-file-navigation flex items-center">{previewNavigation}</div>{breadcrumbs || <span className="min-w-0 flex-1 truncate text-xs" title={filePanel?.label}>{title}</span>}<div className="flex shrink-0 items-center">{previewActions}</div>
       </div>}
       {fileTabs.length > 0 && onCloseFileTab && onSelectFileTab ? (
         <WorkspaceFileTabs
@@ -821,8 +874,8 @@ export function GraphWorkspacePreviewPane({
           trailingAction={previewActions}
         />
       ) : null}
-      {actionsOpen && fileActions}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="workspace-preview-body flex min-h-0 flex-1 flex-col overflow-hidden">
+        {actionsOpen && fileActions}
         {error ? (
           <div role="alert" className="workspace-file-alert flex items-center gap-3 border-b border-[color-mix(in_srgb,#e11d48_30%,var(--theme-border))] bg-[color-mix(in_srgb,#e11d48_8%,var(--theme-panel))] text-sm text-[color-mix(in_srgb,#e11d48_58%,var(--theme-fg))] px-5 py-3">
             <span className="min-w-0 flex-1">{translateReadOnly(error)}</span>
@@ -986,9 +1039,9 @@ export function GraphWorkspacePreviewPane({
           </div>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
-            <div className="thread-graph-file-preview-header border-b px-4 py-3 text-xs uppercase tracking-[0.12em]">
+            {selectedTarget.kind !== 'event' && <div className="thread-graph-file-preview-header border-b px-4 py-3 text-xs uppercase tracking-[0.12em]">
               {selectedTarget.node.kind}
-            </div>
+            </div>}
             <GraphWorkspaceCodePreview
               content={
                 selectedTarget.node.detail ??

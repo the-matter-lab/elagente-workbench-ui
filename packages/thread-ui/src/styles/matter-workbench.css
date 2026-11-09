@@ -1459,9 +1459,8 @@
 .workbench-collaboration [data-status='running'] { color: var(--theme-accent-strong); }
 .workbench-reference-status, .workbench-persistence-notice { padding: 10px 16px; color: var(--theme-fg-muted); font-size: 11px; }
 .workbench-reference .thread-graph-message-list { padding-bottom: 32px; }
-/* The reference header already names this region. Keep its compact tree toolbar
-   for actions rather than squeezing a duplicate heading into a vertical column. */
-.workbench-files .thread-graph-explorer-header h2 { display: none; }
+/* The Explorer toolbar spans the tree and editor and stays put in either state. */
+.workbench-files .thread-graph-explorer-header h2 { display: block; }
 @media (max-width: 639px) {
   .workbench-panels :is(.workbench-pane-heading, .workbench-mobile-views, .workbench-collaboration, .workbench-reference-status) button { min-height: 44px; }
   .workbench-pane-heading { min-height: 48px; }

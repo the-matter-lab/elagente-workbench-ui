@@ -1,4 +1,11 @@
 export const filesEn = {
+  "files.copyContents": "Copy contents",
+  "files.copyingContents": "Copying contents…",
+  "files.contentsCopied": "Contents copied",
+  "files.copyContentsFailed": "Could not copy contents. Try again or select and copy the text.",
+
+  "files.showTree": "Show tree",
+  "files.hideTree": "Hide tree",
   "files.colorModeShowing": "Choose the color mode for this browser. Currently showing {{value1}}.",
   "files.pluginHarnessMissing": "Install DeepSeek Harness (dsh) on this device to use this plugin.",
   "files.pluginUnsupportedPlatform": "Terminal is unavailable on this platform.",

@@ -1,3 +1,4 @@
+import { compareWorkspaceNodes } from '../workspaceTree';
 import { matchWorkspaceExplorerNode } from './workspaceExplorerFilter';
 import type {
   WorkspaceExplorerModel,
@@ -11,13 +12,7 @@ function sortedChildIds(model: WorkspaceExplorerModel, childIds: string[]) {
     if (!left || !right) {
       return left ? -1 : right ? 1 : 0;
     }
-    if (left.kind === 'directory' && right.kind !== 'directory') {
-      return -1;
-    }
-    if (left.kind !== 'directory' && right.kind === 'directory') {
-      return 1;
-    }
-    return left.name.localeCompare(right.name);
+    return compareWorkspaceNodes(left.source, right.source);
   });
 }
 

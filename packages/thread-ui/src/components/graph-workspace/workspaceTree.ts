@@ -363,9 +363,14 @@ export function addPathNode(
 }
 
 export function compareWorkspaceNodes(
-  left: WorkspaceTreeNode,
-  right: WorkspaceTreeNode,
+  left: Pick<WorkspaceTreeNode, 'id' | 'path' | 'kind' | 'name'>,
+  right: Pick<WorkspaceTreeNode, 'id' | 'path' | 'kind' | 'name'>,
 ) {
+  // Debug events are a virtual sibling of workspace files, never their parent.
+  // Keep them after real files as well as real directories.
+  const leftEvents = left.id === 'thread-events' && left.path === 'thread-events:';
+  const rightEvents = right.id === 'thread-events' && right.path === 'thread-events:';
+  if (leftEvents !== rightEvents) return leftEvents ? 1 : -1;
   if (left.kind === 'directory' && right.kind !== 'directory') {
     return -1;
   }

@@ -1,6 +1,6 @@
 import {
   translate
-} from "./chunk-W355VD7T.js";
+} from "./chunk-V4KJ3AYQ.js";
 
 // src/components/themeHooks.ts
 import { useSyncExternalStore } from "react";
@@ -285,6 +285,9 @@ function addPathNode(root, path, node) {
   });
 }
 function compareWorkspaceNodes(left, right) {
+  const leftEvents = left.id === "thread-events" && left.path === "thread-events:";
+  const rightEvents = right.id === "thread-events" && right.path === "thread-events:";
+  if (leftEvents !== rightEvents) return leftEvents ? 1 : -1;
   if (left.kind === "directory" && right.kind !== "directory") {
     return -1;
   }

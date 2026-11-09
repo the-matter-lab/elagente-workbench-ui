@@ -715,9 +715,11 @@
 .thread-ui-shell .workspace-preview-back:hover { background: var(--theme-hover); color: var(--theme-fg); }
 .thread-ui-shell .workspace-file-toolbar .thread-graph-editor-tabs-action { padding: 0; border-left: 1px solid var(--theme-border); }
 .thread-ui-shell .workspace-file-more[aria-expanded="true"] { color: var(--theme-accent-strong); background: var(--theme-accent-soft); }
+.thread-ui-shell .workspace-preview-body { position: relative; }
 .thread-ui-shell .workspace-file-actions {
-  display: flex; align-self: flex-end; flex: none; min-width: 0; max-width: calc(100% - 8px); align-items: center; gap: 2px;
-  height: 28px; margin: 3px 4px; padding: 0 3px; border: 1px solid var(--theme-border); border-radius: 6px;
+  position: absolute; top: 3px; right: 4px; z-index: 20;
+  display: flex; min-width: 0; max-width: calc(100% - 8px); align-items: center; gap: 2px;
+  height: 28px; margin: 0; padding: 0 3px; border: 1px solid var(--theme-border); border-radius: 6px;
   background: var(--theme-surface); color: var(--theme-fg-soft);
 }
 .thread-ui-shell .workspace-file-actions button { display: inline-flex; flex: none; align-items: center; justify-content: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 4px; background: transparent; color: inherit; }
@@ -824,3 +826,50 @@
 /* A copy item shows its result before the menu closes; a failure stays. */
 .workspace-node-menu [data-copy-state='copied'] svg { color: var(--theme-accent-solid); }
 .workspace-node-menu [data-copy-state='failed'] { color: var(--theme-danger, #e5484d); }
+
+/* A stable Explorer header owns the tree toggle, above both panes. */
+.thread-ui-shell .thread-graph-explorer-header h2 { flex-shrink: 0; }
+.thread-ui-shell .thread-graph-explorer-toolbar { margin-left: auto; }
+.thread-ui-shell .workspace-file-breadcrumbs {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--theme-border);
+  white-space: nowrap;
+  font-size: 11px;
+}
+.thread-ui-shell .workspace-file-breadcrumb {
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+  padding: 1px 2px;
+  color: var(--theme-status-info);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.thread-ui-shell .workspace-file-breadcrumb:hover { background: var(--theme-hover); }
+.thread-ui-shell .workspace-file-breadcrumb:focus-visible { outline: 2px solid var(--theme-focus-ring); }
+.thread-ui-shell .workspace-file-breadcrumb-current { font-weight: 600; }
+.thread-ui-shell .workspace-file-copy-contents {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+.thread-ui-shell .workspace-file-copy-contents:hover { background: var(--theme-hover); }
+.thread-ui-shell .workspace-file-breadcrumb-segment { display: inline-flex; align-items: center; gap: 4px; }
+.thread-ui-shell .workspace-file-toolbar > .workspace-file-breadcrumbs { flex: 1; border-bottom: 0; }
+.thread-ui-shell .thread-graph-explorer { container: explorer / inline-size; }
+@container explorer (max-width: 360px) {
+  .thread-ui-shell .thread-graph-explorer-header h2 { display: none; }
+  .thread-ui-shell .thread-graph-explorer-toolbar { gap: 2px; }
+  .thread-ui-shell .thread-graph-explorer-header { padding-inline: 4px; }
+}

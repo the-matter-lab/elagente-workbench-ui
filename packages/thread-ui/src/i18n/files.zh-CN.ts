@@ -1,4 +1,11 @@
 export const filesZhCN = {
+  "files.copyContents": "复制内容",
+  "files.copyingContents": "正在复制内容…",
+  "files.contentsCopied": "内容已复制",
+  "files.copyContentsFailed": "无法复制内容。请重试或选中文本后复制。",
+
+  "files.showTree": "显示文件树",
+  "files.hideTree": "隐藏文件树",
   "files.colorModeShowing": "选择此浏览器的颜色模式。当前显示为{{value1}}。",
   "files.pluginHarnessMissing": "在这台设备上安装 DeepSeek Harness（dsh）后才能使用此插件。",
   "files.pluginUnsupportedPlatform": "此平台不支持终端。",

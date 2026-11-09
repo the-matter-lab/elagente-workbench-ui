@@ -20,9 +20,11 @@ vi.mock('./GraphWorkspacePreviewPane', () => ({
   ) => (node ? { kind: node.kind, node } : null),
   GraphWorkspacePreviewPane: ({
     focusLine,
+    breadcrumbNode,
     mobileNavigation,
     onCollapse,
     onExpandExplorer,
+    onShowTree,
     pdfUrl,
     previewFile,
     downloadOnly,
@@ -30,6 +32,7 @@ vi.mock('./GraphWorkspacePreviewPane', () => ({
     error,
     missingPath,
   }: {
+    breadcrumbNode?: { path: string; kind: string } | null;
     error?: string | null;
     missingPath?: string | null;
     downloadOnly?: boolean;
@@ -38,13 +41,15 @@ vi.mock('./GraphWorkspacePreviewPane', () => ({
     focusLine?: number | null;
     mobileNavigation?: boolean;
     onCollapse?: () => void;
+    onShowTree?: (path?: string) => void;
     onExpandExplorer?: () => void;
     previewFile?: ThreadWorkspaceFilePreview | null;
   }) => (
-    <div data-testid="preview-file" data-focus-line={focusLine ?? undefined} data-pdf-url={pdfUrl ?? undefined}
+    <div data-testid="preview-file" data-breadcrumb-path={breadcrumbNode?.path} data-focus-line={focusLine ?? undefined} data-pdf-url={pdfUrl ?? undefined}
       data-download-only={downloadOnly ? 'true' : undefined} data-download-reason={downloadReason ?? undefined}
       data-missing-path={missingPath ?? undefined} data-error={error ?? undefined}>
       {previewFile?.path ?? 'none'}
+      {onShowTree && <button type="button" aria-label="Event parent breadcrumb" onClick={() => onShowTree('thread-events:/turn-1')} />}
       {onCollapse ? (
         <button type="button" aria-label="Hide Editor" onClick={onCollapse} />
       ) : null}
@@ -397,6 +402,11 @@ describe('GraphWorkspaceExplorer', () => {
     await act(async () => eventRow()!.click());
     await vi.waitFor(() => expect(host!.querySelector('[data-testid="preview-file"]')?.textContent).toContain('none'));
     readFile.mockClear();
+    await act(async () => host!.querySelector<HTMLButtonElement>('[aria-label="Hide tree"]')!.click());
+    await act(async () => host!.querySelector<HTMLButtonElement>('[aria-label="Event parent breadcrumb"]')!.click());
+    expect(host!.querySelector('[role="tree"]')).toBeTruthy();
+    expect(eventRow()).not.toBeNull();
+    expect(readFile).not.toHaveBeenCalled();
     const more = () => host!.querySelector<HTMLButtonElement>('button[aria-label="More Explorer actions"]')!;
     act(() => more().click());
     const toggle = [...host!.querySelectorAll<HTMLButtonElement>('[role="menuitemcheckbox"]')]
@@ -683,50 +693,71 @@ describe('GraphWorkspaceExplorer', () => {
       host?.querySelector('[data-testid="preview-file"]')?.textContent,
     ).toBe('README.md');
     expect(host?.querySelector('[role="tree"]')).toBeNull();
-    await act(async () => host!.querySelector<HTMLButtonElement>('[aria-label="Back to files"]')!.click());
+    await act(async () => host!.querySelector<HTMLButtonElement>('[aria-label="Show tree"]')!.click());
     expect(host?.querySelector('[role="tree"]')).toBeTruthy();
     expect(host?.querySelector('[data-testid="preview-file"]')).toBeNull();
     expect(host?.querySelector('[data-testid="workspace-upload-file-input"]')).toBeTruthy();
   });
 
-  it('restores split view after either pane is hidden', async () => {
+  it('keeps one toolbar and tree toggle in place while hiding and showing the tree', async () => {
     const { adapter, readFile } = createAdapter();
     await renderExplorer(adapter);
     await vi.waitFor(() => expect(readFile).toHaveBeenCalled());
-
-    await act(async () => {
-      host
-        ?.querySelector<HTMLButtonElement>('[aria-label="Hide Explorer"]')
-        ?.click();
-    });
+    const header = host!.querySelector('.thread-graph-explorer-header')!;
+    const actions = () => Array.from(header.querySelectorAll('button')).map(button => button.getAttribute('aria-label'));
+    const shownActions = actions();
+    const toggle = host!.querySelector<HTMLButtonElement>('[aria-label="Hide tree"]')!;
+    expect(toggle).toBeTruthy();
+    expect(host?.querySelector('[aria-label="Hide Editor"]')).toBeNull();
+    await act(async () => toggle.click());
     expect(host?.querySelector('[role="tree"]')).toBeNull();
-    expect(
-      host?.querySelector('[aria-label="Show Explorer"]'),
-    ).toBeTruthy();
-
-    await act(async () => {
-      host
-        ?.querySelector<HTMLButtonElement>('[aria-label="Show Explorer"]')
-        ?.click();
-    });
+    expect(host?.querySelector('[data-testid="preview-file"]')).toBeTruthy();
+    expect(host?.querySelector('.thread-graph-explorer-header')).toBe(header);
+    expect(host?.querySelector('[aria-label="Show tree"]')).toBe(toggle);
+    expect(actions().slice(0, -1)).toEqual(shownActions.slice(0, -1));
+    await act(async () => toggle.click());
     expect(host?.querySelector('[role="tree"]')).toBeTruthy();
     expect(host?.querySelector('[data-testid="preview-file"]')).toBeTruthy();
-
-    await act(async () => {
-      host
-        ?.querySelector<HTMLButtonElement>('[aria-label="Hide Editor"]')
-        ?.click();
-    });
-    expect(host?.querySelector('[data-testid="preview-file"]')).toBeNull();
-    expect(host?.querySelector('[aria-label="Show Editor"]')).toBeTruthy();
-
-    await act(async () => {
-      host
-        ?.querySelector<HTMLButtonElement>('[aria-label="Show Editor"]')
-        ?.click();
-    });
+    expect(host?.querySelectorAll('[data-testid="toggle-explorer-tree"]')).toHaveLength(1);
+    await act(async () => header.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', metaKey: true, bubbles: true })));
+    expect(host?.querySelector('[role="tree"]')).toBeNull();
+    await act(async () => header.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', ctrlKey: true, bubbles: true })));
     expect(host?.querySelector('[role="tree"]')).toBeTruthy();
-    expect(host?.querySelector('[data-testid="preview-file"]')).toBeTruthy();
+    await act(async () => toggle.click());
+    await act(async () => host!.querySelector<HTMLButtonElement>('[aria-label="Filter workspace"]')!.click());
+    expect(host?.querySelector('[role="tree"]')).toBeTruthy();
+    expect(host?.querySelector('[aria-label="Filter workspace files"]')).toBeTruthy();
+    await vi.waitFor(() => expect(document.activeElement).toBe(host?.querySelector('[aria-label="Filter workspace files"]')));
+    await act(async () => toggle.click());
+    await act(async () => host!.querySelector<HTMLButtonElement>('[aria-label="Filter workspace"]')!.click());
+    await vi.waitFor(() => expect(document.activeElement).toBe(host?.querySelector('[aria-label="Filter workspace files"]')));
+    const editor = document.createElement('textarea');
+    editor.className = 'monaco-editor';
+    host!.querySelector('[data-testid="preview-file"]')!.append(editor);
+    await act(async () => editor.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', metaKey: true, bubbles: true })));
+    expect(host?.querySelector('[role="tree"]')).toBeNull();
+  });
+
+  it('updates directory breadcrumbs on selection and expansion, then returns to the file path', async () => {
+    const { adapter, listTree } = createAdapter();
+    listTree.mockImplementation(async () => directory('', [file('README.md'), directory('src', [
+      file('src/index.ts'), directory('src/nested', [file('src/nested/deep.txt')]),
+    ])]));
+    await renderExplorer(adapter);
+    const path = () => host!.querySelector('[data-testid="preview-file"]')?.getAttribute('data-breadcrumb-path');
+    await act(async () => buttonNamed('README.md')!.click());
+    expect(path()).toBe('README.md');
+    await act(async () => host!.querySelector<HTMLButtonElement>('[aria-label="Expand src"]')!.click());
+    expect(path()).toBe('src');
+    expect(host!.querySelector('[data-testid="preview-file"]')?.textContent).toContain('README.md');
+    await act(async () => buttonNamed('nested')!.click());
+    expect(path()).toBe('src/nested');
+    await act(async () => host!.querySelector<HTMLButtonElement>('[aria-label="Expand nested"]')!.click());
+    expect(path()).toBe('src/nested');
+    await act(async () => buttonNamed('deep.txt')!.click());
+    expect(path()).toBe('src/nested/deep.txt');
+    await act(async () => host!.querySelector<HTMLButtonElement>('[data-explorer-path=""] button')!.click());
+    expect(path()).toBe('');
   });
 
   it('collapses folders and filters across loaded descendants', async () => {
