@@ -529,6 +529,13 @@ export function GraphWorkspaceExplorer({
     ...(workspaceAdapter?.createFile ? { onCreateFile: openCreateFile } : {}),
   };
 
+  const treeHidden = !minimized && (collapsedPanel === 'explorer' || (isMobileViewport && collapsedPanel === null && activeNode?.kind === 'file'));
+  function toggleTree() {
+    if (minimized) { filePanel?.setMinimized?.(false); setCollapsedPanel(isMobileViewport ? 'explorer' : null); return; }
+    if (!treeHidden) rememberExplorerScroll();
+    setCollapsedPanel(treeHidden ? (isMobileViewport ? 'viewer' : null) : 'explorer');
+  }
+
   const explorerPanel = (
     <WorkspaceExplorerPanel
       {...(setShowHidden ? {showHidden, onShowHiddenChange: setShowHidden} : {})}
@@ -564,18 +571,18 @@ export function GraphWorkspaceExplorer({
       filterQuery={filterQuery}
       initialLoading={Boolean(workspaceAdapter && !adapterModel && loadingTree)}
       rootError={workspaceAdapter && !adapterModel ? workspaceError : null}
-      {...(minimized ? {} : collapsedPanel === 'viewer'
-        ? {
-            onExpandViewer: () => { if (!isMobileViewport || activeNode?.kind === 'file') setCollapsedPanel(isMobileViewport ? 'explorer' : null); },
-            // On phones the editor can only be shown for an open file.
-            expandViewerAvailable: !isMobileViewport || activeNode?.kind === 'file',
-          }
-        : {
-            onCollapse: () => {
-              rememberExplorerScroll();
-              setCollapsedPanel('explorer');
-            },
-          })}
+      treeHidden={treeHidden}
+      onToggleTree={toggleTree}
+      renderBody={(treeBody) => {
+        const treePane = <div className="thread-graph-workspace-explorer-pane flex h-full min-h-0 flex-col overflow-hidden">{treeBody}</div>;
+        if (minimized || (isMobileViewport && !treeHidden)) return treePane;
+        if (treeHidden) return <div className="min-h-0 flex-1 overflow-hidden">{viewerPanel}</div>;
+        return <ResizablePanelGroup direction="horizontal" className="thread-graph-workspace-resizable min-h-0 flex-1">
+          <ResizablePanel ref={treePanelRef} defaultSize={28} minSize={18}>{treePane}</ResizablePanel>
+          <ResizableHandle className="thread-graph-workspace-resize-handle w-1 bg-transparent after:w-px after:bg-[var(--theme-border)]" />
+          <ResizablePanel defaultSize={72} minSize={40}><div className="thread-graph-workspace-viewer-pane h-full min-h-0 overflow-hidden">{viewerPanel}</div></ResizablePanel>
+        </ResizablePanelGroup>;
+      }}
       expandedPaths={expandedPaths}
       loadingPaths={loadingDirectoryPaths}
       loading={loadingTree}
@@ -630,6 +637,16 @@ export function GraphWorkspaceExplorer({
       imageUrl={imageUrl}
       loadingMore={loadingMore}
       focusLine={focusedLine}
+      onShowTree={(path?: string) => {
+        setCollapsedPanel(isMobileViewport ? 'viewer' : null);
+        if (path && /^(?:thread-events|live|artifacts):(?:\/|$)/.test(path)) {
+          const parts = path.split('/');
+          for (let index = 1; index <= parts.length; index++) {
+            const directory = parts.slice(0, index).join('/');
+            if (!expandedPaths.has(directory)) toggleDirectory(directory);
+          }
+        } else if (path) void focusWorkspacePath(path);
+      }}
       onOpenWorkspaceFile={(path) => {
         // Returning to the directory ends a preview chain. A link opened from
         // that same document starts a fresh chain with its current position.
@@ -639,7 +656,6 @@ export function GraphWorkspaceExplorer({
         void focusWorkspacePath(path);
       }}
       {...(workspaceAdapter?.textRangeRead ? { onLoadMore: handleLoadMore } : {})}
-      onReturnToFiles={() => { setNavigation(current => ({ ...current, paths: [], index: -1 })); setCollapsedPanel('viewer'); }}
       onCloseFileTab={handleCloseTab}
       onSelectFileTab={(path) => {
         setNavigation(current => ({ ...current, paths: [], index: -1 }));
@@ -649,14 +665,6 @@ export function GraphWorkspaceExplorer({
       resourceScopeKey={documents.source}
       canSaveDocument={Boolean(workspaceAdapter?.saveDocument)}
       onSaveAndClose={async (path) => { if (await documents.save(path)) handleCloseTab(path); }}
-      {...(collapsedPanel === 'explorer' || isMobileViewport
-        ? { onExpandExplorer: () => { setNavigation(current => ({ ...current, paths: [], index: -1 })); setCollapsedPanel(isMobileViewport ? 'viewer' : null); } }
-        : {
-            onCollapse: () => {
-              rememberExplorerScroll();
-              setCollapsedPanel('viewer');
-            },
-          })}
       pdfUrl={pdfUrl}
       previewFile={currentPreviewFile}
       previewLoading={previewLoading}
@@ -722,61 +730,17 @@ export function GraphWorkspaceExplorer({
     />
   </>;
 
-  if (minimized) {
-    return (
-      <div data-testid="workspace-panel" data-minimized="true" className="relative h-full min-h-0 w-full overflow-hidden p-1">
-        {explorerPanel}
-        {overlays}
-      </div>
-    );
-  }
-
-  if (collapsedPanel === 'explorer' || (isMobileViewport && collapsedPanel === null && activeNode?.kind === 'file')) {
-    return (
-      <div
-        data-testid="workspace-panel"
-        className="relative h-full min-h-0 w-full overflow-hidden p-1"
-      >
-        {viewerPanel}
-        {overlays}
-      </div>
-    );
-  }
-
-  if (collapsedPanel === 'viewer' || isMobileViewport) {
-    return (
-      <div
-        data-testid="workspace-panel"
-        className="relative h-full min-h-0 w-full overflow-hidden p-1"
-      >
-        {explorerPanel}
-        {overlays}
-      </div>
-    );
-  }
-
   return (
-    <div
-      ref={workspacePanelRef}
-      data-testid="workspace-panel"
-      className="flex h-full min-h-0 w-full overflow-hidden bg-transparent p-1"
-    >
-      <ResizablePanelGroup
-          direction="horizontal"
-          className="thread-graph-workspace-resizable"
-        >
-          <ResizablePanel ref={treePanelRef} defaultSize={28} minSize={18}>
-            <div className="thread-graph-workspace-explorer-pane h-full min-h-0 overflow-hidden">
-              {explorerPanel}
-            </div>
-          </ResizablePanel>
-          <ResizableHandle className="thread-graph-workspace-resize-handle w-1 bg-transparent after:w-px after:bg-slate-200/80 after:transition-colors hover:after:bg-slate-300 dark:after:bg-[#303642] dark:hover:after:bg-[#475063]" />
-          <ResizablePanel defaultSize={72} minSize={40}>
-            <div className="thread-graph-workspace-viewer-pane h-full min-h-0 overflow-hidden">
-              {viewerPanel}
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+    <div ref={workspacePanelRef} data-testid="workspace-panel" data-minimized={minimized || undefined}
+      onKeyDownCapture={(event) => {
+        if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey && event.key.toLowerCase() === 'b') {
+          event.preventDefault();
+          event.stopPropagation();
+          toggleTree();
+        }
+      }}
+      className="relative h-full min-h-0 w-full overflow-hidden p-1">
+      {explorerPanel}
       {overlays}
     </div>
   );

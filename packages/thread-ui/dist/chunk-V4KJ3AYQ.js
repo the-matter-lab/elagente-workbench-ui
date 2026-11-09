@@ -1981,6 +1981,12 @@ var devicesEn = {
 
 // src/i18n/files.en.ts
 var filesEn = {
+  "files.copyContents": "Copy contents",
+  "files.copyingContents": "Copying contents\u2026",
+  "files.contentsCopied": "Contents copied",
+  "files.copyContentsFailed": "Could not copy contents. Try again or select and copy the text.",
+  "files.showTree": "Show tree",
+  "files.hideTree": "Hide tree",
   "files.colorModeShowing": "Choose the color mode for this browser. Currently showing {{value1}}.",
   "files.pluginHarnessMissing": "Install DeepSeek Harness (dsh) on this device to use this plugin.",
   "files.pluginUnsupportedPlatform": "Terminal is unavailable on this platform.",
@@ -6056,6 +6062,12 @@ var devicesZhCN = {
 
 // src/i18n/files.zh-CN.ts
 var filesZhCN = {
+  "files.copyContents": "\u590D\u5236\u5185\u5BB9",
+  "files.copyingContents": "\u6B63\u5728\u590D\u5236\u5185\u5BB9\u2026",
+  "files.contentsCopied": "\u5185\u5BB9\u5DF2\u590D\u5236",
+  "files.copyContentsFailed": "\u65E0\u6CD5\u590D\u5236\u5185\u5BB9\u3002\u8BF7\u91CD\u8BD5\u6216\u9009\u4E2D\u6587\u672C\u540E\u590D\u5236\u3002",
+  "files.showTree": "\u663E\u793A\u6587\u4EF6\u6811",
+  "files.hideTree": "\u9690\u85CF\u6587\u4EF6\u6811",
   "files.colorModeShowing": "\u9009\u62E9\u6B64\u6D4F\u89C8\u5668\u7684\u989C\u8272\u6A21\u5F0F\u3002\u5F53\u524D\u663E\u793A\u4E3A{{value1}}\u3002",
   "files.pluginHarnessMissing": "\u5728\u8FD9\u53F0\u8BBE\u5907\u4E0A\u5B89\u88C5 DeepSeek Harness\uFF08dsh\uFF09\u540E\u624D\u80FD\u4F7F\u7528\u6B64\u63D2\u4EF6\u3002",
   "files.pluginUnsupportedPlatform": "\u6B64\u5E73\u53F0\u4E0D\u652F\u6301\u7EC8\u7AEF\u3002",

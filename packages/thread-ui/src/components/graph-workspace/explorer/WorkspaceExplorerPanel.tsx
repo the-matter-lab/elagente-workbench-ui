@@ -15,7 +15,7 @@ import {
   RefreshCw,
   Search,
   PanelLeftClose,
-  PanelRightOpen,
+  PanelLeftOpen,
   Trash2,
   Upload,
   X,
@@ -71,7 +71,6 @@ export function WorkspaceExplorerPanel({
   loadingPaths,
   loading,
   liveNodes = [],
-  onCollapse,
   onCollapseAll,
   onCopyPath,
   onDownload,
@@ -80,8 +79,6 @@ export function WorkspaceExplorerPanel({
   onRename,
   onDelete,
   onEmptyGarbage,
-  onExpandViewer,
-  expandViewerAvailable = true,
   onFilterModeChange,
   onFilterQueryChange,
   onPreview,
@@ -103,7 +100,13 @@ export function WorkspaceExplorerPanel({
   revealRequestKey,
   tree,
   rootError,
+  treeHidden = false,
+  onToggleTree,
+  renderBody,
 }: {
+  treeHidden?: boolean;
+  onToggleTree?: () => void;
+  renderBody?: (tree: ReactNode) => ReactNode;
   canEmptyGarbage?: boolean;
   canUpload?: boolean;
   pending?: boolean;
@@ -130,14 +133,11 @@ export function WorkspaceExplorerPanel({
   loadingPaths: ReadonlySet<string>;
   loading?: boolean;
   liveNodes?: WorkspaceTreeNode[];
-  onCollapse?: () => void;
   onCollapseAll: () => void;
   onDownload?: (node: WorkspaceTreeNode) => void;
   onDownloadZip?: (node: WorkspaceTreeNode) => void;
   canDownload?: (node: WorkspaceTreeNode) => boolean;
   onEmptyGarbage?: () => void;
-  onExpandViewer?: () => void;
-  expandViewerAvailable?: boolean;
   onFilterModeChange: (mode: 'highlight' | 'filter') => void;
   onFilterQueryChange: (query: string) => void;
   onPreview?: (node: WorkspaceTreeNode) => void;
@@ -187,186 +187,18 @@ export function WorkspaceExplorerPanel({
   );
 
   useEffect(() => {
-    if (filterOpen) {
-      window.requestAnimationFrame(() => filterInputRef.current?.focus());
+    if (filterOpen && !treeHidden) {
+      const frame = window.requestAnimationFrame(() => filterInputRef.current?.focus());
+      return () => window.cancelAnimationFrame(frame);
     }
-  }, [filterOpen]);
+  }, [filterOpen, treeHidden]);
 
   function closeFilter() {
     onFilterQueryChange('');
     setFilterOpen(false);
   }
 
-  return (
-    <aside className="thread-graph-explorer flex h-full min-h-0 flex-col overflow-hidden rounded-md">
-      <div title={filePanel?.label} className="thread-graph-explorer-header flex h-9 shrink-0 items-center justify-between border-b px-2">
-        <h2 className="text-[11px] font-semibold uppercase text-slate-600 dark:text-slate-300">
-          {translate("files.explorer")}</h2>
-        <div className="thread-graph-explorer-toolbar flex items-center gap-1">
-          {/* Window controls, as on a Mac: close the files view, or minimize it to its tree. */}
-          {filePanel?.setMinimized ? (
-            <span className="thread-graph-window-controls">
-              <button type="button" data-testid="workbench-close-files" className="is-close" onClick={filePanel.close}
-                aria-label={translate('workbench.closeFiles')} title={translate('workbench.closeFiles')}><X aria-hidden="true" /></button>
-              <button type="button" className="is-minimize" aria-pressed={Boolean(filePanel.minimized)}
-                onClick={() => filePanel.setMinimized?.(!filePanel.minimized)}
-                aria-label={translate(filePanel.minimized ? 'workbench.restoreFiles' : 'workbench.minimizeFiles')}
-                title={translate(filePanel.minimized ? 'workbench.restoreFiles' : 'workbench.minimizeFiles')}>{filePanel.minimized ? <Maximize2 aria-hidden="true" /> : <Minus aria-hidden="true" />}</button>
-            </span>
-          ) : filePanel && onExpandViewer && <button type="button" data-testid="workbench-close-files" className={iconButtonClassName} onClick={filePanel.close} aria-label={translate('workbench.closeFiles')} title={translate('workbench.closeFiles')}><X data-icon="close" size={16} /></button>}
-          {onCreateFile && <button type="button" onClick={onCreateFile}
-            className={iconButtonClassName} title={translate('files.newFile')}
-            aria-label={translate('files.newFile')}>
-            <FilePlus2 data-icon="new-file" className="h-4 w-4" />
-          </button>}
-          <button
-            type="button"
-            onClick={openFilter}
-            className={iconButtonClassName}
-            title={translate("files.filterWorkspace")}
-            aria-label={translate("files.filterWorkspace")}
-            aria-pressed={filterOpen}
-          >
-            <Search data-icon="filter" className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onCollapseAll}
-            className={iconButtonClassName}
-            title={translate("files.collapseFolders")}
-            aria-label={translate("files.collapseFolders")}
-          >
-            <ListCollapse data-icon="collapse-folders" className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onRefresh}
-            disabled={!onRefresh || pending}
-            className={iconButtonClassName}
-            title={translate("files.refreshWorkspace")}
-            aria-label={translate("files.refreshWorkspace")}
-          >
-            <RefreshCw
-              data-icon="refresh"
-              className={`h-4 w-4 motion-reduce:animate-none ${loading ? 'animate-spin' : ''}`}
-            />
-          </button>
-          {canUpload || onDownloadWorkspace || onDownloadWorkspaceZip ||
-          (onImportArchive && canImportArchive) || onTrashFile || onOpenTrash ||
-          onMoveFile || onDeleteFile || onEmptyGarbage || onShowHiddenChange || onShowThreadEventsChange ? (
-            <ExplorerMoreMenu triggerClassName={iconButtonClassName}>
-              {(close) => <>
-                {onShowHiddenChange ? (
-                  <button type="button" role="menuitemcheckbox" aria-checked={Boolean(showHidden)}
-                    onClick={() => { close(); onShowHiddenChange(!showHidden); }}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none">
-                    <Eye data-icon="show-hidden" className="h-4 w-4" />
-                    <span className="flex-1">{translate("files.showHiddenFiles")}</span>
-                    {showHidden ? <Check aria-hidden="true" className="h-4 w-4" /> : null}
-                  </button>
-                ) : null}
-                {onShowThreadEventsChange ? (
-                  <button type="button" role="menuitemcheckbox" aria-checked={Boolean(showThreadEvents)}
-                    onClick={() => { close(); onShowThreadEventsChange(!showThreadEvents); }}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none">
-                    <ListTree data-icon="show-thread-events" className="h-4 w-4" />
-                    <span className="flex-1">{translate("files.showThreadEvents")}</span>
-                    {showThreadEvents ? <Check aria-hidden="true" className="h-4 w-4" /> : null}
-                  </button>
-                ) : null}
-                {canUpload ? (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => { close(); onUpload?.(); }}
-                    disabled={pending}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none"
-                  >
-                    <Upload data-icon="upload" className="h-4 w-4" />
-                    {translate("files.uploadFile")}</button>
-                ) : null}
-                {/* ElAgente workspace operations, each gated by the host's advertised capabilities. */}
-                {onDownloadWorkspace && downloadFormats.includes('tar') ? (
-                  <button type="button" role="menuitem" onClick={() => { close(); onDownloadWorkspace(); }}
-                    disabled={pending || (canDownload ? !canDownload(tree) : false)}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
-                    <Download data-icon="download" className="h-4 w-4" />Download workspace (TAR)</button>
-                ) : null}
-                {onDownloadWorkspaceZip && downloadFormats.includes('zip') ? (
-                  <button type="button" role="menuitem" onClick={() => { close(); onDownloadWorkspaceZip(); }}
-                    disabled={pending || (canDownload ? !canDownload(tree) : false)}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
-                    <FileArchive data-icon="download-zip" className="h-4 w-4" />Download workspace (ZIP)</button>
-                ) : null}
-                {onImportArchive && canImportArchive && importFormats.length > 0 ? (
-                  <button type="button" role="menuitem" onClick={() => { close(); onImportArchive(); }} disabled={pending}
-                    title={`${importFormats.map((format) => format.toUpperCase()).join(' / ')}. ${archiveLimits ?? 'Extraction limits are enforced by the server.'} Regular uploads store archive bytes without extraction.`}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
-                    <PackageOpen data-icon="import-archive" className="h-4 w-4" />{importFormats.includes('zip') ? 'Import archive' : 'Import TAR archive'}</button>
-                ) : null}
-                {onMoveFile ? (
-                  <button type="button" role="menuitem" onClick={() => { close(); onMoveFile(); }} disabled={pending || !canMove}
-                    title={canMove ? 'Move selected file to a new path' : 'Select a workspace file first.'}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
-                    <FolderInput data-icon="move" className="h-4 w-4" />Move selected file</button>
-                ) : null}
-                {onTrashFile ? (
-                  <button type="button" role="menuitem" onClick={() => { close(); onTrashFile(); }} disabled={pending || !canTrash}
-                    title={canTrash ? 'Move the selected file to Trash' : 'Select a workspace file first.'}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
-                    <Trash2 data-icon="trash" className="h-4 w-4" />Move selected file to Trash</button>
-                ) : null}
-                {onOpenTrash ? (
-                  <button type="button" role="menuitem" onClick={() => { close(); onOpenTrash(); }} disabled={pending}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
-                    <ArchiveRestore data-icon="open-trash" className="h-4 w-4" />Trash</button>
-                ) : null}
-                {onDeleteFile ? (
-                  <button type="button" role="menuitem" onClick={() => { close(); onDeleteFile(); }} disabled={pending || !canDelete}
-                    title={canDelete ? 'Confirm permanent deletion of selected file' : 'Select a workspace file first.'}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm text-rose-600 hover:bg-rose-500/10 focus-visible:bg-rose-500/10 focus-visible:outline-none disabled:opacity-50 dark:text-rose-300">
-                    <Trash2 data-icon="delete" className="h-4 w-4" />Delete selected file…</button>
-                ) : null}
-                {onEmptyGarbage ? (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => { close(); onEmptyGarbage(); }}
-                    disabled={pending || !canEmptyGarbage}
-                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm text-rose-600 hover:bg-rose-500/10 focus-visible:bg-rose-500/10 focus-visible:outline-none disabled:opacity-50 dark:text-rose-300"
-                  >
-                    <Trash2 data-icon="delete" className="h-4 w-4" />
-                    {translate("files.emptyGarbage_b701de")}</button>
-                ) : null}
-              </>}
-            </ExplorerMoreMenu>
-          ) : null}
-          {onExpandViewer ? (expandViewerAvailable ? (
-            <button
-              type="button"
-              data-testid="expand-viewer"
-              onClick={onExpandViewer}
-              className={collapseButtonClassName}
-              title={translate("files.showEditor")}
-              aria-label={translate("files.showEditor")}
-            >
-              <PanelRightOpen data-icon="expand-viewer" className="h-4 w-4" />
-            </button>
-          ) : null) : onCollapse ? (
-            <button
-              type="button"
-              data-testid="collapse-explorer"
-              onClick={onCollapse}
-              className={collapseButtonClassName}
-              title={translate("files.hideExplorer")}
-              aria-label={translate("files.hideExplorer")}
-            >
-              <PanelLeftClose data-icon="collapse-explorer" className="h-4 w-4" />
-            </button>
-          ) : null}
-        </div>
-      </div>
-
+  const treeBody = (<>
       {filterOpen ? (
         <div className="thread-graph-explorer-filter shrink-0 border-b border-[var(--theme-border)] px-3 py-2">
           <div className="flex flex-col gap-1.5">
@@ -526,6 +358,169 @@ export function WorkspaceExplorerPanel({
         <p className="thread-graph-workspace-empty mx-4 mb-4 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-sm text-slate-500 dark:border-[#303642] dark:bg-[#1b1f29] dark:text-slate-400">
           {translate("files.thisWorkspaceIsEmptyAgentToolRuns")}</p>
       ) : null}
+
+  </>);
+
+  return (
+    <aside className="thread-graph-explorer flex h-full min-h-0 flex-col overflow-hidden rounded-md">
+      <div title={filePanel?.label} className="thread-graph-explorer-header flex h-9 shrink-0 items-center justify-between border-b px-2">
+        <h2 className="text-[11px] font-semibold uppercase text-slate-600 dark:text-slate-300">
+          {translate("files.explorer")}</h2>
+        <div className="thread-graph-explorer-toolbar flex items-center gap-1">
+          {/* Window controls, as on a Mac: close the files view, or minimize it to its tree. */}
+          {filePanel?.setMinimized ? (
+            <span className="thread-graph-window-controls">
+              <button type="button" data-testid="workbench-close-files" className="is-close" onClick={filePanel.close}
+                aria-label={translate('workbench.closeFiles')} title={translate('workbench.closeFiles')}><X aria-hidden="true" /></button>
+              <button type="button" className="is-minimize" aria-pressed={Boolean(filePanel.minimized)}
+                onClick={() => filePanel.setMinimized?.(!filePanel.minimized)}
+                aria-label={translate(filePanel.minimized ? 'workbench.restoreFiles' : 'workbench.minimizeFiles')}
+                title={translate(filePanel.minimized ? 'workbench.restoreFiles' : 'workbench.minimizeFiles')}>{filePanel.minimized ? <Maximize2 aria-hidden="true" /> : <Minus aria-hidden="true" />}</button>
+            </span>
+          ) : filePanel && <button type="button" data-testid="workbench-close-files" className={iconButtonClassName} onClick={filePanel.close} aria-label={translate('workbench.closeFiles')} title={translate('workbench.closeFiles')}><X data-icon="close" size={16} /></button>}
+          {onCreateFile && <button type="button" onClick={onCreateFile}
+            className={iconButtonClassName} title={translate('files.newFile')}
+            aria-label={translate('files.newFile')}>
+            <FilePlus2 data-icon="new-file" className="h-4 w-4" />
+          </button>}
+          <button
+            type="button"
+            onClick={() => { if (treeHidden) onToggleTree?.(); openFilter(); }}
+            className={iconButtonClassName}
+            title={translate("files.filterWorkspace")}
+            aria-label={translate("files.filterWorkspace")}
+            aria-pressed={filterOpen}
+          >
+            <Search data-icon="filter" className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onCollapseAll}
+            className={iconButtonClassName}
+            title={translate("files.collapseFolders")}
+            aria-label={translate("files.collapseFolders")}
+          >
+            <ListCollapse data-icon="collapse-folders" className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={!onRefresh || pending}
+            className={iconButtonClassName}
+            title={translate("files.refreshWorkspace")}
+            aria-label={translate("files.refreshWorkspace")}
+          >
+            <RefreshCw
+              data-icon="refresh"
+              className={`h-4 w-4 motion-reduce:animate-none ${loading ? 'animate-spin' : ''}`}
+            />
+          </button>
+          {canUpload || onDownloadWorkspace || onDownloadWorkspaceZip ||
+          (onImportArchive && canImportArchive) || onTrashFile || onOpenTrash ||
+          onMoveFile || onDeleteFile || onEmptyGarbage || onShowHiddenChange || onShowThreadEventsChange ? (
+            <ExplorerMoreMenu triggerClassName={iconButtonClassName}>
+              {(close) => <>
+                {onShowHiddenChange ? (
+                  <button type="button" role="menuitemcheckbox" aria-checked={Boolean(showHidden)}
+                    onClick={() => { close(); onShowHiddenChange(!showHidden); }}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none">
+                    <Eye data-icon="show-hidden" className="h-4 w-4" />
+                    <span className="flex-1">{translate("files.showHiddenFiles")}</span>
+                    {showHidden ? <Check aria-hidden="true" className="h-4 w-4" /> : null}
+                  </button>
+                ) : null}
+                {onShowThreadEventsChange ? (
+                  <button type="button" role="menuitemcheckbox" aria-checked={Boolean(showThreadEvents)}
+                    onClick={() => { close(); onShowThreadEventsChange(!showThreadEvents); }}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none">
+                    <ListTree data-icon="show-thread-events" className="h-4 w-4" />
+                    <span className="flex-1">{translate("files.showThreadEvents")}</span>
+                    {showThreadEvents ? <Check aria-hidden="true" className="h-4 w-4" /> : null}
+                  </button>
+                ) : null}
+                {(onShowHiddenChange || onShowThreadEventsChange) && (canUpload || onDownloadWorkspace || onDownloadWorkspaceZip || onImportArchive || onMoveFile || onTrashFile || onOpenTrash || onDeleteFile || onEmptyGarbage) ? <div role="separator" className="my-1 border-t border-[var(--theme-border)]" /> : null}
+                {canUpload ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => { close(); onUpload?.(); }}
+                    disabled={pending}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none"
+                  >
+                    <Upload data-icon="upload" className="h-4 w-4" />
+                    {translate("files.uploadFile")}</button>
+                ) : null}
+                {/* ElAgente workspace operations, each gated by the host's advertised capabilities. */}
+                {onDownloadWorkspace && downloadFormats.includes('tar') ? (
+                  <button type="button" role="menuitem" onClick={() => { close(); onDownloadWorkspace(); }}
+                    disabled={pending || (canDownload ? !canDownload(tree) : false)}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
+                    <Download data-icon="download" className="h-4 w-4" />Download workspace (TAR)</button>
+                ) : null}
+                {onDownloadWorkspaceZip && downloadFormats.includes('zip') ? (
+                  <button type="button" role="menuitem" onClick={() => { close(); onDownloadWorkspaceZip(); }}
+                    disabled={pending || (canDownload ? !canDownload(tree) : false)}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
+                    <FileArchive data-icon="download-zip" className="h-4 w-4" />Download workspace (ZIP)</button>
+                ) : null}
+                {onImportArchive && canImportArchive && importFormats.length > 0 ? (
+                  <button type="button" role="menuitem" onClick={() => { close(); onImportArchive(); }} disabled={pending}
+                    title={`${importFormats.map((format) => format.toUpperCase()).join(' / ')}. ${archiveLimits ?? 'Extraction limits are enforced by the server.'} Regular uploads store archive bytes without extraction.`}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
+                    <PackageOpen data-icon="import-archive" className="h-4 w-4" />{importFormats.includes('zip') ? 'Import archive' : 'Import TAR archive'}</button>
+                ) : null}
+                {(canUpload || onDownloadWorkspace || onDownloadWorkspaceZip || onImportArchive) && (onMoveFile || onTrashFile || onOpenTrash || onDeleteFile || onEmptyGarbage) ? <div role="separator" className="my-1 border-t border-[var(--theme-border)]" /> : null}
+                {onMoveFile ? (
+                  <button type="button" role="menuitem" onClick={() => { close(); onMoveFile(); }} disabled={pending || !canMove}
+                    title={canMove ? 'Move selected file to a new path' : 'Select a workspace file first.'}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
+                    <FolderInput data-icon="move" className="h-4 w-4" />Move selected file</button>
+                ) : null}
+                {onTrashFile ? (
+                  <button type="button" role="menuitem" onClick={() => { close(); onTrashFile(); }} disabled={pending || !canTrash}
+                    title={canTrash ? 'Move the selected file to Trash' : 'Select a workspace file first.'}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
+                    <Trash2 data-icon="trash" className="h-4 w-4" />Move selected file to Trash</button>
+                ) : null}
+                {onOpenTrash ? (
+                  <button type="button" role="menuitem" onClick={() => { close(); onOpenTrash(); }} disabled={pending}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm hover:bg-[var(--theme-hover)] focus-visible:bg-[var(--theme-hover)] focus-visible:outline-none disabled:opacity-50">
+                    <ArchiveRestore data-icon="open-trash" className="h-4 w-4" />Trash</button>
+                ) : null}
+                {onDeleteFile ? (
+                  <button type="button" role="menuitem" onClick={() => { close(); onDeleteFile(); }} disabled={pending || !canDelete}
+                    title={canDelete ? 'Confirm permanent deletion of selected file' : 'Select a workspace file first.'}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm text-rose-600 hover:bg-rose-500/10 focus-visible:bg-rose-500/10 focus-visible:outline-none disabled:opacity-50 dark:text-rose-300">
+                    <Trash2 data-icon="delete" className="h-4 w-4" />Delete selected file…</button>
+                ) : null}
+                {onEmptyGarbage ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={() => { close(); onEmptyGarbage(); }}
+                    disabled={pending || !canEmptyGarbage}
+                    className="flex h-9 w-full items-center gap-2 rounded px-2 text-left text-sm text-rose-600 hover:bg-rose-500/10 focus-visible:bg-rose-500/10 focus-visible:outline-none disabled:opacity-50 dark:text-rose-300"
+                  >
+                    <Trash2 data-icon="delete" className="h-4 w-4" />
+                    {translate("files.emptyGarbage_b701de")}</button>
+                ) : null}
+              </>}
+            </ExplorerMoreMenu>
+          ) : null}
+          {onToggleTree ? (
+            <span className="ml-1 border-l border-[var(--theme-border)] pl-1">
+              <button type="button" data-testid="toggle-explorer-tree" onClick={onToggleTree}
+                className={collapseButtonClassName} aria-pressed={!treeHidden}
+                title={translate(treeHidden ? 'files.showTree' : 'files.hideTree')}
+                aria-label={translate(treeHidden ? 'files.showTree' : 'files.hideTree')}>
+                {treeHidden ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+              </button>
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {renderBody ? renderBody(treeBody) : treeBody}
     </aside>
   );
 }
