@@ -1,3 +1,9 @@
+var __defProp = Object.defineProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+
 // src/i18n/index.tsx
 import { createContext, useContext, useEffect, useMemo, useSyncExternalStore } from "react";
 
@@ -8291,6 +8297,7 @@ function LanguageSwitcher({ className }) {
 }
 
 export {
+  __export,
   en,
   zhCN,
   SUPPORTED_LOCALES,

@@ -21,4 +21,5 @@ it.each([
 it('returns short messages and a single complete block without truncation', () => {
   expect(messagePreview('Short reply', 20)).toBe('Short reply');
   expect(messagePreview('A single long paragraph.', 5)).toBe('A single long paragraph.');
+  expect(messagePreview('A single long paragraph. \n\n', 5)).toBe('A single long paragraph. \n\n');
 });
