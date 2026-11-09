@@ -134,7 +134,7 @@ it.each(['user', 'markdown'])('anchors the %s message top on expansion and its t
   document.body.append(container);
   const root = createRoot(container);
   const onBeforeResize = vi.fn();
-  const text = 'A long readable paragraph for checking message disclosure anchors.\n'.repeat(100);
+  const text = 'A long readable paragraph for checking message disclosure anchors.\n\n'.repeat(100);
   try {
     act(() => root.render(kind === 'user'
       ? <GraphChatUserMessageBody messageId="anchor-user" text={text} onBeforeResize={onBeforeResize} />
@@ -147,5 +147,26 @@ it.each(['user', 'markdown'])('anchors the %s message top on expansion and its t
     act(() => toggle.click());
     expect(onBeforeResize).toHaveBeenLastCalledWith(toggle);
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  } finally { act(() => root.unmount()); container.remove(); }
+});
+
+
+it('keeps a report path whole before Show more and reveals the remaining files on expansion', async () => {
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+  const prefix = `${'Summary. '.repeat(262)}\n\nFiles:\n\n`;
+  const report = 'runs/hf-def2svp-smiles-fresh-20261109-b1/reports/acetylsalicylic_acid/report.md';
+  const geometry = 'runs/hf-def2svp-smiles-fresh-20261109-b1/reports/acetylsalicylic_acid/final_geometry.xyz';
+  const text = `${prefix}\`${report}\`\n\n\`${geometry}\``;
+  try {
+    await act(async () => root.render(<GraphChatMarkdownAwareBody text={text} scrollRootRef={{current: null}} />));
+    expect(container.querySelector('code')?.textContent).toBe(report);
+    expect(container.textContent).not.toContain(geometry);
+    const toggle = container.querySelector<HTMLButtonElement>('.thread-graph-show-more')!;
+    expect(toggle.textContent).toBe('Show more');
+    await act(async () => toggle.click());
+    expect([...container.querySelectorAll('code')].map(node => node.textContent)).toEqual([report, geometry]);
+    expect(toggle.textContent).toBe('Show less');
   } finally { act(() => root.unmount()); container.remove(); }
 });
