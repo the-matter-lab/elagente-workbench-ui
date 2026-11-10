@@ -94,6 +94,7 @@
   margin-left: auto;
 }
 .molecule-toolbar button,
+.molecule-view-menu button,
 .molecule-caption button,
 .molecule-undo button,
 .molecule-measurements button,
@@ -128,7 +129,8 @@
   outline: 2px solid var(--theme-focus-ring, #28377a);
   outline-offset: 2px;
 }
-.molecule-figure button[aria-pressed="true"] {
+.molecule-figure button[aria-pressed="true"],
+.molecule-view-menu button[aria-checked="true"] {
   color: var(--theme-fg, #121416);
   background: var(--theme-hover, #0032420e);
 }
@@ -172,10 +174,11 @@
 .molecule-view-menu button {
   display: flex;
   width: 100%;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 7px 8px;
 }
-.molecule-view-menu button[aria-pressed="true"]::before {
+.molecule-view-menu button[aria-pressed="true"]::before,
+.molecule-view-menu button[aria-checked="true"]::before {
   content: "✓";
   margin-right: 6px;
 }
@@ -183,6 +186,39 @@
   margin-left: auto;
   color: var(--theme-fg-muted, #828a92);
   font: inherit;
+}
+.molecule-view-menu button:focus-visible {
+  background: var(--theme-hover, #00324208);
+  color: var(--theme-fg, #121416);
+}
+.molecule-representation-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.molecule-figure .molecule-representation-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid var(--theme-border, #e8ecee);
+  border-radius: 8px;
+  background: var(--theme-surface, #fff);
+  color: var(--theme-fg-soft, #5b6269);
+  font: inherit;
+  cursor: pointer;
+}
+.molecule-representation-menu {
+  position: fixed;
+  z-index: 20;
+}
+.molecule-representation-menu > div {
+  top: 0;
+  left: 0;
+  right: auto;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: auto;
 }
 .thread-ui-shell .molecule-figure .thread-graph-molecule-body {
   flex: 1;
@@ -249,19 +285,6 @@
   flex-direction: column;
   gap: 10px;
   padding: 6px 0;
-}
-.molecule-scientific-tools select {
-  padding: 3px 6px;
-  border: 1px solid var(--theme-border, #e8ecee);
-  border-radius: 4px;
-  font: inherit;
-}
-/* Native option popups can retain a light background while inheriting dark
-   theme text. Give both the closed control and its options an opaque pair. */
-.molecule-scientific-tools select,
-.molecule-scientific-tools option {
-  background-color: var(--theme-surface, #fff);
-  color: var(--theme-fg, #121416);
 }
 .molecule-scientific-tools textarea {
   width: 100%;

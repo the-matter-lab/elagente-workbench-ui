@@ -8,6 +8,15 @@ import type { MatterWorkbenchOptions } from '../../src/components/MatterWorkbenc
 import type { ThreadDetailUiAdapter } from '../../src';
 import { mockCapabilities, mockDetail, mockStatus, mockThreads } from '../../../../apps/playground/src/mockData';
 import './fixture.css';
+import './fixture-molecule-appearances.css';
+
+const fixtureParams = new URLSearchParams(location.search);
+if (fixtureParams.has('molecule')) {
+  document.documentElement.classList.add('fixture-molecule-host');
+  document.documentElement.dataset.themeEffective = fixtureParams.get('theme') === 'dark' ? 'dark' : 'light';
+  if (fixtureParams.get('appearance') === 'terminal') document.documentElement.dataset.themePreset = 'terminal';
+  else delete document.documentElement.dataset.themePreset;
+}
 
 const adapter: ThreadDetailUiAdapter = {
   openThread() {}, sendPrompt() {}, interrupt() {}, compact() {}, updateSettings() {},
@@ -54,8 +63,8 @@ function Fixture() {
   </PluginProvider>;
 }
 function MoleculeFixture() {
-  const theme = new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light';
-  return <div className={`thread-ui-shell fixture-molecule`} data-theme-effective={theme}>
+  const theme = fixtureParams.get('theme') === 'dark' ? 'dark' : 'light';
+  return <div className="thread-ui-shell fixture-molecule" data-theme-effective={theme} data-appearance={fixtureParams.get('appearance') === 'terminal' ? 'terminal' : 'classical'}>
     <GraphMoleculeViewer title="Water" source={{content:['3\nWater\nO 0 0 0\nH 0.96 0 0\nH -0.24 0.93 0\n']}} />
   </div>;
 }

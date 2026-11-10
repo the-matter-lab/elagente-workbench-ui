@@ -1,3 +1,36 @@
+// src/components/menu/useMenuKeyboard.ts
+import { useEffect, useRef } from "react";
+function useMenuKeyboard(menuRef, open, onClose, itemSelector = '[role^="menuitem"]:not([disabled])') {
+  const close = useRef(onClose);
+  close.current = onClose;
+  useEffect(() => {
+    if (!open) return;
+    const menu = menuRef.current;
+    if (!menu) return;
+    const items = () => [...menu.querySelectorAll(itemSelector)];
+    items()[0]?.focus();
+    const key = (event) => {
+      const list = items();
+      const index = list.indexOf(document.activeElement);
+      const move = (to) => {
+        event.preventDefault();
+        list[(to + list.length) % list.length]?.focus();
+      };
+      if (event.key === "ArrowDown") move(index + 1);
+      else if (event.key === "ArrowUp") move(index < 0 ? -1 : index - 1);
+      else if (event.key === "Home") move(0);
+      else if (event.key === "End") move(list.length - 1);
+      else if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        close.current(true);
+      } else if (event.key === "Tab") close.current(false);
+    };
+    menu.addEventListener("keydown", key);
+    return () => menu.removeEventListener("keydown", key);
+  }, [menuRef, open, itemSelector]);
+}
+
 // src/components/graph-ui/Button.tsx
 import { Slot } from "@radix-ui/react-slot";
 import { cva } from "class-variance-authority";
@@ -104,6 +137,7 @@ function TooltipContent({
 }
 
 export {
+  useMenuKeyboard,
   cn,
   Button,
   Tooltip,

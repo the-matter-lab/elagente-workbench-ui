@@ -32,14 +32,41 @@ checks direct mouse clicks at both widths, hover hit-testing against the
 overlapping reply-copy control, mobile block-tap reveal followed by button tap,
 and keyboard activation. Each activation must copy the exact code to clipboard.
 
-The molecule representation check uses `?molecule&theme=light|dark` to exercise
-the real viewer. It checks select/option foreground and opaque background colors
-with the opposite OS color preference, in workspace and expanded views, plus
-selection synchronization with the representation toolbar and keyboard focus.
-`MOLECULE_OUTPUT` chooses its screenshots/results directory. The native popup's
-OS chrome is browser-owned; the checks inspect the option styles directly.
+The molecule representation check uses
+`?molecule&appearance=classical|terminal&theme=light|dark` to exercise the real
+viewer in all four appearances, each in workspace and expanded views, with the
+opposite OS color preference. `fixture-molecule-appearances.css` snapshots the
+host's Classic dark palette and Terminal token/typography/control-corner rules
+from deployed `el-agente-cloud-infrastructure` source
+`1617dda8c59ebf586e1a68d6e8a04ba984ce284d` under `apps/web` (source paths and
+SHA256 hashes are recorded in the file). These rules are scoped to the molecule fixture;
+menu styling comes entirely from the production Thread UI styles. The checker
+rejects identical font/palette results for Classical and Terminal.
 
-The checks cover 1440×900, 390×844 and 900×700 in light/dark themes; horizontal
+It compares the actual open View and Representation DOM popup surfaces, normal,
+selected, hovered and keyboard-focused rows, including focus rings. It exercises
+all supported representations, synchronization in both directions with the Style
+toolbar, Arrow/Home/End navigation, Enter/Space activation, Escape/focus restoration,
+and outside-click dismissal. Tab closes the portal popup and advances from the
+trigger to Inspect coordinates; Shift+Tab closes it and returns to the preceding
+Structure tools & selection summary. Geometry and hit testing verify that the lower popup
+opens above its trigger, stays inside the viewer, and exposes clickable rows.
+Menu interactions must preserve the expanded/workspace state.
+`MOLECULE_OUTPUT` chooses its screenshots/results directory. Each of the eight
+cases captures View and Representation separately with selected/hovered and
+selected/keyboard-focused rows visible (32 PNGs total), plus computed style and
+geometry evidence in `results.json`. These are deterministic local Chromium
+checks; they do not establish hosted integration or Safari/Firefox behavior.
+
+For a dedicated port and evidence directory:
+
+```sh
+pnpm exec vite --config packages/thread-ui/tests/layout/vite.config.ts --port 5189
+# In another terminal:
+LAYOUT_URL=http://127.0.0.1:5189 MOLECULE_OUTPUT=/tmp/molecule-menus node packages/thread-ui/tests/layout/check-molecule-representation.mjs
+```
+
+The checks cover 1440×900, 390×844, 900×700 and 1100×900 in light/dark themes; horizontal
 and page overflow, transcript/composer visibility, workspace tree scrolling and
 file preview, retained workspace state, pointer/keyboard resizing and preference
 persistence, drawer focus cycling/restoration, theme and agent selection parity,
