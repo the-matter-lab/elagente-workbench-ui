@@ -19,7 +19,7 @@ async function styles(locator, properties) {
     return Object.fromEntries(names.map(name => [name, computed.getPropertyValue(name)]));
   }, properties);
 }
-const surfaceProperties = ['color', 'background-color', 'border-top-color', 'border-top-width', 'border-top-style', 'border-radius', 'box-shadow', 'padding', 'width', 'font-family', 'font-size'];
+const surfaceProperties = ['color', 'background-color', ...['top', 'right', 'bottom', 'left'].flatMap(edge => ['color', 'width', 'style'].map(property => `border-${edge}-${property}`)), 'border-radius', 'box-shadow', 'padding', 'width', 'font-family', 'font-size'];
 const rowProperties = ['color', 'background-color', 'border-radius', 'padding', 'font-family', 'font-size', 'font-weight'];
 const focusProperties = [...rowProperties, 'outline-color', 'outline-style', 'outline-width', 'outline-offset'];
 function luminance(color) {
@@ -101,6 +101,22 @@ async function inspectMode(page, appearance, theme, expanded) {
   assert.deepEqual(representationStyles.surface, viewStyles.surface, `${name}: open popup surface must match View`);
   assert.deepEqual(representationStyles.selected, viewStyles.selected, `${name}: checked row must match View's selected row`);
   assert.deepEqual(representationStyles.normal, viewStyles.normal, `${name}: normal row must match View`);
+  for (const surface of [viewStyles.surface, representationStyles.surface]) {
+    assert.equal(surface['border-radius'], appearance === 'terminal' ? '0px' : '12px', `${name}: popup corners must follow the active appearance`);
+    if (appearance === 'terminal') {
+      assert.equal(surface['box-shadow'], 'none', `${name}: terminal popups must not have a soft shadow`);
+      const foreground = await figure.evaluate(element => getComputedStyle(element).getPropertyValue('--theme-fg').trim());
+      const foregroundColor = await figure.evaluate((element, color) => {
+        const probe = document.createElement('span'); probe.style.color = color; element.append(probe);
+        const resolved = getComputedStyle(probe).color; probe.remove(); return resolved;
+      }, foreground);
+      for (const edge of ['top', 'right', 'bottom', 'left']) {
+        assert.equal(surface[`border-${edge}-width`], '1px', `${name}: terminal popup ${edge} border must be visible`);
+        assert.equal(surface[`border-${edge}-style`], 'solid', `${name}: terminal popup ${edge} border must be solid`);
+        assert.equal(surface[`border-${edge}-color`], foregroundColor, `${name}: terminal popup ${edge} border must match other terminal menus`);
+      }
+    }
+  }
   assert.equal(luminance(representationStyles.surface['background-color']) < 0.5, theme === 'dark', `${name}: explicit app theme must beat opposite OS preference`);
   assert.match(representationStyles.surface['background-color'], /^rgb\(/, `${name}: popup must be opaque`);
   const contrast = assertContrast(representationStyles.normal.color, representationStyles.surface['background-color'], name);

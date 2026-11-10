@@ -171,6 +171,13 @@
   border-radius: 12px;
   box-shadow: 0 14px 34px #12182024;
 }
+/* View uses a disclosure; Representation uses a radio menu. Both surfaces
+   follow the Terminal preset even when the host styles menus by ARIA role. */
+:root[data-theme-preset="terminal"] .molecule-view-menu > div {
+  border: 1px solid var(--theme-fg);
+  border-radius: 0;
+  box-shadow: none;
+}
 .molecule-view-menu button {
   display: flex;
   width: 100%;

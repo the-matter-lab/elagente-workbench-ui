@@ -257,3 +257,11 @@
   border-radius: 0;
 }
 :root.fixture-molecule-host[data-theme-preset="terminal"] :is(.relay-button-primary, .relay-button-secondary, .host-secondary-button, .theme-preset-card) { border-radius: 0; }
+
+/* Production host's terminal menu rules, including role-based popup styling.
+   Keep these in the fixture: View is a disclosure, Representation a radio menu. */
+:root.fixture-molecule-host[data-theme-preset="terminal"] :is([role='dialog'], [role='menu'], [data-radix-popper-content-wrapper] > *, .thread-graph-dialog) {
+  border-radius: 0;
+  box-shadow: none;
+}
+:root.fixture-molecule-host[data-theme-preset="terminal"] [role='menu'] { border: 1px solid var(--theme-fg); }
