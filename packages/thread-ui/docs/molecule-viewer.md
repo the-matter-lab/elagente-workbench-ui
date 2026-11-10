@@ -21,6 +21,12 @@ trajectory, LIVE, scientific selection/staging/submission, screenshot and
 reviewed extension slots remain under the structure/scientific controls. There
 is no new backend dependency or executable viewer program.
 
+The lower Representation picker uses the same themed menu surface, rows,
+checkmark and hover/focus colors as View. It stays inside the figure's theme and
+expanded dialog, outside the scrolling controls panel. Arrow keys, Home/End,
+Enter/Space, Escape and Tab navigate or dismiss it; choosing a style keeps the
+upper representation toolbar synchronized.
+
 Distance uses two atoms in Å. Angle uses three atoms with the middle atom as
 vertex, in degrees. Measurement picks are separate from scientific selections;
 clicking a pick again cancels it. Records use canonical atom IDs and are isolated
@@ -32,7 +38,8 @@ undo remains available. Nothing persists or submits measurements automatically.
 Keyboard shortcuts apply while inspecting this viewer: 1/2/3 style, L labels,
 H hydrogens, D distance, A angle, M measurement tool, S spin, R reset, ? help,
 Ctrl/⌘ Z undo and Shift Ctrl/⌘ Z redo. Inputs, selects, textareas, contenteditable
-and textbox descendants keep their native keys. Escape closes the View popover
+and textbox descendants keep their native keys. Menu navigation does not invoke
+viewer shortcuts. Escape closes the focused Representation menu or View popover
 or help, clears picks, exits the tool, then closes full view. Reduced motion
 disables spin and transition animations. Theme changes repaint the existing
 model without refitting its camera or dropping agent annotations.

@@ -40,6 +40,7 @@ import {
 } from './GraphMoleculeViewerCommands';
 import GraphMoleculeViewerLowerButtonGroup from './GraphMoleculeViewerLowerButtonGroup';
 import GraphMoleculeViewerUpperButtonGroup from './GraphMoleculeViewerUpperButtonGroup';
+import { GraphMoleculeRepresentationMenu } from './GraphMoleculeRepresentationMenu';
 import type { GraphMoleculeCameraInfo } from './GraphMoleculeViewerControls';
 import { GraphMoleculeFigureFrame } from './GraphMoleculeFigureFrame';
 import { createMoleculeRenderViewer } from './GraphMoleculeViewerLifetime';
@@ -1998,22 +1999,10 @@ export function GraphMoleculeViewer({
               <div>
                 <div className="thread-graph-molecule-control-row">
                   <div className="min-w-0">
-                    <label>
-                      Representation{' '}
-                      <select
-                        aria-label="Representation"
-                        value={style}
-                        onChange={(event) =>
-                          setStyle(event.target.value as ViewerStyle)
-                        }
-                      >
-                        {supportedStyles.map((entry) => (
-                          <option key={entry} value={entry}>
-                            {entry}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
+                    <div className="molecule-representation-control">
+                      <span>Representation</span>
+                      <GraphMoleculeRepresentationMenu value={style} options={supportedStyles} onChange={setStyle} />
+                    </div>
                     <p className="thread-graph-molecule-control-subtitle">
                       XYZ / PDB / CIF preview
                     </p>

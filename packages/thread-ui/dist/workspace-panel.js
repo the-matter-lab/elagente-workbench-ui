@@ -29,16 +29,17 @@ import {
   syntaxThemeFor,
   useFilePanel,
   useLongPress,
-  useMenuKeyboard,
   useTabScrollEdges
-} from "./chunk-PBO4HIC4.js";
+} from "./chunk-IHGK6WBS.js";
 import {
   CubeFormatError,
   GraphMoleculeViewer,
   MAX_CUBE_GRID_POINTS,
   readCubeHeader
-} from "./chunk-HT67OKWG.js";
-import "./chunk-R24MQJGW.js";
+} from "./chunk-BZKC3B6Q.js";
+import {
+  useMenuKeyboard
+} from "./chunk-OCACD4WT.js";
 import {
   DRAWIO_MAX_BYTES,
   downloadOnlyReason,

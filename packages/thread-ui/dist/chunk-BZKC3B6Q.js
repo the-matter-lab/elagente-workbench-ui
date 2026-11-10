@@ -3,8 +3,9 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-  cn
-} from "./chunk-R24MQJGW.js";
+  cn,
+  useMenuKeyboard
+} from "./chunk-OCACD4WT.js";
 import {
   translate,
   useI18n
@@ -30,11 +31,11 @@ import {
   Redo2
 } from "lucide-react";
 import {
-  useEffect,
-  useLayoutEffect as useLayoutEffect2,
+  useEffect as useEffect2,
+  useLayoutEffect as useLayoutEffect3,
   useMemo,
-  useRef as useRef2,
-  useState as useState2
+  useRef as useRef3,
+  useState as useState3
 } from "react";
 
 // src/components/graph-workspace/GraphMoleculeViewerCommands.ts
@@ -983,10 +984,156 @@ function GraphMoleculeViewerUpperButtonGroup({
   ] });
 }
 
+// src/components/graph-workspace/GraphMoleculeRepresentationMenu.tsx
+import { ChevronDown } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState as useState2
+} from "react";
+import { createPortal } from "react-dom";
+import { Fragment as Fragment3, jsx as jsx6, jsxs as jsxs4 } from "react/jsx-runtime";
+function GraphMoleculeRepresentationMenu({
+  value,
+  options,
+  onChange
+}) {
+  const id = useId();
+  const trigger = useRef(null);
+  const menu = useRef(null);
+  const [open, setOpen] = useState2(false);
+  const [place, setPlace] = useState2(null);
+  const host = open ? trigger.current?.closest(".molecule-figure") ?? trigger.current?.closest(".thread-ui-shell") ?? document.body : null;
+  const close = useCallback((restoreFocus) => {
+    setOpen(false);
+    setPlace(null);
+    if (restoreFocus) trigger.current?.focus();
+  }, []);
+  const shown = open && place !== null;
+  useMenuKeyboard(menu, shown, close);
+  useEffect(() => {
+    if (shown)
+      menu.current?.querySelector('[aria-checked="true"]')?.focus();
+  }, [shown, value]);
+  useLayoutEffect(() => {
+    if (!open || !host) return;
+    const update = () => {
+      const anchor = trigger.current?.getBoundingClientRect();
+      if (!anchor || !menu.current) return;
+      const bounds = host.getBoundingClientRect();
+      const leftEdge = Math.max(0, bounds.left) + 8;
+      const rightEdge = Math.min(window.innerWidth, bounds.right) - 8;
+      const topEdge = Math.max(0, bounds.top) + 8;
+      const bottomEdge = Math.min(window.innerHeight, bounds.bottom) - 8;
+      const width = Math.min(210, Math.max(0, rightEdge - leftEdge));
+      const maxHeight = Math.max(0, bottomEdge - topEdge);
+      const borderHeight = menu.current.offsetHeight - menu.current.clientHeight;
+      const height = Math.min(
+        menu.current.scrollHeight + borderHeight,
+        maxHeight
+      );
+      const preferredTop = anchor.top - height - 4 >= topEdge ? anchor.top - height - 4 : anchor.bottom + 4;
+      setPlace({
+        left: Math.max(leftEdge, Math.min(anchor.left, rightEdge - width)),
+        top: Math.max(topEdge, Math.min(preferredTop, bottomEdge - height)),
+        width,
+        maxHeight
+      });
+    };
+    const outside = (event) => {
+      const target = event.target;
+      if (!trigger.current?.contains(target) && !menu.current?.contains(target))
+        close(false);
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    document.addEventListener("pointerdown", outside, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+      document.removeEventListener("pointerdown", outside, true);
+    };
+  }, [open, host, close]);
+  return /* @__PURE__ */ jsxs4(Fragment3, { children: [
+    /* @__PURE__ */ jsxs4(
+      "button",
+      {
+        ref: trigger,
+        type: "button",
+        className: "molecule-representation-trigger",
+        "aria-label": "Representation",
+        "aria-haspopup": "menu",
+        "aria-expanded": open,
+        "aria-controls": open ? id : void 0,
+        onClick: () => open ? close(false) : setOpen(true),
+        onKeyDown: (event) => {
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            setOpen(true);
+          }
+        },
+        children: [
+          value,
+          /* @__PURE__ */ jsx6(ChevronDown, { size: 12, "aria-hidden": "true" })
+        ]
+      }
+    ),
+    open && host ? createPortal(
+      /* @__PURE__ */ jsx6(
+        "div",
+        {
+          className: "molecule-view-menu molecule-representation-menu",
+          style: {
+            left: place?.left ?? 0,
+            top: place?.top ?? 0,
+            width: place?.width ?? 210,
+            visibility: shown ? "visible" : "hidden"
+          },
+          children: /* @__PURE__ */ jsx6(
+            "div",
+            {
+              ref: menu,
+              id,
+              role: "menu",
+              "aria-label": "Representation",
+              style: { maxHeight: place?.maxHeight },
+              onKeyDownCapture: (event) => {
+                if (event.key === "Tab") trigger.current?.focus();
+              },
+              onKeyDown: (event) => event.stopPropagation(),
+              children: options.map((option) => /* @__PURE__ */ jsx6(
+                "button",
+                {
+                  type: "button",
+                  role: "menuitemradio",
+                  tabIndex: -1,
+                  "aria-label": option,
+                  "aria-checked": value === option,
+                  onClick: () => {
+                    onChange(option);
+                    close(true);
+                  },
+                  children: option
+                },
+                option
+              ))
+            }
+          )
+        }
+      ),
+      host
+    ) : null
+  ] });
+}
+
 // src/components/graph-workspace/GraphMoleculeFigureFrame.tsx
 import { Maximize2, X } from "lucide-react";
-import { useLayoutEffect, useRef } from "react";
-import { jsx as jsx6, jsxs as jsxs4 } from "react/jsx-runtime";
+import { useLayoutEffect as useLayoutEffect2, useRef as useRef2 } from "react";
+import { jsx as jsx7, jsxs as jsxs5 } from "react/jsx-runtime";
 function GraphMoleculeFigureFrame({
   expanded,
   onExpandedChange,
@@ -996,11 +1143,11 @@ function GraphMoleculeFigureFrame({
   presentation,
   className = ""
 }) {
-  const dialog = useRef(null);
-  const opener = useRef(null);
-  const placeholder = useRef(null);
-  const returnFocus = useRef(null);
-  useLayoutEffect(() => {
+  const dialog = useRef2(null);
+  const opener = useRef2(null);
+  const placeholder = useRef2(null);
+  const returnFocus = useRef2(null);
+  useLayoutEffect2(() => {
     const element = dialog.current;
     if (!element) return;
     if (expanded && !element.open) {
@@ -1034,12 +1181,12 @@ function GraphMoleculeFigureFrame({
         );
     }
   }, [expanded]);
-  return /* @__PURE__ */ jsxs4(
+  return /* @__PURE__ */ jsxs5(
     "div",
     {
       className: `molecule-figure-frame is-${presentation} ${expanded ? "is-expanded" : ""}`,
       children: [
-        /* @__PURE__ */ jsx6(
+        /* @__PURE__ */ jsx7(
           "div",
           {
             ref: placeholder,
@@ -1047,7 +1194,7 @@ function GraphMoleculeFigureFrame({
             "aria-hidden": "true"
           }
         ),
-        /* @__PURE__ */ jsxs4(
+        /* @__PURE__ */ jsxs5(
           "dialog",
           {
             ref: dialog,
@@ -1067,7 +1214,7 @@ function GraphMoleculeFigureFrame({
               }
             },
             children: [
-              /* @__PURE__ */ jsx6(
+              /* @__PURE__ */ jsx7(
                 "button",
                 {
                   ref: opener,
@@ -1076,7 +1223,7 @@ function GraphMoleculeFigureFrame({
                   "aria-label": expanded ? "Close full view" : "Open full view",
                   title: expanded ? "Close full view (Esc)" : "Open full view",
                   onClick: () => onExpandedChange(!expanded),
-                  children: expanded ? /* @__PURE__ */ jsx6(X, { size: 16 }) : /* @__PURE__ */ jsx6(Maximize2, { size: 16 })
+                  children: expanded ? /* @__PURE__ */ jsx7(X, { size: 16 }) : /* @__PURE__ */ jsx7(Maximize2, { size: 16 })
                 }
               ),
               children
@@ -1438,7 +1585,7 @@ ${atoms.join("\n")}
 }
 
 // src/components/graph-workspace/GraphMoleculeViewer.tsx
-import { jsx as jsx7, jsxs as jsxs5 } from "react/jsx-runtime";
+import { jsx as jsx8, jsxs as jsxs6 } from "react/jsx-runtime";
 function GraphMoleculeViewer({
   className = "",
   moleculeId = null,
@@ -1459,89 +1606,89 @@ function GraphMoleculeViewer({
   followControl = false
 }) {
   useI18n();
-  const viewerHostRef = useRef2(null);
-  const viewerRef = useRef2(null);
-  const apiRef = useRef2(null);
-  const modelRef = useRef2(null);
-  const [viewerReady, setViewerReady] = useState2(false);
-  const loadingRef = useRef2(loading);
+  const viewerHostRef = useRef3(null);
+  const viewerRef = useRef3(null);
+  const apiRef = useRef3(null);
+  const modelRef = useRef3(null);
+  const [viewerReady, setViewerReady] = useState3(false);
+  const loadingRef = useRef3(loading);
   loadingRef.current = loading;
-  const onReadyRef = useRef2(onReady);
+  const onReadyRef = useRef3(onReady);
   onReadyRef.current = onReady;
-  const readyHandleRef = useRef2(null);
-  const captureRef = useRef2(() => {
+  const readyHandleRef = useRef3(null);
+  const captureRef = useRef3(() => {
     throw new Error("Screenshot is unavailable");
   });
-  const zoomedRef = useRef2(false);
-  const unitCellPreferenceRef = useRef2(true);
-  const [cameraInfo, setCameraInfo] = useState2(
+  const zoomedRef = useRef3(false);
+  const unitCellPreferenceRef = useRef3(true);
+  const [cameraInfo, setCameraInfo] = useState3(
     null
   );
-  const [requestedIndex, setCurrentIndex] = useState2(0);
-  const [hoveredAtom, setHoveredAtom] = useState2(null);
-  const [isPlaying, setIsPlaying] = useState2(false);
-  const [selectedAtomLabels, setSelectedAtomLabels] = useState2({});
-  const [selectedSerials, setSelectedSerials] = useState2([]);
-  const selectedSerialsRef = useRef2(selectedSerials);
+  const [requestedIndex, setCurrentIndex] = useState3(0);
+  const [hoveredAtom, setHoveredAtom] = useState3(null);
+  const [isPlaying, setIsPlaying] = useState3(false);
+  const [selectedAtomLabels, setSelectedAtomLabels] = useState3({});
+  const [selectedSerials, setSelectedSerials] = useState3([]);
+  const selectedSerialsRef = useRef3(selectedSerials);
   selectedSerialsRef.current = selectedSerials;
-  const selectionStyleRef = useRef2({
+  const selectionStyleRef = useRef3({
     color: "yellow"
   });
-  const [stagedSelections, setStagedSelections] = useState2({});
-  const [status, setStatus] = useState2(null);
-  const [busy, setBusy] = useState2(false);
-  const busyRef = useRef2(false);
-  const [live, setLive] = useState2(true);
-  const [style, setStyle] = useState2(
+  const [stagedSelections, setStagedSelections] = useState3({});
+  const [status, setStatus] = useState3(null);
+  const [busy, setBusy] = useState3(false);
+  const busyRef = useRef3(false);
+  const [live, setLive] = useState3(true);
+  const [style, setStyle] = useState3(
     typeof source === "object" && source?.metadata?.render?.style || "ball-stick"
   );
-  const [cartoonAvailable, setCartoonAvailable] = useState2(false);
-  const applyingCommandRef = useRef2(false);
-  const [annotations, setAnnotations] = useState2([]);
-  const atomIdsRef = useRef2([]);
-  const cellRef = useRef2(void 0);
-  const renderedTargetRef = useRef2(void 0);
-  const [unitCellAvailable, setUnitCellAvailable] = useState2(false);
-  const [unitCellVisible, setUnitCellVisible] = useState2(false);
-  const [viewerInitError, setViewerInitError] = useState2(null);
-  const [expanded, setExpanded] = useState2(false);
-  const [hydrogens, setHydrogens] = useState2(true);
-  const [atomLabels, setAtomLabels] = useState2(false);
-  const [help, setHelp] = useState2(false);
-  const [measureTool, setMeasureTool] = useState2(
+  const [cartoonAvailable, setCartoonAvailable] = useState3(false);
+  const applyingCommandRef = useRef3(false);
+  const [annotations, setAnnotations] = useState3([]);
+  const atomIdsRef = useRef3([]);
+  const cellRef = useRef3(void 0);
+  const renderedTargetRef = useRef3(void 0);
+  const [unitCellAvailable, setUnitCellAvailable] = useState3(false);
+  const [unitCellVisible, setUnitCellVisible] = useState3(false);
+  const [viewerInitError, setViewerInitError] = useState3(null);
+  const [expanded, setExpanded] = useState3(false);
+  const [hydrogens, setHydrogens] = useState3(true);
+  const [atomLabels, setAtomLabels] = useState3(false);
+  const [help, setHelp] = useState3(false);
+  const [measureTool, setMeasureTool] = useState3(
     null
   );
-  const measureToolRef = useRef2(measureTool);
+  const measureToolRef = useRef3(measureTool);
   measureToolRef.current = measureTool;
-  const [measurePicks, setMeasurePicks] = useState2([]);
-  const picksRef = useRef2(measurePicks);
+  const [measurePicks, setMeasurePicks] = useState3([]);
+  const picksRef = useRef3(measurePicks);
   picksRef.current = measurePicks;
-  const measurePickKeyRef = useRef2("");
-  const [measurements, setMeasurements] = useState2({});
-  const [measurementHistory, setMeasurementHistory] = useState2([]);
-  const [measurementFuture, setMeasurementFuture] = useState2([]);
-  const [measurementNotice, setMeasurementNotice] = useState2(false);
-  const [measurementsPinned, setMeasurementsPinned] = useState2(false);
-  const [focusedMeasurement, setFocusedMeasurement] = useState2(
+  const measurePickKeyRef = useRef3("");
+  const [measurements, setMeasurements] = useState3({});
+  const [measurementHistory, setMeasurementHistory] = useState3([]);
+  const [measurementFuture, setMeasurementFuture] = useState3([]);
+  const [measurementNotice, setMeasurementNotice] = useState3(false);
+  const [measurementsPinned, setMeasurementsPinned] = useState3(false);
+  const [focusedMeasurement, setFocusedMeasurement] = useState3(
     null
   );
-  const [spin, setSpin] = useState2(0);
-  const [dark, setDark] = useState2(false);
-  const [reducedMotion, setReducedMotion] = useState2(false);
-  const pickMeasurementRef = useRef2(() => {
+  const [spin, setSpin] = useState3(0);
+  const [dark, setDark] = useState3(false);
+  const [reducedMotion, setReducedMotion] = useState3(false);
+  const pickMeasurementRef = useRef3(() => {
   });
-  const nextMeasurementId = useRef2(0);
-  const measurementShapes = useRef2([]);
-  const [formula, setFormula] = useState2(
+  const nextMeasurementId = useRef3(0);
+  const measurementShapes = useRef3([]);
+  const [formula, setFormula] = useState3(
     []
   );
-  const [atomCount, setAtomCount] = useState2(0);
-  const [isovalue, setIsovalue] = useState2(DEFAULT_CUBE_ISOVALUE);
-  const [isoOpacity, setIsoOpacity] = useState2(DEFAULT_CUBE_OPACITY);
-  const isoShapesRef = useRef2([]);
-  const isoDrawRef = useRef2("");
-  const modelGenerationRef = useRef2(0);
-  const volumeRef = useRef2(null);
+  const [atomCount, setAtomCount] = useState3(0);
+  const [isovalue, setIsovalue] = useState3(DEFAULT_CUBE_ISOVALUE);
+  const [isoOpacity, setIsoOpacity] = useState3(DEFAULT_CUBE_OPACITY);
+  const isoShapesRef = useRef3([]);
+  const isoDrawRef = useRef3("");
+  const modelGenerationRef = useRef3(0);
+  const volumeRef = useRef3(null);
   const viewerData = useMemo(
     () => readGraphMoleculeViewerData(source),
     [source]
@@ -1561,19 +1708,19 @@ function GraphMoleculeViewer({
   }, [isCube, xyzContent]);
   const snapshot = typeof source === "object" && source ? source : void 0;
   const target = frameTarget(snapshot, currentIndex, xyzArray.length);
-  const currentFrameRef = useRef2("");
+  const currentFrameRef = useRef3("");
   currentFrameRef.current = `${currentIndex}:${xyzFormat}:${xyzContent}`;
-  const renderedFrameRef = useRef2("");
-  const renderedModelKeyRef = useRef2(null);
-  const surfaceActiveRef = useRef2(false);
-  const labelsActiveRef = useRef2(false);
-  const decoratedRef = useRef2("");
-  const backgroundRef = useRef2(null);
-  const styledRef = useRef2("");
-  const cellDrawRef = useRef2("");
-  const renderedReadyRef = useRef2(false);
+  const renderedFrameRef = useRef3("");
+  const renderedModelKeyRef = useRef3(null);
+  const surfaceActiveRef = useRef3(false);
+  const labelsActiveRef = useRef3(false);
+  const decoratedRef = useRef3("");
+  const backgroundRef = useRef3(null);
+  const styledRef = useRef3("");
+  const cellDrawRef = useRef3("");
+  const renderedReadyRef = useRef3(false);
   const targetKey = JSON.stringify(target);
-  const targetRef = useRef2(target);
+  const targetRef = useRef3(target);
   targetRef.current = target;
   const activeObject = snapshot?.target?.objectId ?? snapshot?.uuid ?? moleculeId;
   const frameCells = snapshot?.metadata?.frameCells;
@@ -1600,7 +1747,7 @@ function GraphMoleculeViewer({
       snapshot?.metadata?.render
     ]
   );
-  const objectRef = useRef2(activeObject);
+  const objectRef = useRef3(activeObject);
   const measurementKey = JSON.stringify([
     activeObject,
     target?.sourceRevision ?? snapshot?.target?.sourceRevision,
@@ -1622,7 +1769,7 @@ function GraphMoleculeViewer({
     selectedIds: selectedSerials.map((index) => atomIdsRef.current[index]).filter(Boolean),
     ...target ? { target } : {}
   });
-  const cellShapesRef = useRef2([]);
+  const cellShapesRef = useRef3([]);
   function drawCell(visible) {
     const viewer = viewerRef.current, model = modelRef.current;
     if (!viewer || !model) return;
@@ -1876,7 +2023,7 @@ function GraphMoleculeViewer({
     });
     return true;
   }
-  const commandState = useRef2({
+  const commandState = useRef3({
     target,
     discovery: extensionHost?.discovery,
     atomIds: atomIdsRef.current,
@@ -1894,7 +2041,7 @@ function GraphMoleculeViewer({
       viewerRef.current && modelRef.current && renderedReadyRef.current && currentFrameRef.current === renderedFrameRef.current && sameScientificTarget(renderedTargetRef.current, target)
     )
   };
-  const applyCommandsRef = useRef2(() => {
+  const applyCommandsRef = useRef3(() => {
   });
   applyCommandsRef.current = async (commands) => {
     applyingCommandRef.current = true;
@@ -1938,7 +2085,7 @@ function GraphMoleculeViewer({
       applyingCommandRef.current = false;
     }
   };
-  const executorRef = useRef2(null);
+  const executorRef = useRef3(null);
   executorRef.current ??= createViewerCommandExecutor(
     () => commandState.current,
     (commands) => applyCommandsRef.current(commands)
@@ -1958,7 +2105,7 @@ function GraphMoleculeViewer({
       setBusy(false);
     }
   };
-  useEffect(() => {
+  useEffect2(() => {
     if (objectRef.current !== activeObject) {
       objectRef.current = activeObject;
       zoomedRef.current = false;
@@ -1978,7 +2125,7 @@ function GraphMoleculeViewer({
     0
   );
   const stagedMolecules = Object.keys(stagedSelections).length;
-  useEffect(() => {
+  useEffect2(() => {
     if (xyzArray.length === 0) {
       setCurrentIndex(0);
       return;
@@ -1987,7 +2134,7 @@ function GraphMoleculeViewer({
       (previous) => live ? xyzArray.length - 1 : Math.min(previous, xyzArray.length - 1)
     );
   }, [xyzArray.length, live]);
-  useEffect(() => {
+  useEffect2(() => {
     if (!isPlaying || xyzArray.length <= 1) {
       return;
     }
@@ -2003,7 +2150,7 @@ function GraphMoleculeViewer({
     }, 200);
     return () => window.clearInterval(interval);
   }, [isPlaying, xyzArray.length]);
-  useEffect(() => {
+  useEffect2(() => {
     const host = viewerHostRef.current;
     if (!host || viewerRef.current) {
       return;
@@ -2066,7 +2213,7 @@ function GraphMoleculeViewer({
       readyHandleRef.current = null;
     };
   }, []);
-  useLayoutEffect2(() => {
+  useLayoutEffect3(() => {
     const viewer = viewerRef.current;
     if (!viewer || !xyzContent) {
       return;
@@ -2268,7 +2415,7 @@ function GraphMoleculeViewer({
     activeObject,
     loading
   ]);
-  useEffect(() => {
+  useEffect2(() => {
     if (!viewerReady || !isCube) return;
     const frame = window.requestAnimationFrame(() => {
       if (!renderedReadyRef.current) return;
@@ -2282,7 +2429,7 @@ function GraphMoleculeViewer({
     });
     return () => window.cancelAnimationFrame(frame);
   }, [isovalue, isoOpacity, viewerReady, isCube]);
-  useEffect(() => {
+  useEffect2(() => {
     if (!viewerReady) return;
     const visible = unitCellVisible && unitCellAvailable;
     if (cellDrawRef.current !== JSON.stringify([visible, cellRef.current, dark])) {
@@ -2290,7 +2437,7 @@ function GraphMoleculeViewer({
       viewerRef.current?.render();
     }
   }, [unitCellAvailable, unitCellVisible, viewerReady, dark]);
-  useEffect(() => {
+  useEffect2(() => {
     if (!viewerReady || applyingCommandRef.current) return;
     const next = JSON.stringify([
       style,
@@ -2313,7 +2460,7 @@ function GraphMoleculeViewer({
     hydrogens,
     dark
   ]);
-  useEffect(() => {
+  useEffect2(() => {
     if (!viewerReady || loading || applyingCommandRef.current) return;
     const changed = drawAnnotations(annotations);
     const background = snapshot?.metadata?.render?.background ?? (dark ? "#0e1215" : "#ffffff");
@@ -2337,12 +2484,12 @@ function GraphMoleculeViewer({
     viewerReady,
     loading
   ]);
-  useLayoutEffect2(() => {
+  useLayoutEffect3(() => {
     picksRef.current = [];
     setMeasurePicks((current) => current.length ? [] : current);
     setFocusedMeasurement(null);
   }, [measurementKey]);
-  useEffect(() => {
+  useEffect2(() => {
     const host = viewerHostRef.current;
     if (!host) return;
     const sync = () => {
@@ -2364,7 +2511,7 @@ function GraphMoleculeViewer({
       motion?.removeEventListener?.("change", syncMotion);
     };
   }, []);
-  useEffect(() => {
+  useEffect2(() => {
     if (reducedMotion || loading || presentation === "timeline" && !expanded) {
       setSpin(0);
       viewerRef.current?.spin?.(false);
@@ -2375,15 +2522,15 @@ function GraphMoleculeViewer({
       viewerRef.current?.spin?.(false);
     };
   }, [spin, reducedMotion, loading, expanded, presentation, viewerReady]);
-  useLayoutEffect2(() => {
+  useLayoutEffect3(() => {
     viewerRef.current?.resize();
   }, [expanded]);
-  useEffect(() => {
+  useEffect2(() => {
     if (!measurementNotice) return;
     const timer = window.setTimeout(() => setMeasurementNotice(false), 8e3);
     return () => window.clearTimeout(timer);
   }, [measurementNotice, measurementHistory]);
-  useEffect(() => {
+  useEffect2(() => {
     if (!xyzContent) {
       return;
     }
@@ -2582,7 +2729,7 @@ function GraphMoleculeViewer({
       setHoveredAtom(null);
     }
   }
-  const liveButton = /* @__PURE__ */ jsxs5(
+  const liveButton = /* @__PURE__ */ jsxs6(
     Button,
     {
       type: "button",
@@ -2597,7 +2744,7 @@ function GraphMoleculeViewer({
       ]
     }
   );
-  return /* @__PURE__ */ jsx7(
+  return /* @__PURE__ */ jsx8(
     GraphMoleculeFigureFrame,
     {
       expanded,
@@ -2605,7 +2752,7 @@ function GraphMoleculeViewer({
       onEscape: closeLayer,
       title: title || "Molecular structure",
       presentation,
-      children: /* @__PURE__ */ jsxs5(
+      children: /* @__PURE__ */ jsxs6(
         "div",
         {
           className: `thread-graph-molecule-viewer is-${presentation} ${expanded ? "is-fullview" : ""} flex h-full min-h-0 flex-col ${className}`,
@@ -2658,9 +2805,9 @@ function GraphMoleculeViewer({
             if (handle?.isAvailable()) onActive?.(handle);
           },
           children: [
-            /* @__PURE__ */ jsxs5("div", { className: "thread-graph-molecule-header flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-3 py-2 sm:px-4 sm:py-3", children: [
-              /* @__PURE__ */ jsxs5("div", { className: "min-w-0", children: [
-                /* @__PURE__ */ jsx7("h2", { className: "truncate text-sm font-semibold text-slate-900", children: onOpenFile ? /* @__PURE__ */ jsxs5(
+            /* @__PURE__ */ jsxs6("div", { className: "thread-graph-molecule-header flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-3 py-2 sm:px-4 sm:py-3", children: [
+              /* @__PURE__ */ jsxs6("div", { className: "min-w-0", children: [
+                /* @__PURE__ */ jsx8("h2", { className: "truncate text-sm font-semibold text-slate-900", children: onOpenFile ? /* @__PURE__ */ jsxs6(
                   "button",
                   {
                     type: "button",
@@ -2668,25 +2815,25 @@ function GraphMoleculeViewer({
                     className: "thread-graph-molecule-file-link",
                     title: "Open in workspace",
                     children: [
-                      /* @__PURE__ */ jsx7("span", { className: "truncate", children: title }),
-                      /* @__PURE__ */ jsx7(PanelRightOpen, { className: "size-4 shrink-0" })
+                      /* @__PURE__ */ jsx8("span", { className: "truncate", children: title }),
+                      /* @__PURE__ */ jsx8(PanelRightOpen, { className: "size-4 shrink-0" })
                     ]
                   }
                 ) : title }),
-                /* @__PURE__ */ jsx7("p", { className: "mt-1 hidden text-[11px] text-slate-400 sm:block", children: "Structure and trajectory" })
+                /* @__PURE__ */ jsx8("p", { className: "mt-1 hidden text-[11px] text-slate-400 sm:block", children: "Structure and trajectory" })
               ] }),
-              /* @__PURE__ */ jsxs5(
+              /* @__PURE__ */ jsxs6(
                 "div",
                 {
                   className: "molecule-toolbar",
                   "aria-label": "View controls",
                   inert: loading || Boolean(viewerInitError),
                   children: [
-                    /* @__PURE__ */ jsx7("div", { className: "molecule-styles", role: "group", "aria-label": "Style", children: [
+                    /* @__PURE__ */ jsx8("div", { className: "molecule-styles", role: "group", "aria-label": "Style", children: [
                       ["ball-stick", "Ball & stick"],
                       ["stick", "Sticks"],
                       ["spacefill", "Space-fill"]
-                    ].map(([value, label], index) => /* @__PURE__ */ jsx7(
+                    ].map(([value, label], index) => /* @__PURE__ */ jsx8(
                       "button",
                       {
                         type: "button",
@@ -2697,10 +2844,10 @@ function GraphMoleculeViewer({
                       },
                       value
                     )) }),
-                    /* @__PURE__ */ jsxs5("details", { className: "molecule-view-menu", children: [
-                      /* @__PURE__ */ jsx7("summary", { children: "View" }),
-                      /* @__PURE__ */ jsxs5("div", { children: [
-                        /* @__PURE__ */ jsxs5(
+                    /* @__PURE__ */ jsxs6("details", { className: "molecule-view-menu", children: [
+                      /* @__PURE__ */ jsx8("summary", { children: "View" }),
+                      /* @__PURE__ */ jsxs6("div", { children: [
+                        /* @__PURE__ */ jsxs6(
                           "button",
                           {
                             type: "button",
@@ -2709,11 +2856,11 @@ function GraphMoleculeViewer({
                             onClick: () => setAtomLabels(!atomLabels),
                             children: [
                               "Atom labels ",
-                              /* @__PURE__ */ jsx7("kbd", { children: "L" })
+                              /* @__PURE__ */ jsx8("kbd", { children: "L" })
                             ]
                           }
                         ),
-                        /* @__PURE__ */ jsxs5(
+                        /* @__PURE__ */ jsxs6(
                           "button",
                           {
                             type: "button",
@@ -2722,11 +2869,11 @@ function GraphMoleculeViewer({
                             onClick: () => setHydrogens(!hydrogens),
                             children: [
                               "Hydrogens ",
-                              /* @__PURE__ */ jsx7("kbd", { children: "H" })
+                              /* @__PURE__ */ jsx8("kbd", { children: "H" })
                             ]
                           }
                         ),
-                        /* @__PURE__ */ jsxs5(
+                        /* @__PURE__ */ jsxs6(
                           "button",
                           {
                             type: "button",
@@ -2738,13 +2885,13 @@ function GraphMoleculeViewer({
                               "Spin: ",
                               spin === 1 ? "slow" : spin === 2 ? "fast" : "off",
                               " ",
-                              /* @__PURE__ */ jsx7("kbd", { children: "S" })
+                              /* @__PURE__ */ jsx8("kbd", { children: "S" })
                             ]
                           }
                         )
                       ] })
                     ] }),
-                    /* @__PURE__ */ jsx7(
+                    /* @__PURE__ */ jsx8(
                       "button",
                       {
                         type: "button",
@@ -2753,10 +2900,10 @@ function GraphMoleculeViewer({
                         "aria-pressed": measureTool === "distance",
                         disabled: !viewerReady || !xyzContent || loading,
                         onClick: () => toggleMeasureTool("distance"),
-                        children: /* @__PURE__ */ jsx7(Ruler, { size: 16 })
+                        children: /* @__PURE__ */ jsx8(Ruler, { size: 16 })
                       }
                     ),
-                    /* @__PURE__ */ jsx7(
+                    /* @__PURE__ */ jsx8(
                       "button",
                       {
                         type: "button",
@@ -2765,20 +2912,20 @@ function GraphMoleculeViewer({
                         "aria-pressed": measureTool === "angle",
                         disabled: !viewerReady || !xyzContent || loading,
                         onClick: () => toggleMeasureTool("angle"),
-                        children: /* @__PURE__ */ jsx7(Waypoints, { size: 16 })
+                        children: /* @__PURE__ */ jsx8(Waypoints, { size: 16 })
                       }
                     ),
-                    /* @__PURE__ */ jsx7(
+                    /* @__PURE__ */ jsx8(
                       "button",
                       {
                         type: "button",
                         "aria-label": "Reset view",
                         title: "Reset view (R)",
                         onClick: resetView,
-                        children: /* @__PURE__ */ jsx7(RotateCcw2, { size: 16 })
+                        children: /* @__PURE__ */ jsx8(RotateCcw2, { size: 16 })
                       }
                     ),
-                    /* @__PURE__ */ jsx7(
+                    /* @__PURE__ */ jsx8(
                       "button",
                       {
                         type: "button",
@@ -2786,15 +2933,15 @@ function GraphMoleculeViewer({
                         title: "Download immutable source",
                         disabled: !viewerData.exportContent || loading,
                         onClick: downloadSource,
-                        children: /* @__PURE__ */ jsx7(Download2, { size: 16 })
+                        children: /* @__PURE__ */ jsx8(Download2, { size: 16 })
                       }
                     )
                   ]
                 }
               )
             ] }),
-            /* @__PURE__ */ jsxs5("div", { className: "thread-graph-molecule-body min-h-0 flex-1", children: [
-              /* @__PURE__ */ jsxs5(
+            /* @__PURE__ */ jsxs6("div", { className: "thread-graph-molecule-body min-h-0 flex-1", children: [
+              /* @__PURE__ */ jsxs6(
                 "div",
                 {
                   ref: viewerHostRef,
@@ -2812,7 +2959,7 @@ function GraphMoleculeViewer({
                   },
                   onPointerCancel: () => setSpin(0),
                   children: [
-                    viewerInitError ? /* @__PURE__ */ jsx7(
+                    viewerInitError ? /* @__PURE__ */ jsx8(
                       "div",
                       {
                         "data-testid": "molecule-viewer-error",
@@ -2820,24 +2967,24 @@ function GraphMoleculeViewer({
                         children: viewerInitError
                       }
                     ) : null,
-                    !viewerInitError && !xyzContent ? /* @__PURE__ */ jsx7("div", { className: "thread-graph-molecule-empty absolute inset-0 flex items-center justify-center p-4 text-sm text-slate-400", children: "No molecule data available." }) : null,
-                    hoveredAtom ? /* @__PURE__ */ jsxs5(
+                    !viewerInitError && !xyzContent ? /* @__PURE__ */ jsx8("div", { className: "thread-graph-molecule-empty absolute inset-0 flex items-center justify-center p-4 text-sm text-slate-400", children: "No molecule data available." }) : null,
+                    hoveredAtom ? /* @__PURE__ */ jsxs6(
                       "div",
                       {
                         className: "thread-graph-molecule-tooltip pointer-events-none fixed z-[1000] rounded-md border border-gray-300 bg-white/95 px-2 py-1.5 text-[10px] text-gray-800 shadow-md",
                         style: { left: hoveredAtom.x - 20, top: hoveredAtom.y - 50 },
                         children: [
-                          /* @__PURE__ */ jsx7("div", { className: "mb-0.5 font-semibold text-gray-900", children: hoveredAtom.label }),
-                          /* @__PURE__ */ jsxs5("div", { className: "space-x-2 text-gray-600", children: [
-                            /* @__PURE__ */ jsxs5("span", { children: [
+                          /* @__PURE__ */ jsx8("div", { className: "mb-0.5 font-semibold text-gray-900", children: hoveredAtom.label }),
+                          /* @__PURE__ */ jsxs6("div", { className: "space-x-2 text-gray-600", children: [
+                            /* @__PURE__ */ jsxs6("span", { children: [
                               "x: ",
                               hoveredAtom.coords.x
                             ] }),
-                            /* @__PURE__ */ jsxs5("span", { children: [
+                            /* @__PURE__ */ jsxs6("span", { children: [
                               "y: ",
                               hoveredAtom.coords.y
                             ] }),
-                            /* @__PURE__ */ jsxs5("span", { children: [
+                            /* @__PURE__ */ jsxs6("span", { children: [
                               "z: ",
                               hoveredAtom.coords.z
                             ] })
@@ -2845,7 +2992,7 @@ function GraphMoleculeViewer({
                         ]
                       }
                     ) : null,
-                    (measureTool || measurementsPinned && currentMeasurements.length > 0) && /* @__PURE__ */ jsxs5(
+                    (measureTool || measurementsPinned && currentMeasurements.length > 0) && /* @__PURE__ */ jsxs6(
                       "section",
                       {
                         className: "molecule-measurements",
@@ -2853,20 +3000,20 @@ function GraphMoleculeViewer({
                         onDoubleClick: (event) => event.stopPropagation(),
                         onPointerDown: (event) => event.stopPropagation(),
                         children: [
-                          /* @__PURE__ */ jsxs5("header", { children: [
-                            /* @__PURE__ */ jsx7(
+                          /* @__PURE__ */ jsxs6("header", { children: [
+                            /* @__PURE__ */ jsx8(
                               "button",
                               {
                                 type: "button",
                                 "aria-label": "Pin measurements",
                                 "aria-pressed": measurementsPinned,
                                 onClick: () => setMeasurementsPinned(!measurementsPinned),
-                                children: /* @__PURE__ */ jsx7(Pin, { size: 14 })
+                                children: /* @__PURE__ */ jsx8(Pin, { size: 14 })
                               }
                             ),
-                            /* @__PURE__ */ jsx7("strong", { children: "Measurements" }),
-                            /* @__PURE__ */ jsx7("span", { children: currentMeasurements.length }),
-                            /* @__PURE__ */ jsx7(
+                            /* @__PURE__ */ jsx8("strong", { children: "Measurements" }),
+                            /* @__PURE__ */ jsx8("span", { children: currentMeasurements.length }),
+                            /* @__PURE__ */ jsx8(
                               "button",
                               {
                                 type: "button",
@@ -2877,13 +3024,13 @@ function GraphMoleculeViewer({
                               }
                             )
                           ] }),
-                          /* @__PURE__ */ jsx7("ol", { children: currentMeasurements.map((measurement, index) => {
+                          /* @__PURE__ */ jsx8("ol", { children: currentMeasurements.map((measurement, index) => {
                             const atoms = measurement.atomIds.map(
                               (id) => modelRef.current?.selectedAtoms({})[atomIdsRef.current.indexOf(id)]
                             ).filter(
                               (atom) => Boolean(atom)
                             );
-                            return /* @__PURE__ */ jsxs5(
+                            return /* @__PURE__ */ jsxs6(
                               "li",
                               {
                                 onMouseEnter: () => setFocusedMeasurement(measurement.id),
@@ -2891,10 +3038,10 @@ function GraphMoleculeViewer({
                                 onFocus: () => setFocusedMeasurement(measurement.id),
                                 onBlur: () => setFocusedMeasurement(null),
                                 children: [
-                                  /* @__PURE__ */ jsx7("span", { children: index + 1 }),
-                                  /* @__PURE__ */ jsx7("span", { title: measurement.atomIds.join(" \u2192 "), children: measurement.atomIds.join("\u2013") }),
-                                  /* @__PURE__ */ jsx7("output", { children: measureAtoms(atoms) }),
-                                  /* @__PURE__ */ jsx7(
+                                  /* @__PURE__ */ jsx8("span", { children: index + 1 }),
+                                  /* @__PURE__ */ jsx8("span", { title: measurement.atomIds.join(" \u2192 "), children: measurement.atomIds.join("\u2013") }),
+                                  /* @__PURE__ */ jsx8("output", { children: measureAtoms(atoms) }),
+                                  /* @__PURE__ */ jsx8(
                                     "button",
                                     {
                                       type: "button",
@@ -2904,7 +3051,7 @@ function GraphMoleculeViewer({
                                           (entry) => entry.id !== measurement.id
                                         )
                                       ),
-                                      children: /* @__PURE__ */ jsx7(X2, { size: 12 })
+                                      children: /* @__PURE__ */ jsx8(X2, { size: 12 })
                                     }
                                   )
                                 ]
@@ -2912,43 +3059,43 @@ function GraphMoleculeViewer({
                               measurement.id
                             );
                           }) }),
-                          !currentMeasurements.length && /* @__PURE__ */ jsx7("p", { children: "Click atoms to measure" })
+                          !currentMeasurements.length && /* @__PURE__ */ jsx8("p", { children: "Click atoms to measure" })
                         ]
                       }
                     ),
-                    help && /* @__PURE__ */ jsxs5(
+                    help && /* @__PURE__ */ jsxs6(
                       "div",
                       {
                         className: "molecule-help",
                         role: "dialog",
                         "aria-label": "Viewer help",
                         children: [
-                          /* @__PURE__ */ jsx7(
+                          /* @__PURE__ */ jsx8(
                             "button",
                             {
                               type: "button",
                               "aria-label": "Close help",
                               onClick: () => setHelp(false),
-                              children: /* @__PURE__ */ jsx7(X2, { size: 14 })
+                              children: /* @__PURE__ */ jsx8(X2, { size: 14 })
                             }
                           ),
-                          /* @__PURE__ */ jsx7("p", { children: "Drag to rotate \xB7 scroll or pinch to zoom \xB7 double-click to reset." }),
-                          /* @__PURE__ */ jsx7("p", { children: "Click an atom to select; Shift/Ctrl/\u2318 adds atoms. Measurements use separate picks." }),
-                          /* @__PURE__ */ jsx7("p", { children: "1/2/3 style \xB7 L labels \xB7 H hydrogens \xB7 D distance \xB7 A angle \xB7 M measure \xB7 S spin \xB7 R reset \xB7 ? help" }),
-                          /* @__PURE__ */ jsx7("p", { children: "Ctrl/\u2318 Z undo \xB7 Shift Ctrl/\u2318 Z redo. Escape closes popovers, clears picks, exits the tool, then closes full view." })
+                          /* @__PURE__ */ jsx8("p", { children: "Drag to rotate \xB7 scroll or pinch to zoom \xB7 double-click to reset." }),
+                          /* @__PURE__ */ jsx8("p", { children: "Click an atom to select; Shift/Ctrl/\u2318 adds atoms. Measurements use separate picks." }),
+                          /* @__PURE__ */ jsx8("p", { children: "1/2/3 style \xB7 L labels \xB7 H hydrogens \xB7 D distance \xB7 A angle \xB7 M measure \xB7 S spin \xB7 R reset \xB7 ? help" }),
+                          /* @__PURE__ */ jsx8("p", { children: "Ctrl/\u2318 Z undo \xB7 Shift Ctrl/\u2318 Z redo. Escape closes popovers, clears picks, exits the tool, then closes full view." })
                         ]
                       }
                     )
                   ]
                 }
               ),
-              /* @__PURE__ */ jsxs5("div", { className: "molecule-caption", children: [
-                /* @__PURE__ */ jsxs5("div", { children: [
-                  /* @__PURE__ */ jsx7("strong", { children: title }),
-                  /* @__PURE__ */ jsxs5("span", { children: [
-                    formula.map(({ element, count }) => /* @__PURE__ */ jsxs5("span", { children: [
+              /* @__PURE__ */ jsxs6("div", { className: "molecule-caption", children: [
+                /* @__PURE__ */ jsxs6("div", { children: [
+                  /* @__PURE__ */ jsx8("strong", { children: title }),
+                  /* @__PURE__ */ jsxs6("span", { children: [
+                    formula.map(({ element, count }) => /* @__PURE__ */ jsxs6("span", { children: [
                       element,
-                      count > 1 && /* @__PURE__ */ jsx7("sub", { children: count })
+                      count > 1 && /* @__PURE__ */ jsx8("sub", { children: count })
                     ] }, element)),
                     atomCount ? ` \xB7 ${atomCount} atoms` : "",
                     cube.header ? ` \xB7 ${translate("files.cubeGrid", {
@@ -2959,7 +3106,7 @@ function GraphMoleculeViewer({
                     xyzArray.length > 1 ? ` \xB7 Frame ${currentIndex + 1} / ${xyzArray.length}` : ""
                   ] })
                 ] }),
-                /* @__PURE__ */ jsx7(
+                /* @__PURE__ */ jsx8(
                   "button",
                   {
                     type: "button",
@@ -2967,10 +3114,10 @@ function GraphMoleculeViewer({
                     "aria-label": "Download figure source",
                     disabled: loading || !viewerData.exportContent,
                     onClick: downloadSource,
-                    children: /* @__PURE__ */ jsx7(Download2, { size: 16 })
+                    children: /* @__PURE__ */ jsx8(Download2, { size: 16 })
                   }
                 ),
-                /* @__PURE__ */ jsx7(
+                /* @__PURE__ */ jsx8(
                   "button",
                   {
                     type: "button",
@@ -2978,62 +3125,53 @@ function GraphMoleculeViewer({
                     "aria-label": "Viewer help",
                     "aria-expanded": help,
                     onClick: () => setHelp(!help),
-                    children: /* @__PURE__ */ jsx7(HelpCircle, { size: 16 })
+                    children: /* @__PURE__ */ jsx8(HelpCircle, { size: 16 })
                   }
                 )
               ] }),
-              measureTool && /* @__PURE__ */ jsxs5("p", { className: "molecule-measure-hint", role: "status", children: [
+              measureTool && /* @__PURE__ */ jsxs6("p", { className: "molecule-measure-hint", role: "status", children: [
                 measureTool === "angle" ? "Angle: pick three atoms; the middle atom is the vertex." : "Distance: pick two atoms.",
                 " ",
                 measurePicks.length ? `${measurePicks.join(" \u2192 ")} \u2192 pick ${(measureTool === "angle" ? 3 : 2) - measurePicks.length} more. Click a picked atom to cancel it.` : ""
               ] }),
-              (measurementNotice || measurementFuture.length > 0) && /* @__PURE__ */ jsxs5("div", { className: "molecule-undo", role: "status", children: [
-                /* @__PURE__ */ jsx7("span", { children: "Measurement change" }),
-                /* @__PURE__ */ jsx7(
+              (measurementNotice || measurementFuture.length > 0) && /* @__PURE__ */ jsxs6("div", { className: "molecule-undo", role: "status", children: [
+                /* @__PURE__ */ jsx8("span", { children: "Measurement change" }),
+                /* @__PURE__ */ jsx8(
                   "button",
                   {
                     type: "button",
                     "aria-label": "Undo measurement change",
                     disabled: !measurementHistory.length,
                     onClick: () => undoMeasurement(),
-                    children: /* @__PURE__ */ jsx7(Undo2, { size: 15 })
+                    children: /* @__PURE__ */ jsx8(Undo2, { size: 15 })
                   }
                 ),
-                /* @__PURE__ */ jsx7(
+                /* @__PURE__ */ jsx8(
                   "button",
                   {
                     type: "button",
                     "aria-label": "Redo measurement change",
                     disabled: !measurementFuture.length,
                     onClick: () => undoMeasurement(true),
-                    children: /* @__PURE__ */ jsx7(Redo2, { size: 15 })
+                    children: /* @__PURE__ */ jsx8(Redo2, { size: 15 })
                   }
                 )
               ] }),
-              /* @__PURE__ */ jsxs5("div", { className: "thread-graph-molecule-controls shrink-0", children: [
-                /* @__PURE__ */ jsxs5("details", { className: "molecule-scientific-tools", children: [
-                  /* @__PURE__ */ jsxs5("summary", { children: [
+              /* @__PURE__ */ jsxs6("div", { className: "thread-graph-molecule-controls shrink-0", children: [
+                /* @__PURE__ */ jsxs6("details", { className: "molecule-scientific-tools", children: [
+                  /* @__PURE__ */ jsxs6("summary", { children: [
                     "Structure tools & selection",
                     selectedSerials.length ? ` \xB7 ${selectedSerials.length} selected` : ""
                   ] }),
-                  /* @__PURE__ */ jsx7("div", { children: /* @__PURE__ */ jsxs5("div", { className: "thread-graph-molecule-control-row", children: [
-                    /* @__PURE__ */ jsxs5("div", { className: "min-w-0", children: [
-                      /* @__PURE__ */ jsxs5("label", { children: [
-                        "Representation",
-                        " ",
-                        /* @__PURE__ */ jsx7(
-                          "select",
-                          {
-                            "aria-label": "Representation",
-                            value: style,
-                            onChange: (event) => setStyle(event.target.value),
-                            children: supportedStyles.map((entry) => /* @__PURE__ */ jsx7("option", { value: entry, children: entry }, entry))
-                          }
-                        )
+                  /* @__PURE__ */ jsx8("div", { children: /* @__PURE__ */ jsxs6("div", { className: "thread-graph-molecule-control-row", children: [
+                    /* @__PURE__ */ jsxs6("div", { className: "min-w-0", children: [
+                      /* @__PURE__ */ jsxs6("div", { className: "molecule-representation-control", children: [
+                        /* @__PURE__ */ jsx8("span", { children: "Representation" }),
+                        /* @__PURE__ */ jsx8(GraphMoleculeRepresentationMenu, { value: style, options: supportedStyles, onChange: setStyle })
                       ] }),
-                      /* @__PURE__ */ jsx7("p", { className: "thread-graph-molecule-control-subtitle", children: "XYZ / PDB / CIF preview" })
+                      /* @__PURE__ */ jsx8("p", { className: "thread-graph-molecule-control-subtitle", children: "XYZ / PDB / CIF preview" })
                     ] }),
-                    /* @__PURE__ */ jsx7(
+                    /* @__PURE__ */ jsx8(
                       GraphMoleculeViewerUpperButtonGroup,
                       {
                         currentIndex,
@@ -3054,15 +3192,15 @@ function GraphMoleculeViewer({
                     )
                   ] }) })
                 ] }),
-                xyzArray.length > 1 ? /* @__PURE__ */ jsxs5(
+                xyzArray.length > 1 ? /* @__PURE__ */ jsxs6(
                   "div",
                   {
                     className: "thread-graph-molecule-trajectory",
                     role: "group",
                     "aria-label": "Trajectory controls",
                     children: [
-                      /* @__PURE__ */ jsxs5("div", { className: "thread-graph-molecule-playback-row", children: [
-                        /* @__PURE__ */ jsxs5(
+                      /* @__PURE__ */ jsxs6("div", { className: "thread-graph-molecule-playback-row", children: [
+                        /* @__PURE__ */ jsxs6(
                           Button,
                           {
                             type: "button",
@@ -3076,20 +3214,20 @@ function GraphMoleculeViewer({
                               setIsPlaying((current) => !current);
                             },
                             children: [
-                              isPlaying ? /* @__PURE__ */ jsx7(Pause, { className: "size-4" }) : /* @__PURE__ */ jsx7(Play, { className: "size-4" }),
+                              isPlaying ? /* @__PURE__ */ jsx8(Pause, { className: "size-4" }) : /* @__PURE__ */ jsx8(Play, { className: "size-4" }),
                               isPlaying ? "Pause" : "Play"
                             ]
                           }
                         ),
-                        /* @__PURE__ */ jsxs5("span", { className: "thread-graph-molecule-frame-count", children: [
+                        /* @__PURE__ */ jsxs6("span", { className: "thread-graph-molecule-frame-count", children: [
                           "Frame ",
-                          /* @__PURE__ */ jsx7("strong", { children: currentIndex + 1 }),
+                          /* @__PURE__ */ jsx8("strong", { children: currentIndex + 1 }),
                           " /",
                           " ",
                           xyzArray.length
                         ] }),
                         followControl ? liveButton : null,
-                        /* @__PURE__ */ jsx7("div", { className: "thread-graph-molecule-frame-buttons", children: [
+                        /* @__PURE__ */ jsx8("div", { className: "thread-graph-molecule-frame-buttons", children: [
                           {
                             label: "First frame",
                             index: 0,
@@ -3114,7 +3252,7 @@ function GraphMoleculeViewer({
                             Icon: SkipForward,
                             disabled: currentIndex === xyzArray.length - 1
                           }
-                        ].map(({ label, index, Icon, disabled }) => /* @__PURE__ */ jsx7(
+                        ].map(({ label, index, Icon, disabled }) => /* @__PURE__ */ jsx8(
                           Button,
                           {
                             type: "button",
@@ -3128,12 +3266,12 @@ function GraphMoleculeViewer({
                               setIsPlaying(false);
                               setCurrentIndex(index);
                             },
-                            children: /* @__PURE__ */ jsx7(Icon, { className: "size-4" })
+                            children: /* @__PURE__ */ jsx8(Icon, { className: "size-4" })
                           },
                           label
                         )) })
                       ] }),
-                      /* @__PURE__ */ jsx7(
+                      /* @__PURE__ */ jsx8(
                         "input",
                         {
                           type: "range",
@@ -3154,14 +3292,14 @@ function GraphMoleculeViewer({
                           }
                         }
                       ),
-                      /* @__PURE__ */ jsxs5(
+                      /* @__PURE__ */ jsxs6(
                         "div",
                         {
                           className: "thread-graph-molecule-frame-scale",
                           "aria-hidden": "true",
                           children: [
-                            /* @__PURE__ */ jsx7("span", { children: "1" }),
-                            /* @__PURE__ */ jsxs5("span", { children: [
+                            /* @__PURE__ */ jsx8("span", { children: "1" }),
+                            /* @__PURE__ */ jsxs6("span", { children: [
                               xyzArray.length,
                               " frames"
                             ] })
@@ -3171,18 +3309,18 @@ function GraphMoleculeViewer({
                     ]
                   }
                 ) : null,
-                /* @__PURE__ */ jsxs5(
+                /* @__PURE__ */ jsxs6(
                   "details",
                   {
                     className: "molecule-scientific-actions",
                     open: isCube || void 0,
                     children: [
-                      /* @__PURE__ */ jsxs5("summary", { children: [
+                      /* @__PURE__ */ jsxs6("summary", { children: [
                         "Scientific actions",
                         selectedSerials.length ? ` \xB7 ${selectedSerials.length} selected` : ""
                       ] }),
-                      /* @__PURE__ */ jsxs5("div", { children: [
-                        /* @__PURE__ */ jsx7(
+                      /* @__PURE__ */ jsxs6("div", { children: [
+                        /* @__PURE__ */ jsx8(
                           "div",
                           {
                             role: "group",
@@ -3194,7 +3332,7 @@ function GraphMoleculeViewer({
                         ),
                         rendererSlot?.({ target, selectedIds }),
                         followControl ? null : liveButton,
-                        onScreenshot && /* @__PURE__ */ jsx7(
+                        onScreenshot && /* @__PURE__ */ jsx8(
                           Button,
                           {
                             type: "button",
@@ -3206,8 +3344,8 @@ function GraphMoleculeViewer({
                             children: "Send screenshot"
                           }
                         ),
-                        status && /* @__PURE__ */ jsx7("p", { role: "status", children: status }),
-                        /* @__PURE__ */ jsx7(
+                        status && /* @__PURE__ */ jsx8("p", { role: "status", children: status }),
+                        /* @__PURE__ */ jsx8(
                           GraphMoleculeViewerLowerButtonGroup,
                           {
                             cameraInfo,
