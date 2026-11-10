@@ -17,6 +17,7 @@ In another terminal, with Playwright and Chromium already installed:
 ```sh
 node packages/thread-ui/tests/layout/check.mjs
 node packages/thread-ui/tests/layout/check-code-copy.mjs
+node packages/thread-ui/tests/layout/check-molecule-representation.mjs
 pnpm exec tsc -p packages/thread-ui/tests/layout/tsconfig.json
 pnpm --filter @remote-codex/thread-ui exec vitest run src/components/MatterWorkbench.test.tsx src/components/ThreadWorkspaceLayout.test.tsx
 ```
@@ -30,6 +31,13 @@ The code-copy check uses a reply ending in a one-line fenced code block. It
 checks direct mouse clicks at both widths, hover hit-testing against the
 overlapping reply-copy control, mobile block-tap reveal followed by button tap,
 and keyboard activation. Each activation must copy the exact code to clipboard.
+
+The molecule representation check uses `?molecule&theme=light|dark` to exercise
+the real viewer. It checks select/option foreground and opaque background colors
+with the opposite OS color preference, in workspace and expanded views, plus
+selection synchronization with the representation toolbar and keyboard focus.
+`MOLECULE_OUTPUT` chooses its screenshots/results directory. The native popup's
+OS chrome is browser-owned; the checks inspect the option styles directly.
 
 The checks cover 1440×900, 390×844 and 900×700 in light/dark themes; horizontal
 and page overflow, transcript/composer visibility, workspace tree scrolling and

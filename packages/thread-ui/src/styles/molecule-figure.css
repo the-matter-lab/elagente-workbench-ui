@@ -250,6 +250,19 @@
   gap: 10px;
   padding: 6px 0;
 }
+.molecule-scientific-tools select {
+  padding: 3px 6px;
+  border: 1px solid var(--theme-border, #e8ecee);
+  border-radius: 4px;
+  font: inherit;
+}
+/* Native option popups can retain a light background while inheriting dark
+   theme text. Give both the closed control and its options an opaque pair. */
+.molecule-scientific-tools select,
+.molecule-scientific-tools option {
+  background-color: var(--theme-surface, #fff);
+  color: var(--theme-fg, #121416);
+}
 .molecule-scientific-tools textarea {
   width: 100%;
   min-height: 120px;
