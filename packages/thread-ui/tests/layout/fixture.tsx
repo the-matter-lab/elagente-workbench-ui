@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { ThreadDetailSurface } from '../../src/ThreadDetailSurface';
 import { ThreadWorkspaceLayout } from '../../src/components/ThreadWorkspaceLayout';
 import { PluginProvider } from '../../src/plugins/PluginProvider';
+import { GraphMoleculeViewer } from '../../src/components/graph-workspace/GraphMoleculeViewer';
 import type { MatterWorkbenchOptions } from '../../src/components/MatterWorkbench';
 import type { ThreadDetailUiAdapter } from '../../src';
 import { mockCapabilities, mockDetail, mockStatus, mockThreads } from '../../../../apps/playground/src/mockData';
@@ -52,4 +53,12 @@ function Fixture() {
     }
   </PluginProvider>;
 }
-createRoot(document.getElementById('root')!).render(<Fixture />);
+function MoleculeFixture() {
+  const theme = new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light';
+  return <div className={`thread-ui-shell fixture-molecule`} data-theme-effective={theme}>
+    <GraphMoleculeViewer title="Water" source={{content:['3\nWater\nO 0 0 0\nH 0.96 0 0\nH -0.24 0.93 0\n']}} />
+  </div>;
+}
+createRoot(document.getElementById('root')!).render(
+  new URLSearchParams(location.search).has('molecule') ? <MoleculeFixture /> : <Fixture />,
+);
