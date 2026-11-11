@@ -684,6 +684,15 @@
 .thread-graph-download-preview-actions a:hover { background: var(--theme-bg); }
 .thread-graph-download-preview button:disabled { opacity: .6; cursor: wait; }
 
+.workspace-json-view-toolbar { display:flex; flex-shrink:0; flex-wrap:wrap; align-items:center; gap:12px; padding:4px 8px; border-bottom:1px solid var(--theme-border); font-size:12px; }
+.workspace-json-view-toggle { display:inline-flex; padding:2px; background:var(--theme-hover); }
+.workspace-json-view-toggle button { padding:4px 8px; border:1px solid transparent; color:var(--theme-fg-muted); background:transparent; }
+.workspace-json-view-toggle button[aria-pressed='true'] { border-color:var(--theme-border); background:var(--theme-panel); color:var(--theme-fg); font-weight:500; }
+.workspace-json-view-toggle button[aria-disabled='true'] { opacity:.5; cursor:default; }
+.workspace-json-view-toggle button:focus-visible { outline:2px solid var(--theme-fg); outline-offset:1px; }
+.workspace-json-formatted-status { display:inline-flex; align-items:center; gap:6px; color:var(--theme-fg-muted); }
+.workspace-json-formatted-status svg { flex-shrink:0; color:var(--success, #16834b); }
+
 /* Safe small-file documents reuse the workspace surface and existing themes. */
 .workspace-document-status { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px; padding:8px 12px; border-bottom:1px solid var(--theme-border); color:var(--theme-fg-muted); font-size:11px; flex-shrink:0; }
 .workspace-document-actions { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }

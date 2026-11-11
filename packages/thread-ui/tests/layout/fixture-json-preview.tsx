@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import * as monaco from 'monaco-editor/editor/editor.api.js';
 import { GraphWorkspacePreviewPane } from '../../src/components/graph-workspace/GraphWorkspacePreviewPane';
+import { formatJsonPreview } from '../../src/components/graph-workspace/explorer/jsonPreview';
 import { createDefaultPluginContextValue } from '../../src/plugins/plugin-context';
 import {
   newDraft,
@@ -16,8 +17,9 @@ document.documentElement.classList.add('fixture-molecule-host');
 document.documentElement.dataset.themeEffective = theme;
 if (params.get('appearance') === 'terminal')
   document.documentElement.dataset.themePreset = 'terminal';
-const source =
+const minifiedSource =
   '{"version":1,"events":[{"progress":{"callId":"pyscf:3c566151","energy":-1.234567890123456789e-100,"step":2,"status":"complete"}}],"id":9007199254740993,"empty":[]}';
+const source = params.has('preformatted') ? formatJsonPreview(minifiedSource)! + '\n' : minifiedSource;
 const node = {
   id: 'json',
   path: 'runs/molecules/node-progress.json',
@@ -77,9 +79,9 @@ function Fixture() {
   const pane = (
     <GraphWorkspacePreviewPane
       plugins={createDefaultPluginContextValue()}
-      selectedTarget={{ kind: 'workspace-file', node }}
-      previewFile={preview}
-      documents={documents}
+      selectedTarget={params.has('event') ? { kind: 'event', node: { ...node, kind: 'event', path: 'thread-events:/turn-a/001-tool-call.json', detail: source } } : { kind: 'workspace-file', node }}
+      previewFile={params.has('event') ? null : preview}
+      {...(params.has('event') ? {} : { documents })}
       canSaveDocument
       onDownloadFile={() => {
         Object.assign(window, { __download: source });
@@ -96,15 +98,16 @@ function Fixture() {
         padding: 16,
         background: 'var(--theme-bg)',
         display: 'flex',
+        flexDirection: 'row',
       }}
     >
       {params.has('duplicate') ? (
         <>
-          <div style={{ width: '50%' }}>{pane}</div>
-          <div style={{ width: '50%' }}>{pane}</div>
+          <div style={{ width: '50%', height: '100%', minWidth: 0 }}>{pane}</div>
+          <div style={{ width: '50%', height: '100%', minWidth: 0 }}>{pane}</div>
         </>
       ) : (
-        pane
+        <div style={{ width: '100%', height: '100%', minWidth: 0 }}>{pane}</div>
       )}
     </main>
   );
