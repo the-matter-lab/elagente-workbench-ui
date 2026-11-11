@@ -473,6 +473,7 @@ export const filesEn = {
   "files.jsonView": "JSON view",
   "files.jsonFormatted": "Formatted",
   "files.jsonRaw": "Raw",
+  "files.jsonAlreadyFormatted": "Source is already formatted",
   "files.showExplorer": "Show Explorer",
   "files.hideEditor": "Hide Editor",
   "files.preview_f1fbb2": "Preview",

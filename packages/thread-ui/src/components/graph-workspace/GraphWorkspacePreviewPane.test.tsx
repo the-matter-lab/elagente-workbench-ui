@@ -458,6 +458,47 @@ describe('JSON file previews', () => {
     expect(lines(element)).toBe(extra.content);
   });
 
+  it('explains when source JSON is already formatted while copying preserves its final newline', async () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    const content = '{\n  "version": 1\n}\n';
+    const element = render(<GraphWorkspacePreviewPane {...props({ previewFile: { ...preview, content } })} />);
+    expect(element.textContent).toContain('Source is already formatted');
+    act(() => [...element.querySelectorAll<HTMLButtonElement>('[aria-label="JSON view"] button')].find(button => button.textContent === 'Raw')!.click());
+    expect(element.querySelector('[aria-label="JSON view"] button[aria-pressed="true"]')?.textContent).toBe('Raw');
+    expect(lines(element).trimEnd()).toBe(content.trimEnd());
+    openFileActions(element);
+    await act(async () => element.querySelector<HTMLButtonElement>('[aria-label="Copy contents"]')!.click());
+    expect(writeText).toHaveBeenCalledExactlyOnceWith(content);
+  });
+
+  it('formats debug event JSON without a mode toggle or editing and copies its original text', async () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    const detail = '{"id":"debug-call","progress":{"status":"complete"}}';
+    const eventNode: WorkspaceTreeNode = { ...node, id: 'event', kind: 'event', path: 'thread-events:/turn-a/001-tool-call.json', detail };
+    const element = render(<GraphWorkspacePreviewPane {...props({ previewFile: null, selectedTarget: { kind: 'event', node: eventNode } })} />);
+    expect(lines(element)).toBe('{\n  "id": "debug-call",\n  "progress": {\n    "status": "complete"\n  }\n}');
+    expect(element.querySelector('[aria-label="JSON view"]')).toBeNull();
+    expect(element.querySelector('textarea')).toBeNull();
+    openFileActions(element);
+    expect(element.querySelector('[aria-label="Edit file"]')).toBeNull();
+    await act(async () => element.querySelector<HTMLButtonElement>('[aria-label="Copy contents"]')!.click());
+    expect(writeText).toHaveBeenCalledExactlyOnceWith(detail);
+  });
+
+  it('keeps debug events read-only when a previous file snapshot is still present', () => {
+    const draft = newDraft('json-key', { ...preview, workspaceRevision: '1', fileIdentity: 'file-1', contentHash: 'hash', encoding: 'utf-8', bom: false, eol: 'lf', readOnlyReason: null });
+    const documents: WorkspaceDocuments = { documents: new Map([[node.path, draft]]), source: 'json-test', load: vi.fn(), change: vi.fn(), setEditing: vi.fn(), discard: vi.fn(), save: vi.fn(), reconcile: vi.fn(), adoptDisk: vi.fn(), checkDisk: vi.fn(), acceptVerifiedDisk: vi.fn() };
+    const eventNode: WorkspaceTreeNode = { ...node, id: 'event', kind: 'event', path: 'thread-events:/turn-a/001-tool-call.json', detail: '{"event":true}' };
+    const element = render(<GraphWorkspacePreviewPane {...props({ selectedTarget: { kind: 'event', node: eventNode }, documents, canSaveDocument: true })} />);
+    openFileActions(element);
+    expect(element.querySelector('[aria-label="Edit file"]')).toBeNull();
+    expect(element.querySelector('[aria-label="JSON view"]')).toBeNull();
+    expect(documents.setEditing).not.toHaveBeenCalled();
+    expect(documents.save).not.toHaveBeenCalled();
+  });
+
   it('preserves linked source line numbers and resets Raw when switching files', () => {
     const element = render(<GraphWorkspacePreviewPane {...props({ focusLine: 1 })} />);
     expect(element.querySelector('[aria-label="JSON view"]')).toBeNull();

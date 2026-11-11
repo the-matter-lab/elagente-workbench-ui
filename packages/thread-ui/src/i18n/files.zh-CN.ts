@@ -473,6 +473,7 @@ export const filesZhCN = {
   "files.jsonView": "JSON 视图",
   "files.jsonFormatted": "格式化",
   "files.jsonRaw": "原始",
+  "files.jsonAlreadyFormatted": "源文件已格式化",
   "files.showExplorer": "显示文件浏览器",
   "files.hideEditor": "隐藏编辑器",
   "files.preview_f1fbb2": "预览",

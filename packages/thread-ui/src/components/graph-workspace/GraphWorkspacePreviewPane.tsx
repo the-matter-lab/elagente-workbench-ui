@@ -641,7 +641,7 @@ export function GraphWorkspacePreviewPane({
   const { locale: i18nLocale } = useI18n();
   const filePanel = useFilePanel();
   const surfaceRef = useRef<HTMLElement | null>(null);
-  const document = previewFile ? documents?.documents.get(previewFile.path) : undefined;
+  const document = selectedTarget?.kind === 'workspace-file' && previewFile ? documents?.documents.get(previewFile.path) : undefined;
   const editing = document?.editing ?? false;
   const draftContent = document?.content ?? previewFile?.content ?? '';
   const saving = document?.phase === 'saving';
@@ -686,13 +686,21 @@ export function GraphWorkspacePreviewPane({
       ? formatJsonPreview(previewFile.content) : null,
   [selectedTarget?.kind, extension, previewFile?.content, previewFile?.truncated, editing]);
   const showingFormattedJson = formattedJson !== null && jsonView === 'formatted' && focusLine == null;
+  const jsonAlreadyFormatted = formattedJson !== null && formattedJson === previewFile?.content.trimEnd();
   const previewContent = showingFormattedJson ? formattedJson : previewFile?.content ?? '';
   // A formatted preview must never share a retained editable document model.
   const editorResourceKey = document?.key ?? `${resourceScopeKey}:${previewFile?.path}`;
   const previewResourceKey = showingFormattedJson ? JSON.stringify([editorResourceKey, 'formatted-json', jsonPreviewId]) : editorResourceKey;
+  const eventContent = selectedTarget?.kind === 'event'
+    ? selectedTarget.node.detail ?? selectedTarget.node.preview ?? selectedTarget.node.name : null;
+  const eventPreviewContent = useMemo(() => eventContent === null ? null
+    : focusLine == null ? formatJsonPreview(eventContent) ?? eventContent : eventContent,
+  [eventContent, focusLine]);
+  const eventResourceKey = JSON.stringify([resourceScopeKey, 'event-json', activeNode?.id, activeNode?.path, jsonPreviewId]);
   const renderedViewLabel = isDrawioFile ? translate("files.diagram") : 'Markdown';
   const title = previewTargetTitle(selectedTarget);
   const canEditFile =
+    selectedTarget?.kind === 'workspace-file' &&
     Boolean(previewFile && canSaveDocument && document && !document.snapshot.readOnlyReason && document.snapshot.contentHash) &&
     !(previewFile && MOLECULAR_EXTENSIONS.has(extension)) &&
     isSmallEditableTextFile(previewFile!);
@@ -755,7 +763,7 @@ export function GraphWorkspacePreviewPane({
   }
 
   const fileToolbar =
-    previewFile && (isMarkdownFile || isDrawioFile || canEditFile) ? (
+    selectedTarget?.kind === 'workspace-file' && previewFile && (isMarkdownFile || isDrawioFile || canEditFile) ? (
       <div className="flex shrink-0 items-center gap-1">
         {(isMarkdownFile || isDrawioFile) && !editing ? (
           <button type="button" className="thread-graph-editor-toolbar-button workspace-mobile-view-toggle" aria-label={translate(markdownView==='preview' ? 'files.source' : 'files.preview', { value1: renderedViewLabel })} title={translate(markdownView==='preview' ? 'files.source' : 'files.preview', { value1: renderedViewLabel })} onClick={() => setMarkdownView(view => view==='preview'?'source':'preview')}>
@@ -923,7 +931,7 @@ export function GraphWorkspacePreviewPane({
         ) : selectedTarget.kind === 'workspace-file' && previewFile ? (
           <div className="flex min-h-0 flex-1 flex-col">
             {formattedJson !== null && focusLine == null ? (
-              <div className="workspace-json-view-toggle flex shrink-0 items-center gap-1 border-b px-2 py-1 text-xs" role="group" aria-label={translate('files.jsonView')}>
+              <div className="workspace-json-view-toggle flex shrink-0 flex-wrap items-center gap-1 border-b px-2 py-1 text-xs" role="group" aria-label={translate('files.jsonView')}>
                 {(['formatted', 'raw'] as const).map(view => (
                   <button key={view} type="button" aria-pressed={jsonView === view}
                     className={`rounded px-2 py-1 ${jsonView === view ? 'bg-[var(--theme-hover)] font-medium text-[var(--theme-fg)]' : 'text-[var(--theme-fg-muted)]'}`}
@@ -931,6 +939,7 @@ export function GraphWorkspacePreviewPane({
                     {translate(view === 'formatted' ? 'files.jsonFormatted' : 'files.jsonRaw')}
                   </button>
                 ))}
+                {jsonAlreadyFormatted ? <span className="px-2 text-[var(--theme-fg-muted)]">{translate('files.jsonAlreadyFormatted')}</span> : null}
               </div>
             ) : null}
             {document && (document.snapshot.readOnlyReason || ['conflict','unknown','error'].includes(document.phase)) ? (
@@ -1051,6 +1060,18 @@ export function GraphWorkspacePreviewPane({
           >
             {renderedArtifact}
           </div>
+        ) : selectedTarget.kind === 'event' ? (
+          <div className="flex min-h-0 flex-1 flex-col">
+            {compactViewer ? (
+              <GraphWorkspaceCodePreview content={eventPreviewContent ?? ''} language="json" focusLine={focusLine} />
+            ) : (
+              <Suspense fallback={<div className="flex min-h-0 flex-1 items-center justify-center text-sm text-[var(--theme-fg-muted)]">{translate('files.loadingEditor')}</div>}>
+                <GraphWorkspaceMonacoEditor key={eventResourceKey} resourceKey={eventResourceKey}
+                  content={eventPreviewContent ?? ''} dark={dark} focusLine={focusLine}
+                  language="json" path={selectedTarget.node.path} readOnly />
+              </Suspense>
+            )}
+          </div>
         ) : selectedTarget.kind === 'meta' ? (
           <div className="min-h-0 flex-1 overflow-auto p-3">
             <div className="grid gap-3">
@@ -1063,9 +1084,9 @@ export function GraphWorkspacePreviewPane({
           </div>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
-            {selectedTarget.kind !== 'event' && <div className="thread-graph-file-preview-header border-b px-4 py-3 text-xs uppercase tracking-[0.12em]">
+            <div className="thread-graph-file-preview-header border-b px-4 py-3 text-xs uppercase tracking-[0.12em]">
               {selectedTarget.node.kind}
-            </div>}
+            </div>
             <GraphWorkspaceCodePreview
               content={
                 selectedTarget.node.detail ??

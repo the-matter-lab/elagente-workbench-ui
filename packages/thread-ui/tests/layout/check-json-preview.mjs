@@ -138,6 +138,10 @@ try {
     });
     await page.goto(`${baseUrl}/json-preview.html?duplicate=1`);
     await expect(page.locator('.monaco-editor')).toHaveCount(2);
+    for (const editor of await page.locator('.monaco-editor').all()) {
+      await expect.poll(async () => (await editor.boundingBox())?.height ?? 0).toBeGreaterThan(200);
+      await expect.poll(async () => (await editor.boundingBox())?.width ?? 0).toBeGreaterThan(400);
+    }
     const models = () =>
       page.evaluate(() =>
         window.__jsonFixture.monaco.editor
@@ -171,6 +175,66 @@ try {
     });
     await page.close();
   }
+  {
+    const page = await browser.newPage({ viewport: { width: 1100, height: 760 } });
+    await page.goto(`${baseUrl}/json-preview.html?preformatted=1`);
+    await expect(page.getByText('Source is already formatted', { exact: true })).toBeVisible();
+    const value = () => page.evaluate(() => window.__jsonFixture.monaco.editor.getEditors().find(e => e.getDomNode()?.isConnected)?.getValue());
+    await expect(page.locator('.monaco-editor')).toBeVisible();
+    const formatted = await value();
+    await page.getByRole('button', { name: 'Raw', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Raw', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    expect(await value()).toBe(await page.evaluate(() => window.__jsonFixture.source));
+    expect((await value()).trimEnd()).toBe(formatted);
+    await page.getByRole('button', { name: 'Formatted', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Formatted', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    expect(await value()).toBe(formatted);
+    await page.screenshot({ path: `${out}/already-formatted-source.png` });
+    results.push({ mode: 'already-formatted', status: 'passed', rawExact: true, explanationVisible: true });
+    await page.close();
+  }
+  for (const appearance of ['classical', 'terminal'])
+    for (const theme of ['light', 'dark']) {
+      const page = await browser.newPage({ viewport: { width: 1400, height: 800 } });
+      const errors = [];
+      page.on('pageerror', e => errors.push(e.message));
+      await page.goto(`${baseUrl}/json-preview.html?event=1&duplicate=1&appearance=${appearance}&theme=${theme}`);
+      await expect(page.locator('.monaco-editor')).toHaveCount(2);
+      for (const editor of await page.locator('.monaco-editor').all()) {
+        await expect.poll(async () => (await editor.boundingBox())?.height ?? 0).toBeGreaterThan(200);
+        await expect.poll(async () => (await editor.boundingBox())?.width ?? 0).toBeGreaterThan(400);
+      }
+      await expect(page.getByRole('group', { name: 'JSON view', exact: true })).toHaveCount(0);
+      const models = await page.evaluate(() => window.__jsonFixture.monaco.editor.getEditors().filter(e => e.getDomNode()?.isConnected).map(e => ({
+        value: e.getValue(), language: e.getModel()?.getLanguageId(), readOnly: e.getRawOptions().readOnly, uri: e.getModel()?.uri.toString(),
+      })));
+      expect(models).toHaveLength(2);
+      expect(models[0].uri).not.toBe(models[1].uri);
+      for (const m of models) {
+        expect(m.language).toBe('json');
+        expect(m.readOnly).toBe(true);
+        expect(m.value).toContain('\n  "version": 1,\n');
+        expect(m.value).toContain('9007199254740993');
+      }
+      await page.evaluate(async () => {
+        const editors = window.__jsonFixture.monaco.editor.getEditors().filter(e => e.getDomNode()?.isConnected);
+        await editors[0].getAction('editor.foldAll').run();
+      });
+      await expect(page.locator('.codicon-folding-collapsed').first()).toBeAttached();
+      await page.getByRole('button', { name: 'File actions', exact: true }).first().click();
+      await expect(page.getByRole('button', { name: 'Edit file', exact: true })).toHaveCount(0);
+      await page.getByRole('button', { name: 'File actions', exact: true }).first().click();
+      await page.evaluate(async () => {
+        const editors = window.__jsonFixture.monaco.editor.getEditors().filter(e => e.getDomNode()?.isConnected);
+        await editors[0].getAction('editor.unfoldAll').run();
+      });
+      expect(await page.evaluate(() => window.__jsonFixture.changes)).toBe(0);
+      expect(await page.evaluate(() => window.__jsonFixture.saves)).toBe(0);
+      expect(errors).toEqual([]);
+      await page.screenshot({ path: `${out}/debug-${appearance}-${theme}.png` });
+      results.push({ mode: 'debug-event', appearance, theme, status: 'passed', noToggle: true, readOnly: true, jsonLanguage: true, folding: true, separateModels: true });
+      await page.close();
+    }
   await writeFile(
     `${out}/BROWSER_RESULTS.json`,
     JSON.stringify({ status: 'passed', results }, null, 2) + '\n',
