@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": { "noEmit": true },
-  "include": ["fixture.tsx", "vite.config.ts", "../../src/components/graph-workspace/3dmol.d.ts"]
+  "include": ["fixture.tsx", "fixture-json-preview.tsx", "vite.config.ts", "../../src/components/graph-workspace/3dmol.d.ts"]
 }

@@ -14,6 +14,7 @@ import {
 import type { WorkspaceTreeNode } from './workspaceTree';
 import type { WorkspaceDocuments } from './explorer/useWorkspaceDocuments';
 import { editDraft, newDraft } from './explorer/workspaceDocuments';
+import { MAX_JSON_PREVIEW_CHARS } from './explorer/jsonPreview';
 
 vi.mock('../graph-chat/graphChatShiki', () => ({
   getGraphChatHighlighter: () => new Promise(() => undefined),
@@ -409,6 +410,64 @@ it('renders draw.io in a sandbox by default and preserves source/preview switchi
   expect(element.querySelector('[aria-label="Source code"]')).toBeTruthy();
   act(() => element.querySelector<HTMLButtonElement>('[aria-label="Diagram preview"]')!.click());
   expect(element.querySelector('iframe')).toBeTruthy();
+});
+
+describe('JSON file previews', () => {
+  const node: WorkspaceTreeNode = { id: 'json', name: 'node-progress.json', path: 'runs/node-progress.json', kind: 'file', children: [] };
+  const source = '{"version":1,"events":[{"progress":true}]}';
+  const preview = { path: node.path, name: node.name, language: 'json', content: source, size: source.length, truncated: false, nextOffset: source.length };
+  const props = (extra: Partial<ComponentProps<typeof GraphWorkspacePreviewPane>> = {}): ComponentProps<typeof GraphWorkspacePreviewPane> => ({
+    plugins: createDefaultPluginContextValue(), selectedTarget: { kind: 'workspace-file', node }, previewFile: preview, ...extra,
+  });
+  const lines = (element: HTMLElement) => [...element.querySelectorAll('.thread-graph-code-line > span:last-child')].map(line => line.textContent).join('\n');
+
+  it('opens formatted, toggles exact raw text, and leaves copy/download and the document unchanged', async () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    const draft = newDraft('json-key', { ...preview, workspaceRevision: '1', fileIdentity: 'file-1', contentHash: 'hash', encoding: 'utf-8', bom: false, eol: 'lf', readOnlyReason: null });
+    const documents: WorkspaceDocuments = { documents: new Map([[node.path, draft]]), source: 'json-test', load: vi.fn(), change: vi.fn(), setEditing: vi.fn(), discard: vi.fn(), save: vi.fn(), reconcile: vi.fn(), adoptDisk: vi.fn(), checkDisk: vi.fn(), acceptVerifiedDisk: vi.fn() };
+    const onDownloadFile = vi.fn();
+    const element = render(<GraphWorkspacePreviewPane {...props({ documents, canSaveDocument: true, onDownloadFile })} />);
+    expect(element.querySelector('[aria-label="JSON view"] button[aria-pressed="true"]')?.textContent).toBe('Formatted');
+    expect(lines(element)).toContain('\n  "version": 1,\n');
+    act(() => [...element.querySelectorAll<HTMLButtonElement>('[aria-label="JSON view"] button')].find(button => button.textContent === 'Raw')!.click());
+    expect(lines(element)).toBe(source);
+    act(() => [...element.querySelectorAll<HTMLButtonElement>('[aria-label="JSON view"] button')].find(button => button.textContent === 'Formatted')!.click());
+    openFileActions(element);
+    await act(async () => element.querySelector<HTMLButtonElement>('[aria-label="Copy contents"]')!.click());
+    expect(writeText).toHaveBeenCalledExactlyOnceWith(source);
+    act(() => element.querySelector<HTMLButtonElement>('[aria-label="Download file"]')!.click());
+    expect(onDownloadFile).toHaveBeenCalledOnce();
+    expect(documents.change).not.toHaveBeenCalled();
+    expect(documents.save).not.toHaveBeenCalled();
+    expect(draft.content).toBe(source);
+    expect(draft.phase).toBe('clean');
+    // Entering edit mode must use the original source, not the formatted preview.
+    act(() => root!.render(<GraphWorkspacePreviewPane {...props({ documents: { ...documents, documents: new Map([[node.path, { ...draft, editing: true }]]) }, canSaveDocument: true })} />));
+    expect(element.querySelector('[aria-label="JSON view"]')).toBeNull();
+    expect(element.querySelector<HTMLTextAreaElement>('textarea')?.value).toBe(source);
+  });
+
+  it.each([
+    { content: '{"broken":', truncated: false },
+    { content: source, truncated: true },
+    { content: '"' + 'a'.repeat(MAX_JSON_PREVIEW_CHARS) + '"', truncated: false },
+  ])('keeps invalid, partial and oversized previews raw ($truncated)', extra => {
+    const element = render(<GraphWorkspacePreviewPane {...props({ previewFile: { ...preview, ...extra, size: extra.content.length, nextOffset: extra.content.length } })} />);
+    expect(element.querySelector('[aria-label="JSON view"]')).toBeNull();
+    expect(lines(element)).toBe(extra.content);
+  });
+
+  it('preserves linked source line numbers and resets Raw when switching files', () => {
+    const element = render(<GraphWorkspacePreviewPane {...props({ focusLine: 1 })} />);
+    expect(element.querySelector('[aria-label="JSON view"]')).toBeNull();
+    expect(lines(element)).toBe(source);
+    act(() => root!.render(<GraphWorkspacePreviewPane {...props()} />));
+    act(() => [...element.querySelectorAll<HTMLButtonElement>('[aria-label="JSON view"] button')].find(button => button.textContent === 'Raw')!.click());
+    const other = { ...node, id: 'other', path: 'other.json', name: 'other.json' };
+    act(() => root!.render(<GraphWorkspacePreviewPane {...props({ selectedTarget: { kind: 'workspace-file', node: other }, previewFile: { ...preview, path: other.path, name: other.name } })} />));
+    expect(element.querySelector('[aria-label="JSON view"] button[aria-pressed="true"]')?.textContent).toBe('Formatted');
+  });
 });
 
 describe('copy preview contents', () => {

@@ -1,6 +1,7 @@
 import { translate, useI18n } from '../../i18n';
 import { useEffect, useRef } from 'react';
 import * as monaco from 'monaco-editor/editor/editor.api.js';
+import 'monaco-editor/features/folding/register.js';
 import { cssHexVariable, useDocumentThemeRevision } from '../themeHooks';
 import 'monaco-editor/languages/definitions/cpp/register.js';
 import 'monaco-editor/languages/definitions/css/register.js';

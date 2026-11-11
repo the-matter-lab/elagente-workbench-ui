@@ -18,6 +18,7 @@ In another terminal, with Playwright and Chromium already installed:
 node packages/thread-ui/tests/layout/check.mjs
 node packages/thread-ui/tests/layout/check-code-copy.mjs
 node packages/thread-ui/tests/layout/check-molecule-representation.mjs
+node packages/thread-ui/tests/layout/check-json-preview.mjs
 pnpm exec tsc -p packages/thread-ui/tests/layout/tsconfig.json
 pnpm --filter @remote-codex/thread-ui exec vitest run src/components/MatterWorkbench.test.tsx src/components/ThreadWorkspaceLayout.test.tsx
 ```
@@ -26,6 +27,13 @@ If Playwright is supplied by a separate checkout, set `PLAYWRIGHT_MODULE` to tha
 checkout's absolute `node_modules/@playwright/test` path. `LAYOUT_OUTPUT` chooses
 the screenshot/results directory; `LAYOUT_URL` overrides the localhost URL.
 `COPY_OUTPUT` chooses the code-copy screenshot/results directory.
+
+The JSON preview check opens `json-preview.html` with the real Monaco editor in
+Classical/Terminal and light/dark appearances. It checks default formatting,
+fold/unfold, exact Raw text, keyboard switching, original edit/download content,
+and that previewing does not dirty or save the document. Invalid and partial JSON
+stay raw. A two-pane case guards against one preview disposing the other's model.
+`JSON_PREVIEW_OUTPUT` chooses its screenshots and `BROWSER_RESULTS.json` directory.
 
 The code-copy check uses a reply ending in a one-line fenced code block. It
 checks direct mouse clicks at both widths, hover hit-testing against the
