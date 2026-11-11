@@ -8,6 +8,7 @@ import { WorkspaceImagePreview, ZoomableImage as GraphWorkspaceZoomableImage } f
 import {
   createContext,
   useContext,
+  useId,
   lazy,
   memo,
   Suspense,
@@ -61,6 +62,7 @@ import { WorkspaceInfoCard } from './GraphWorkspaceCards';
 import { GraphMoleculeViewer } from './GraphMoleculeViewer';
 import { GraphDrawioPreview } from './GraphDrawioPreview';
 import { isDrawioPath } from './explorer/filePreviewPolicy';
+import { formatJsonPreview } from './explorer/jsonPreview';
 import {
   WorkspaceFileTabs,
   type WorkspaceFileTab,
@@ -653,6 +655,8 @@ export function GraphWorkspacePreviewPane({
   const [markdownView, setMarkdownView] = useState<'preview' | 'source'>(
     'preview',
   );
+  const [jsonView, setJsonView] = useState<'formatted' | 'raw'>('formatted');
+  const jsonPreviewId = useId();
   const [compactViewer, setCompactViewer] = useState(
     () =>
       typeof window === 'undefined' ||
@@ -676,6 +680,16 @@ export function GraphWorkspacePreviewPane({
   const extension = previewFile ? extensionOf(previewFile.path) : '';
   const isMarkdownFile = MARKDOWN_EXTENSIONS.has(extension);
   const isDrawioFile = isDrawioPath(previewFile?.path ?? '');
+  const formattedJson = useMemo(() =>
+    selectedTarget?.kind === 'workspace-file' && extension === 'json' &&
+    previewFile && !previewFile.truncated && !editing
+      ? formatJsonPreview(previewFile.content) : null,
+  [selectedTarget?.kind, extension, previewFile?.content, previewFile?.truncated, editing]);
+  const showingFormattedJson = formattedJson !== null && jsonView === 'formatted' && focusLine == null;
+  const previewContent = showingFormattedJson ? formattedJson : previewFile?.content ?? '';
+  // A formatted preview must never share a retained editable document model.
+  const editorResourceKey = document?.key ?? `${resourceScopeKey}:${previewFile?.path}`;
+  const previewResourceKey = showingFormattedJson ? JSON.stringify([editorResourceKey, 'formatted-json', jsonPreviewId]) : editorResourceKey;
   const renderedViewLabel = isDrawioFile ? translate("files.diagram") : 'Markdown';
   const title = previewTargetTitle(selectedTarget);
   const canEditFile =
@@ -725,8 +739,8 @@ export function GraphWorkspacePreviewPane({
   }, []);
 
   useEffect(() => {
-    setMarkdownView('preview'); setShowConflict(true); setDiffMode('draftDisk'); setActionsOpen(false);
-  }, [activeNode?.path]);
+    setMarkdownView('preview'); setJsonView('formatted'); setShowConflict(true); setDiffMode('draftDisk'); setActionsOpen(false);
+  }, [activeNode?.path, resourceScopeKey]);
   useEffect(() => {
     if (!actionsOpen) return;
     const escape = (event: KeyboardEvent) => {
@@ -908,6 +922,17 @@ export function GraphWorkspacePreviewPane({
           <WorkspacePdfPreview key={pdfUrl} src={pdfUrl} node={selectedTarget.node} />
         ) : selectedTarget.kind === 'workspace-file' && previewFile ? (
           <div className="flex min-h-0 flex-1 flex-col">
+            {formattedJson !== null && focusLine == null ? (
+              <div className="workspace-json-view-toggle flex shrink-0 items-center gap-1 border-b px-2 py-1 text-xs" role="group" aria-label={translate('files.jsonView')}>
+                {(['formatted', 'raw'] as const).map(view => (
+                  <button key={view} type="button" aria-pressed={jsonView === view}
+                    className={`rounded px-2 py-1 ${jsonView === view ? 'bg-[var(--theme-hover)] font-medium text-[var(--theme-fg)]' : 'text-[var(--theme-fg-muted)]'}`}
+                    onClick={() => setJsonView(view)}>
+                    {translate(view === 'formatted' ? 'files.jsonFormatted' : 'files.jsonRaw')}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             {document && (document.snapshot.readOnlyReason || ['conflict','unknown','error'].includes(document.phase)) ? (
               <div className="workspace-document-status" role="status">
                 <span>{document.snapshot.readOnlyReason ? translate('files.safeReadOnly', {reason: translateReadOnly(document.snapshot.readOnlyReason)}) : translate(document.needsVerification && document.phase==='clean' ? 'files.safeAdoptedSnapshot':`files.safePhase.${document.phase}`)} · {document.snapshot.encoding==='utf-8' ? 'UTF-8':translate('files.safeUnknownEncoding')}{document.snapshot.bom ? ' BOM' : ''} · {document.snapshot.eol.toUpperCase()} · r{document.revision}</span>
@@ -969,7 +994,7 @@ export function GraphWorkspacePreviewPane({
               />
             ) : compactViewer ? (
               <GraphWorkspaceCodePreview
-                content={previewFile.content}
+                content={previewContent}
                 focusLine={focusLine}
                 language={fileLanguage}
               />
@@ -981,15 +1006,14 @@ export function GraphWorkspacePreviewPane({
                 }
               >
                 <GraphWorkspaceMonacoEditor
-                  key={document?.key ?? `${resourceScopeKey}:${previewFile.path}`}
-                  resourceKey={document?.key ?? `${resourceScopeKey}:${previewFile.path}`}
-                  retainModel={Boolean(document)}
-                  content={editing ? draftContent : previewFile.content}
+                  key={previewResourceKey}
+                  resourceKey={previewResourceKey}
+                  retainModel={Boolean(document) && !showingFormattedJson}
+                  content={editing ? draftContent : previewContent}
                   dark={dark}
                   focusLine={focusLine}
                   language={fileLanguage}
-                  onChange={setDraftContent}
-                  onSave={() => void handleSaveFile()}
+                  {...(editing ? { onChange: setDraftContent, onSave: () => void handleSaveFile() } : {})}
                   path={previewFile.path}
                   readOnly={!editing}
                 />
