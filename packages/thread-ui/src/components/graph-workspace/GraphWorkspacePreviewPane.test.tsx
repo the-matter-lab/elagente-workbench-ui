@@ -463,13 +463,41 @@ describe('JSON file previews', () => {
     Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
     const content = '{\n  "version": 1\n}\n';
     const element = render(<GraphWorkspacePreviewPane {...props({ previewFile: { ...preview, content } })} />);
-    expect(element.textContent).toContain('Source is already formatted');
-    act(() => [...element.querySelectorAll<HTMLButtonElement>('[aria-label="JSON view"] button')].find(button => button.textContent === 'Raw')!.click());
-    expect(element.querySelector('[aria-label="JSON view"] button[aria-pressed="true"]')?.textContent).toBe('Raw');
+    const group = element.querySelector('[aria-label="JSON view"]')!;
+    const raw = [...group.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent === 'Raw')!;
+    const note = element.querySelector('.workspace-json-formatted-status')!;
+    expect(note.textContent).toBe('Already formatted');
+    expect(group.contains(note)).toBe(false);
+    expect(note.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    expect(raw.getAttribute('aria-disabled')).toBe('true');
+    expect(raw.getAttribute('aria-describedby')).toBe(note.id);
+    act(() => raw.click());
+    expect(group.querySelector('button[aria-pressed="true"]')?.textContent).toBe('Formatted');
     expect(lines(element).trimEnd()).toBe(content.trimEnd());
     openFileActions(element);
     await act(async () => element.querySelector<HTMLButtonElement>('[aria-label="Copy contents"]')!.click());
     expect(writeText).toHaveBeenCalledExactlyOnceWith(content);
+  });
+
+  it('keeps Raw enabled for multiline JSON with different indentation and inline arrays', () => {
+    const content = '{\n    "values": [1, 2]\n}';
+    const element = render(<GraphWorkspacePreviewPane {...props({ previewFile: { ...preview, content } })} />);
+    const raw = [...element.querySelectorAll<HTMLButtonElement>('[aria-label="JSON view"] button')].find(button => button.textContent === 'Raw')!;
+    expect(raw.getAttribute('aria-disabled')).toBeNull();
+    expect(element.querySelector('.workspace-json-formatted-status')).toBeNull();
+    expect(lines(element)).toContain('\n  "values": [\n');
+    act(() => raw.click());
+    expect(lines(element)).toBe(content);
+  });
+
+  it('shows Formatted when a refreshed file becomes equivalent while Raw was selected', () => {
+    const element = render(<GraphWorkspacePreviewPane {...props()} />);
+    act(() => [...element.querySelectorAll<HTMLButtonElement>('[aria-label="JSON view"] button')].find(button => button.textContent === 'Raw')!.click());
+    const content = '{\n  "version": 1\n}\n';
+    act(() => root!.render(<GraphWorkspacePreviewPane {...props({ previewFile: { ...preview, content } })} />));
+    expect(element.querySelector('[aria-label="JSON view"] button[aria-pressed="true"]')?.textContent).toBe('Formatted');
+    expect(element.querySelector('[aria-label="JSON view"] button[aria-disabled="true"]')?.getAttribute('aria-pressed')).toBe('false');
+    expect(lines(element).trimEnd()).toBe(content.trimEnd());
   });
 
   it('formats debug event JSON without a mode toggle or editing and copies its original text', async () => {

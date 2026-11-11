@@ -685,8 +685,9 @@ export function GraphWorkspacePreviewPane({
     previewFile && !previewFile.truncated && !editing
       ? formatJsonPreview(previewFile.content) : null,
   [selectedTarget?.kind, extension, previewFile?.content, previewFile?.truncated, editing]);
-  const showingFormattedJson = formattedJson !== null && jsonView === 'formatted' && focusLine == null;
   const jsonAlreadyFormatted = formattedJson !== null && formattedJson === previewFile?.content.trimEnd();
+  const activeJsonView = jsonAlreadyFormatted ? 'formatted' : jsonView;
+  const showingFormattedJson = formattedJson !== null && activeJsonView === 'formatted' && focusLine == null;
   const previewContent = showingFormattedJson ? formattedJson : previewFile?.content ?? '';
   // A formatted preview must never share a retained editable document model.
   const editorResourceKey = document?.key ?? `${resourceScopeKey}:${previewFile?.path}`;
@@ -931,15 +932,25 @@ export function GraphWorkspacePreviewPane({
         ) : selectedTarget.kind === 'workspace-file' && previewFile ? (
           <div className="flex min-h-0 flex-1 flex-col">
             {formattedJson !== null && focusLine == null ? (
-              <div className="workspace-json-view-toggle flex shrink-0 flex-wrap items-center gap-1 border-b px-2 py-1 text-xs" role="group" aria-label={translate('files.jsonView')}>
-                {(['formatted', 'raw'] as const).map(view => (
-                  <button key={view} type="button" aria-pressed={jsonView === view}
-                    className={`rounded px-2 py-1 ${jsonView === view ? 'bg-[var(--theme-hover)] font-medium text-[var(--theme-fg)]' : 'text-[var(--theme-fg-muted)]'}`}
-                    onClick={() => setJsonView(view)}>
-                    {translate(view === 'formatted' ? 'files.jsonFormatted' : 'files.jsonRaw')}
-                  </button>
-                ))}
-                {jsonAlreadyFormatted ? <span className="px-2 text-[var(--theme-fg-muted)]">{translate('files.jsonAlreadyFormatted')}</span> : null}
+              <div className="workspace-json-view-toolbar">
+                <div className="workspace-json-view-toggle rounded" role="group" aria-label={translate('files.jsonView')}>
+                  {(['formatted', 'raw'] as const).map(view => (
+                    <button key={view} type="button" aria-pressed={activeJsonView === view}
+                      aria-disabled={view === 'raw' && jsonAlreadyFormatted ? true : undefined}
+                      aria-describedby={view === 'raw' && jsonAlreadyFormatted ? `${jsonPreviewId}-formatted-status` : undefined}
+                      title={view === 'raw' && jsonAlreadyFormatted ? translate('files.jsonRawAlreadyFormatted') : undefined}
+                      className="rounded"
+                      onClick={() => { if (view !== 'raw' || !jsonAlreadyFormatted) setJsonView(view); }}>
+                      {translate(view === 'formatted' ? 'files.jsonFormatted' : 'files.jsonRaw')}
+                    </button>
+                  ))}
+                </div>
+                {jsonAlreadyFormatted ? (
+                  <span id={`${jsonPreviewId}-formatted-status`} className="workspace-json-formatted-status">
+                    <Check size={13} aria-hidden="true" />
+                    {translate('files.jsonAlreadyFormatted')}
+                  </span>
+                ) : null}
               </div>
             ) : null}
             {document && (document.snapshot.readOnlyReason || ['conflict','unknown','error'].includes(document.phase)) ? (

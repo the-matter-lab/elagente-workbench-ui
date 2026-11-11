@@ -175,24 +175,41 @@ try {
     });
     await page.close();
   }
-  {
-    const page = await browser.newPage({ viewport: { width: 1100, height: 760 } });
-    await page.goto(`${baseUrl}/json-preview.html?preformatted=1`);
-    await expect(page.getByText('Source is already formatted', { exact: true })).toBeVisible();
-    const value = () => page.evaluate(() => window.__jsonFixture.monaco.editor.getEditors().find(e => e.getDomNode()?.isConnected)?.getValue());
-    await expect(page.locator('.monaco-editor')).toBeVisible();
-    const formatted = await value();
-    await page.getByRole('button', { name: 'Raw', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Raw', exact: true })).toHaveAttribute('aria-pressed', 'true');
-    expect(await value()).toBe(await page.evaluate(() => window.__jsonFixture.source));
-    expect((await value()).trimEnd()).toBe(formatted);
-    await page.getByRole('button', { name: 'Formatted', exact: true }).click();
-    await expect(page.getByRole('button', { name: 'Formatted', exact: true })).toHaveAttribute('aria-pressed', 'true');
-    expect(await value()).toBe(formatted);
-    await page.screenshot({ path: `${out}/already-formatted-source.png` });
-    results.push({ mode: 'already-formatted', status: 'passed', rawExact: true, explanationVisible: true });
-    await page.close();
-  }
+  for (const appearance of ['classical', 'terminal'])
+    for (const theme of ['light', 'dark']) {
+      const page = await browser.newPage({ viewport: { width: 1100, height: 760 } });
+      await page.goto(`${baseUrl}/json-preview.html?preformatted=1&appearance=${appearance}&theme=${theme}`);
+      const note = page.getByText('Already formatted', { exact: true });
+      const group = page.getByRole('group', { name: 'JSON view', exact: true });
+      const raw = group.getByRole('button', { name: 'Raw', exact: true });
+      const formatted = group.getByRole('button', { name: 'Formatted', exact: true });
+      await expect(note).toBeVisible();
+      await expect(raw).toHaveAttribute('aria-disabled', 'true');
+      await expect(raw).toHaveAccessibleDescription('Already formatted');
+      await expect(group.getByText('Already formatted', { exact: true })).toHaveCount(0);
+      await expect(note.locator('svg[aria-hidden="true"]')).toHaveCount(1);
+      await expect(page.locator('.monaco-editor')).toBeVisible();
+      // aria-disabled keeps the explanation reachable by keyboard, but blocks activation.
+      await raw.focus();
+      await expect(raw).toBeFocused();
+      await raw.press('Enter');
+      await raw.press('Space');
+      await expect(formatted).toHaveAttribute('aria-pressed', 'true');
+      await expect(raw).toHaveAttribute('aria-pressed', 'false');
+      const value = await page.evaluate(() => window.__jsonFixture.monaco.editor.getEditors().find(e => e.getDomNode()?.isConnected)?.getValue());
+      expect(value).toBe((await page.evaluate(() => window.__jsonFixture.source)).trimEnd());
+      const geometry = await group.evaluate(g => ({
+        borderRadius: getComputedStyle(g).borderRadius,
+        noteBackground: getComputedStyle(g.nextElementSibling).backgroundColor,
+        gap: g.nextElementSibling.getBoundingClientRect().left - g.getBoundingClientRect().right,
+      }));
+      expect(geometry.noteBackground).toBe('rgba(0, 0, 0, 0)');
+      expect(geometry.gap).toBeGreaterThanOrEqual(10);
+      if (appearance === 'terminal') expect(geometry.borderRadius).toBe('0px');
+      await page.screenshot({ path: `${out}/already-formatted-${appearance}-${theme}.png` });
+      results.push({ mode: 'already-formatted', appearance, theme, status: 'passed', rawDisabled: true, keyboardExplanation: true, noteOutsideControl: true });
+      await page.close();
+    }
   for (const appearance of ['classical', 'terminal'])
     for (const theme of ['light', 'dark']) {
       const page = await browser.newPage({ viewport: { width: 1400, height: 800 } });
