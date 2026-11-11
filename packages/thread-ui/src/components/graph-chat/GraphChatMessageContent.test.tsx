@@ -275,7 +275,8 @@ it('links an auto-detected path under a folder hidden by default (ELA-260)', asy
   // runs/ is in .workbenchignore: only a listing with hidden entries contains it.
   const listTree = vi.fn(async ({ path, showHidden }: { path?: string | null; showHidden?: boolean }) => ({
     name: 'abc', path: path ?? '', kind: 'directory' as const,
-    children: showHidden && path === 'runs/abc' ? [{ name: 'x.out', path: 'runs/abc/x.out', kind: 'file' as const }] : [],
+    children: !showHidden ? [] : path === 'runs/abc' ? [{ name: 'x.out', path: 'runs/abc/x.out', kind: 'file' as const }]
+      : path === '' ? [{ name: 'runs', path: 'runs', kind: 'directory' as const }] : [],
   }));
   const resolve = createWorkspacePathResolver({ listTree, hiddenFiles: true }, { threadId: 't' }, '/code');
   let element!: HTMLDivElement;

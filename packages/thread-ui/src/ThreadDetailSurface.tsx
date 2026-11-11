@@ -333,6 +333,15 @@ export function ThreadDetailSurface({
     openThread,
     cancelPendingSteer,
   } = adapter;
+  const threadId = detail?.thread.id, workspaceId = detail?.workspace.id, workspaceRoot = detail?.workspace.absPath;
+  // Its own memo: the timeline adapter below also changes with the host's callbacks,
+  // and every new resolver makes each linked path verify again (ELA-311).
+  const resolveWorkspacePath = useMemo(
+    () => threadId && workspaceRoot !== undefined && adapter.workspace
+      ? createWorkspacePathResolver(adapter.workspace, { threadId, workspaceId }, workspaceRoot)
+      : undefined,
+    [adapter.workspace, threadId, workspaceId, workspaceRoot],
+  );
   const timelineAdapter = useMemo(
     () => ({
       ...(getImageAssetUrl
@@ -355,7 +364,7 @@ export function ThreadDetailSurface({
         return adapter.workspace.getRawFileUrl({threadId: detail.thread.id, workspaceId: detail.workspace.id, path: relative ?? path});
       },
       workspaceRootPath: detail?.workspace.absPath,
-      ...(detail && adapter.workspace ? { resolveWorkspacePath: createWorkspacePathResolver(adapter.workspace, { threadId: detail.thread.id, workspaceId: detail.workspace.id }, detail.workspace.absPath) } : {}),
+      ...(resolveWorkspacePath ? { resolveWorkspacePath } : {}),
       onOpenLinkedThread: openThread,
       ...(adapter.resolveArtifact ? { resolveArtifact: adapter.resolveArtifact } : {}),
       ...(adapter.getThreadHref ? { getThreadHref: adapter.getThreadHref } : {}),
@@ -371,6 +380,7 @@ export function ThreadDetailSurface({
       detail?.workspace.absPath,
       detail?.workspace.id,
       detail?.thread.id,
+      resolveWorkspacePath,
       adapter.workspace,
       adapter.resolveArtifact,
       adapter.getThreadHref,
