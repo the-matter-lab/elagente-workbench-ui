@@ -107,6 +107,7 @@ function IsosurfaceControls({
 export default function GraphMoleculeViewerLowerButtonGroup({
   cameraInfo,
   canSubmit = false,
+  selectionSubmission = true,
   onClearSelection,
   onClearStaged,
   onSendSelection,
@@ -124,6 +125,8 @@ export default function GraphMoleculeViewerLowerButtonGroup({
   /** Present for volumetric (cube) sources. */
   isosurface?: GraphMoleculeIsosurfaceControls;
   canSubmit?: boolean;
+  /** False when the host has no selection handler: the send and staging buttons are hidden, not disabled. */
+  selectionSubmission?: boolean;
   cameraInfo: GraphMoleculeCameraInfo | null;
   onClearSelection: () => void;
   onClearStaged: () => void;
@@ -160,34 +163,38 @@ export default function GraphMoleculeViewerLowerButtonGroup({
           >
             <Trash2 className="size-4" />
           </GraphMoleculeIconButton>
-          <GraphMoleculeIconButton
-            label="Send selection"
-            disabled={!hasSelection || !canSubmit}
-            onClick={onSendSelection}
-          >
-            <Send className="size-4" />
-          </GraphMoleculeIconButton>
-          <GraphMoleculeIconButton
-            label="Stage current selection"
-            disabled={!hasSelection}
-            onClick={onStageSelection}
-          >
-            <Box className="size-4" />
-          </GraphMoleculeIconButton>
-          <GraphMoleculeIconButton
-            label="Clear staged selections"
-            disabled={!hasStaged}
-            onClick={onClearStaged}
-          >
-            <Eraser className="size-4" />
-          </GraphMoleculeIconButton>
-          <GraphMoleculeIconButton
-            label="Send staged selections"
-            disabled={!hasStaged || !canSubmit}
-            onClick={onSendStaged}
-          >
-            <ArrowUpRight className="size-4" />
-          </GraphMoleculeIconButton>
+          {selectionSubmission ? (
+            <>
+              <GraphMoleculeIconButton
+                label="Send selection"
+                disabled={!hasSelection || !canSubmit}
+                onClick={onSendSelection}
+              >
+                <Send className="size-4" />
+              </GraphMoleculeIconButton>
+              <GraphMoleculeIconButton
+                label="Stage current selection"
+                disabled={!hasSelection}
+                onClick={onStageSelection}
+              >
+                <Box className="size-4" />
+              </GraphMoleculeIconButton>
+              <GraphMoleculeIconButton
+                label="Clear staged selections"
+                disabled={!hasStaged}
+                onClick={onClearStaged}
+              >
+                <Eraser className="size-4" />
+              </GraphMoleculeIconButton>
+              <GraphMoleculeIconButton
+                label="Send staged selections"
+                disabled={!hasStaged || !canSubmit}
+                onClick={onSendStaged}
+              >
+                <ArrowUpRight className="size-4" />
+              </GraphMoleculeIconButton>
+            </>
+          ) : null}
         </GraphMoleculeButtonGroup>
       </div>
 
@@ -217,9 +224,11 @@ export default function GraphMoleculeViewerLowerButtonGroup({
                     .join(', ')
                 : 'None'}
             </div>
-            <div>
-              Staged: {stagedMolecules} molecule(s), {stagedAtoms} atom(s)
-            </div>
+            {selectionSubmission ? (
+              <div>
+                Staged: {stagedMolecules} molecule(s), {stagedAtoms} atom(s)
+              </div>
+            ) : null}
           </div>
         </div>
       ) : null}

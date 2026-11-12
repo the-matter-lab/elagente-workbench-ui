@@ -816,12 +816,16 @@ it('applies browser commands, rejects stale targets, and retains immutable coord
   );
 });
 
-it('disabled submission without a callback and rejected submissions provide visible feedback', async () => {
+it('hides selection submission without a callback; rejected submissions provide visible feedback', async () => {
   await act(async () =>
     root.render(<GraphMoleculeViewer source={{ content: [first], target }} />),
   );
   await act(async () => runtime.click({ index: 0 }, runtime.viewer));
-  expect(button('Send selection').disabled).toBe(true);
+  // An Agent without a selection action (Estructural, ELA-387) shows no send or staging buttons.
+  for (const label of ['Send selection', 'Stage current selection', 'Clear staged selections', 'Send staged selections'])
+    expect(button(label)).toBeNull();
+  expect(button('Clear selection').disabled).toBe(false);
+  expect(node.textContent).not.toContain('Staged:');
   await act(async () =>
     root.render(
       <GraphMoleculeViewer
