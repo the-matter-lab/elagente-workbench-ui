@@ -2186,6 +2186,7 @@ export function GraphMoleculeViewer({
                   cameraInfo={cameraInfo}
                   onClearSelection={() => setSelectedSerials([])}
                   onClearStaged={() => setStagedSelections({})}
+                  selectionSubmission={Boolean(onSelectionSubmit)}
                   canSubmit={
                     Boolean(onSelectionSubmit && target) &&
                     !loading &&
