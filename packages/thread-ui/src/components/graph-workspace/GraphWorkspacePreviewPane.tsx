@@ -48,6 +48,7 @@ import { MarkdownImageLinkContext } from '../ZoomableImage';
 import type { HighlighterCore } from 'shiki/core';
 
 import type { ThreadWorkspaceFilePreview } from '../../adapters';
+import type { ThreadArtifactDto } from '@remote-codex/shared';
 import type { PluginContextValue } from '../../plugins/plugin-context';
 import { getGraphChatHighlighter, syntaxThemeFor } from '../graph-chat/graphChatShiki';
 import { useThemeFeature } from '../themeHooks';
@@ -63,6 +64,7 @@ import { GraphMoleculeViewer } from './GraphMoleculeViewer';
 import { GraphDrawioPreview } from './GraphDrawioPreview';
 import { isDrawioPath } from './explorer/filePreviewPolicy';
 import { formatJsonPreview } from './explorer/jsonPreview';
+import { publishedArtifactForFile } from './explorer/publishedStructureArtifact';
 import {
   WorkspaceFileTabs,
   type WorkspaceFileTab,
@@ -565,6 +567,7 @@ function MissingLinkedFile({ path }: { path: string }) {
 
 export function GraphWorkspacePreviewPane({
   activeFilePath,
+  artifacts = [],
   breadcrumbNode,
   dirtyFilePaths = new Set(),
   error,
@@ -600,6 +603,8 @@ export function GraphWorkspacePreviewPane({
   workspaceRootPath,
 }: {
   activeFilePath?: string | null;
+  /** Published thread artifacts; a structure file binds the one for its exact revision. */
+  artifacts?: readonly ThreadArtifactDto[];
   /** Directory navigation changes breadcrumbs without changing the preview's file actions. */
   breadcrumbNode?: WorkspaceTreeNode | null;
   dirtyFilePaths?: ReadonlySet<string>;
@@ -675,6 +680,19 @@ export function GraphWorkspacePreviewPane({
       })
     : null;
   const moleculeSnapshot = buildMoleculePreviewSnapshot(previewFile ?? null);
+  // A structure file renders as its published artifact only for a verified,
+  // unchanged disk revision; otherwise the plain preview has no target.
+  const fileArtifact = selectedTarget?.kind === 'workspace-file' && moleculeSnapshot && previewFile &&
+    document?.phase === 'clean' && !document.needsVerification
+    ? publishedArtifactForFile(artifacts, previewFile.path, document.snapshot.contentHash) : null;
+  const renderedFileArtifact = fileArtifact
+    ? plugins.renderArtifact({
+        artifact: fileArtifact,
+        expanded: true,
+        presentation: 'workspace',
+        onToggleExpanded: () => undefined,
+      })
+    : null;
   const fileLanguage =
     previewFile?.language || languageForPath(previewFile?.path ?? '');
   const extension = previewFile ? extensionOf(previewFile.path) : '';
@@ -919,11 +937,13 @@ export function GraphWorkspacePreviewPane({
           <DownloadFilePreview key={selectedTarget.node.path} node={selectedTarget.node} onDownload={onDownloadFile} {...(downloadReason ? { readOnlyReason: downloadReason } : activeFilePath && documents?.documents.get(activeFilePath)?.snapshot.readOnlyReason ? {readOnlyReason:documents.documents.get(activeFilePath)!.snapshot.readOnlyReason!}: {})} />
         ) : selectedTarget.kind === 'workspace-file' && moleculeSnapshot ? (
           <div className="thread-graph-molecule-preview min-h-0 flex-1 overflow-hidden">
-            <GraphMoleculeViewer
-              source={moleculeSnapshot}
-              moleculeId={moleculeSnapshot.uuid ?? selectedTarget.node.path}
-              title={selectedTarget.node.name}
-            />
+            {renderedFileArtifact ?? (
+              <GraphMoleculeViewer
+                source={moleculeSnapshot}
+                moleculeId={moleculeSnapshot.uuid ?? selectedTarget.node.path}
+                title={selectedTarget.node.name}
+              />
+            )}
           </div>
         ) : selectedTarget.kind === 'workspace-file' && imageUrl ? (
           <WorkspaceImagePreview key={imageUrl} src={imageUrl} alt={selectedTarget.node.path || selectedTarget.node.name} />
