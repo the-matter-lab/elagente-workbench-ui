@@ -627,6 +627,7 @@ export function GraphWorkspaceExplorer({
   const viewerPanel = (
     <GraphWorkspacePreviewPane
       key={`${workspaceIdentity.threadId}:${workspaceIdentity.workspaceId}`}
+      artifacts={artifacts}
       mobileNavigation={isMobileViewport}
       readingPositions={readingPositions}
       {...(navigation.index > 0 ? { onNavigateBack: () => navigatePreview(-1), previousFilePath: navigation.paths[navigation.index - 1] } : {})}
