@@ -17,8 +17,8 @@ and keyboard-overlap measurements. Updating it preserves the mounted composer.
 Both additions are optional. The package contains no idle policy, countdown, or
 keepalive implementation. Hosts supply descriptions, notices, and actions.
 
-The review package is `@remote-codex/thread-ui@0.1.29-idle.2`, built from the
-0.1.28 release base. Consumers only need to replace their thread-ui tarball URL;
+The stable package is `@remote-codex/thread-ui@0.1.29`, built from merged PR #25
+on the 0.1.28 release base. Consumers only need to replace their thread-ui tarball URL;
 shared, plugin-runtime, plugin-terminal, and plugin-xyz pins can remain unchanged.
 
 `MatterWorkbenchOptions.threadHeader.singleRow?: boolean` replaces the desktop
