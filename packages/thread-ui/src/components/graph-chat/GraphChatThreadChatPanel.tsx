@@ -43,6 +43,7 @@ interface GraphChatThreadChatPanelProps {
   liveOutput?: string;
   beforeTimelineContent?: ReactNode;
   composerProps?: Omit<ThreadComposerProps, 'activeView' | 'onSubmit'>;
+  composerNotice?: ReactNode;
   timelineProps?: Partial<
     Omit<ThreadTimelineProps, 'threadId' | 'turns' | 'liveOutput' | 'adapter'>
   >;
@@ -64,6 +65,7 @@ export function GraphChatThreadChatPanel({
   liveOutput = '',
   beforeTimelineContent,
   composerProps,
+  composerNotice,
   timelineProps,
   transcriptItemCount,
   useFloatingMobileComposer = false,
@@ -258,7 +260,7 @@ export function GraphChatThreadChatPanel({
     return () => {
       observer.disconnect();
     };
-  }, [isMobileViewport, floatingDesktopComposer, composerProps, hasPendingRequests]);
+  }, [isMobileViewport, floatingDesktopComposer, composerProps, composerNotice, hasPendingRequests]);
 
   useLayoutEffect(() => {
     const node = internalComposerHostRef.current;
@@ -308,6 +310,7 @@ export function GraphChatThreadChatPanel({
     mobileKeyboardInset,
     mobilePromptFocused,
     composerProps,
+    composerNotice,
     hasPendingRequests,
     useFloatingMobileComposer,
   ]);
@@ -442,6 +445,9 @@ export function GraphChatThreadChatPanel({
     latestRequest, previousRequest, nextRequest, handlePreviousAvailability, handleNextAvailability,
   ]);
 
+  const hasComposerNotice = composerNotice !== null && composerNotice !== undefined && composerNotice !== false;
+  const notice = hasComposerNotice ? <div className="thread-composer-notice">{composerNotice}</div> : null;
+
   return (
     <div
       ref={panelRootRef}
@@ -482,6 +488,7 @@ export function GraphChatThreadChatPanel({
           <div
             ref={setComposerHostRefs}
             className="fixed inset-x-0 bottom-0 z-50 overflow-visible sm:hidden"
+            data-composer-notice={hasComposerNotice ? 'true' : undefined}
             style={
               floatingComposerStyle ?? {
                 bottom: `${floatingMobileComposerBottomOffset}px`,
@@ -490,6 +497,7 @@ export function GraphChatThreadChatPanel({
               }
             }
           >
+            {notice}
             <ThreadComposer
               key={detail.thread.id}
               {...resolvedComposerProps}
@@ -502,7 +510,9 @@ export function GraphChatThreadChatPanel({
           <div
             ref={setComposerHostRefs}
             className="thread-graph-composer-host shrink-0"
+            data-composer-notice={hasComposerNotice ? 'true' : undefined}
           >
+            {notice}
             <ThreadComposer
               key={detail.thread.id}
               {...resolvedComposerProps}

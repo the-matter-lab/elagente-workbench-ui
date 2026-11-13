@@ -126,6 +126,8 @@ export interface MatterWorkbenchOptions {
   /** Opt-in thread toolbar below the tabs. Lifecycle belongs to the host. */
   threadHeader?: {
     status: string;
+    /** Optional hover/focus explanation for the lifecycle pill. */
+    statusDescription?: string;
     tone: 'running' | 'stopped' | 'failed' | 'pending';
     /** Defaults to disabled unless running; controls remain visible. */
     toolsDisabled?: boolean;

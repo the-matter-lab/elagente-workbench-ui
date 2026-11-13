@@ -221,6 +221,8 @@ export interface ThreadDetailSurfaceProps {
     Omit<ThreadTimelineProps, "threadId" | "turns" | "liveOutput" | "adapter">
   >;
   composerProps?: Omit<ThreadComposerProps, "activeView" | "onSubmit">;
+  /** Host content attached above the chat composer, inside its measured host. */
+  composerNotice?: ReactNode;
   shellComposerProps?: Omit<ThreadComposerProps, "activeView" | "onSubmit">;
   useFloatingMobileComposer?: boolean;
   floatingMobileComposerBottomOffset?: number;
@@ -300,6 +302,7 @@ export function ThreadDetailSurface({
   liveOutput = "",
   timelineProps,
   composerProps,
+  composerNotice,
   shellComposerProps,
   useFloatingMobileComposer = false,
   floatingMobileComposerBottomOffset = 0,
@@ -477,6 +480,7 @@ export function ThreadDetailSurface({
           timelineAdapter={timelineAdapter}
           TimelineComponent={TimelineComponent}
           liveOutput={liveOutput}
+          composerNotice={composerNotice}
           transcriptItemCount={transcriptItemCount}
           useFloatingMobileComposer={useFloatingMobileComposer}
           floatingDesktopComposer={Boolean(workbench)}
