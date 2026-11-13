@@ -146,9 +146,12 @@ it('reuses operation identity after an ambiguous network failure and does not cl
   await expect(rendered.props.onSelectionSubmit!(selection)).rejects.toThrow(
     'Connection lost',
   );
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
   await expect(rendered.props.onSelectionSubmit!(selection)).rejects.toThrow(
-    'target mismatch',
+    'The Agent’s reply doesn’t match this structure. Reopen it, then try again.',
   );
+  expect(String(warn.mock.calls[0]?.[1])).toContain('target mismatch');
+  warn.mockRestore();
   expect(submitInput.mock.calls[1]![0].operationId).toBe(
     submitInput.mock.calls[0]![0].operationId,
   );
@@ -267,10 +270,42 @@ it('forwards real PNG callbacks and keeps frozen capture artifact schema separat
     submitInput: vi.fn(),
   });
   expect(rendered.props.onScreenshot).toBeUndefined();
-  expect(node.textContent).toContain('PNG submission is unavailable');
+  // Grafico advertises no PNG action: nothing to tell the user.
+  expect(node.querySelector('[role="note"]')).toBeNull();
+  expect(node.textContent).not.toContain('unavailable');
+});
+
+it('hides absent actions and gives a short hint only when an offered action lacks a published target', async () => {
+  const debug = vi.spyOn(console, 'debug').mockImplementation(() => {});
+  // Estructural advertises no viewer actions.
+  await mount(asset(), {
+    discovery: { ...EXTENSION_FIXTURES.grafico.discovery, actions: [] },
+    submitInput: vi.fn(),
+  });
+  expect(rendered.props.onSelectionSubmit).toBeUndefined();
+  expect(node.querySelector('[role="note"]')).toBeNull();
+  expect(node.textContent).not.toMatch(/host|immutable|unavailable/);
+  expect(debug.mock.calls.flat().join(' ')).toContain(
+    'Selection submission is unavailable',
+  );
+  // Grafico offers selection, but this file has no published artifact.
+  const plain = { ...asset(), artifactId: undefined, metadata: undefined };
+  await mount(plain, {
+    discovery: EXTENSION_FIXTURES.grafico.discovery,
+    submitInput: vi.fn(),
+  });
+  await vi.waitFor(() =>
+    expect(node.querySelector('[role="note"]')?.textContent).toBe(
+      'Open a structure the Agent has produced to send a selection.',
+    ),
+  );
+  expect(rendered.props.onSelectionSubmit).toBeUndefined();
+  debug.mockRestore();
 });
 
 it('checksum failure and cross-origin assets fail visibly without rendering unverified bytes', async () => {
+  const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+  const logged = () => error.mock.calls.map((call) => String(call[1])).join(' ');
   await act(async () =>
     root.render(
       <StructureView
@@ -279,10 +314,11 @@ it('checksum failure and cross-origin assets fail visibly without rendering unve
     ),
   );
   await vi.waitFor(() =>
-    expect(node.querySelector('[role="alert"]')?.textContent).toContain(
-      'checksum differs',
+    expect(node.querySelector('[role="alert"]')?.textContent).toBe(
+      'Unable to load this structure. Reopen it to try again.',
     ),
   );
+  expect(logged()).toContain('checksum differs');
   expect(node.querySelector('[data-testid="viewer"]')).toBeNull();
   await act(async () =>
     root.render(
@@ -291,11 +327,11 @@ it('checksum failure and cross-origin assets fail visibly without rendering unve
       />,
     ),
   );
-  await vi.waitFor(() =>
-    expect(node.querySelector('[role="alert"]')?.textContent).toContain(
-      'must come from this app-server',
-    ),
+  await vi.waitFor(() => expect(logged()).toContain('must come from this app-server'));
+  expect(node.querySelector('[role="alert"]')?.textContent).toBe(
+    'Unable to load this structure. Reopen it to try again.',
   );
+  error.mockRestore();
 });
 
 it('an update pending verification disables identity-bearing actions while retaining the viewer', async () => {
@@ -339,9 +375,12 @@ it('retains operation identity after accepted-only input and only completes on a
       { moleculeId: 'water', atoms: [0], selectedIds: ['oxygen'], target },
     ],
   };
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
   await expect(rendered.props.onSelectionSubmit!(selection)).rejects.toThrow(
-    'awaiting native completion',
+    'The Agent hasn’t confirmed this yet. Send it again to check.',
   );
+  expect(String(warn.mock.calls[0]?.[1])).toContain('awaiting native completion');
+  warn.mockRestore();
   await rendered.props.onSelectionSubmit!(selection);
   expect(submitInput.mock.calls[1]![0].operationId).toBe(
     submitInput.mock.calls[0]![0].operationId,

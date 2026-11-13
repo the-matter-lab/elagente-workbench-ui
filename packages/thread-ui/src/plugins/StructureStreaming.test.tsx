@@ -57,8 +57,11 @@ test('finalizing an in-flight immutable stream keeps one GET and still rejects c
   expect(node.querySelector('[data-testid="viewer"]')).toBe(viewer);
   // A metadata mutation remains part of verified identity even with the same
   // URL and artifact checksum. Finalization never bypasses target validation.
+  const error=vi.spyOn(console,'error').mockImplementation(()=>{});
   await act(async()=>{root.render(<StructureView asset={{...asset,streaming:false,metadata:{...metadata,checksum:'0'.repeat(64)}}}/>);});
-  await vi.waitFor(()=>expect(node.querySelector('[role="alert"]')?.textContent).toContain('Canonical metadata checksum differs'));
+  await vi.waitFor(()=>expect(node.querySelector('[role="alert"]')?.textContent).toBe('Unable to load this structure. Reopen it to try again.'));
+  expect(String(error.mock.calls[0]?.[1])).toContain('Canonical metadata checksum differs');
+  error.mockRestore();
   expect(fetch).toHaveBeenCalledTimes(1);
  } finally {await act(async()=>root.unmount());node.remove();vi.unstubAllGlobals();}
 });

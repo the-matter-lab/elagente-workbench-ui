@@ -58,7 +58,18 @@ function host(enabled = true) {
   };
 }
 let root: Root, node: HTMLDivElement;
+let errorLog: ReturnType<typeof vi.spyOn>;
+// Users see a short load failure; the verification reason stays in the console.
+function expectLoadFailure(detail: string) {
+  expect(node.querySelector('[role=alert]')?.textContent).toBe(
+    'Unable to load this structure. Reopen it to try again.',
+  );
+  expect(errorLog.mock.calls.map((call) => String(call[1])).join(' ')).toContain(
+    detail,
+  );
+}
 beforeEach(() => {
+  errorLog = vi.spyOn(console, 'error').mockImplementation(() => {});
   Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
   Object.defineProperty(window.crypto, 'subtle', {
     value: webcrypto.subtle,
@@ -81,6 +92,7 @@ afterEach(async () => {
   await act(async () => root.unmount());
   node.remove();
   vi.unstubAllGlobals();
+  errorLog.mockRestore();
 });
 async function render(next: StructureAsset, enabled = true) {
   await act(async () =>
@@ -131,9 +143,7 @@ it('keeps the verified view unavailable on a corrupt inline append, without fall
   next.metadata!.inlineSource!.content += 'changed';
   await render(next);
   await vi.waitFor(() =>
-    expect(node.querySelector('[role=alert]')?.textContent).toContain(
-      'checksum differs',
-    ),
+    expectLoadFailure('checksum differs'),
   );
   expect(observed.props.loading).toBe(true);
   expect(observed.props.source.content[0]).toBe(first);
@@ -187,9 +197,7 @@ it('retains exact per-frame checksum/count validation on the inline path', async
   ];
   await render(next);
   await vi.waitFor(() =>
-    expect(node.querySelector('[role=alert]')?.textContent).toContain(
-      'Frame checksum differs',
-    ),
+    expectLoadFailure('Frame checksum differs'),
   );
   expect(observed.props).toBeNull();
   expect(fetch).not.toHaveBeenCalled();
@@ -219,9 +227,7 @@ it('requires the inline checksum to match the published artifact as well as cano
   next.checksum = hash('distinct render representation');
   await render(next);
   await vi.waitFor(() =>
-    expect(node.querySelector('[role=alert]')?.textContent).toContain(
-      'published artifact and canonical metadata',
-    ),
+    expectLoadFailure('published artifact and canonical metadata'),
   );
   expect(observed.props).toBeNull();
   expect(fetch).not.toHaveBeenCalled();

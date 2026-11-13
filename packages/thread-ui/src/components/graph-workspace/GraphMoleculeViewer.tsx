@@ -1395,10 +1395,28 @@ export function GraphMoleculeViewer({
     };
   };
   captureRef.current = capture;
+  // Hosts receive capture's own errors; the status line shows user wording.
+  const captureForUser = () => {
+    try {
+      return capture();
+    } catch (error) {
+      console.warn('Viewer capture failed:', error);
+      throw new Error(
+        'Couldn’t capture the view. Wait for the structure to load, then try again.',
+      );
+    }
+  };
   const handleScreenshot = async () => {
-    const screenshot = capture();
+    const screenshot = captureForUser();
     const blob = await (await fetch(screenshot.image)).blob();
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    } catch (error) {
+      console.warn('Copying the PNG failed:', error);
+      throw new Error(
+        'Couldn’t copy the PNG. Allow clipboard access, then try again.',
+      );
+    }
   };
   function assertSubmissionTargets(entries: GraphMoleculeAtomSelection[]) {
     if (loading) throw new Error('Wait for the verified structure to load.');
@@ -2173,7 +2191,7 @@ export function GraphMoleculeViewer({
                     }
                     onClick={() =>
                       void runOperation(
-                        () => onScreenshot(capture()),
+                        () => onScreenshot(captureForUser()),
                         'PNG submitted.',
                       )
                     }
