@@ -36,6 +36,17 @@ type GraphMoleculeViewerHandle = {
     target?: ScientificTarget;
     execute: (request: ViewerRequest) => Promise<ViewerAcknowledgement>;
 };
+/**
+ * The viewer moved to a newer revision of the same object. `selection` says
+ * what the §4.3 rule did with the user's selection and staged selections.
+ */
+type GraphMoleculeRevisionChange = {
+    objectId: string;
+    from: string;
+    to: string;
+    selection: 'kept' | 'cleared' | 'none';
+};
+declare const SELECTION_CLEARED_MESSAGE = "The structure changed. Select the atoms again.";
 type GraphMoleculeViewerProps = {
     className?: string;
     presentation?: 'timeline' | 'workspace';
@@ -47,6 +58,11 @@ type GraphMoleculeViewerProps = {
     onReady?: (view: GraphMoleculeViewerHandle) => void;
     /** Personal inspection signal; never a durable input or shared camera event. */
     onActive?: (view: GraphMoleculeViewerHandle) => void;
+    /**
+     * The host explains the change itself. Without it the viewer's status line
+     * asks the user to reselect when the selection was cleared.
+     */
+    onRevisionChange?: (change: GraphMoleculeRevisionChange) => void;
     source: GraphMoleculeViewerSource;
     title?: string | null;
     extensionHost?: ExtensionHostAdapter;
@@ -67,7 +83,7 @@ type GraphMoleculeViewerProps = {
      */
     followControl?: boolean;
 };
-declare function GraphMoleculeViewer({ className, moleculeId, onScreenshot, onSelectionChange, onSelectionSubmit, onReady, onActive, source, title, presentation, onOpenFile, extensionHost, toolbar, rendererSlot, onDownloadSource, loading, followControl, }: GraphMoleculeViewerProps): react.JSX.Element;
+declare function GraphMoleculeViewer({ className, moleculeId, onScreenshot, onSelectionChange, onSelectionSubmit, onReady, onActive, onRevisionChange, source, title, presentation, onOpenFile, extensionHost, toolbar, rendererSlot, onDownloadSource, loading, followControl, }: GraphMoleculeViewerProps): react.JSX.Element;
 
 type ViewerStyle = 'ball-stick' | 'stick' | 'spacefill' | 'cartoon' | 'surface';
 type ViewerAnnotation = {
@@ -106,4 +122,4 @@ declare function createViewerCommandExecutor(getState: () => {
     cellAvailable?: boolean;
 }, apply: (commands: ViewerCommand[]) => void | Promise<void>): (request: ViewerRequest) => Promise<ViewerAcknowledgement>;
 
-export { type GraphMoleculeAtomSelection, type GraphMoleculeScreenshot, type GraphMoleculeSelectionSubmission, GraphMoleculeViewer, type GraphMoleculeViewerHandle, type GraphMoleculeViewerProps, type ViewerAnnotation, type ViewerCommand, type ViewerStyle, createViewerCommandExecutor, sameScientificTarget, validateViewerCommands };
+export { type GraphMoleculeAtomSelection, type GraphMoleculeRevisionChange, type GraphMoleculeScreenshot, type GraphMoleculeSelectionSubmission, GraphMoleculeViewer, type GraphMoleculeViewerHandle, type GraphMoleculeViewerProps, SELECTION_CLEARED_MESSAGE, type ViewerAnnotation, type ViewerCommand, type ViewerStyle, createViewerCommandExecutor, sameScientificTarget, validateViewerCommands };

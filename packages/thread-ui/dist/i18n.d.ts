@@ -1571,6 +1571,7 @@ declare const en: {
     readonly "files.fileActions": "File actions";
     readonly "files.reloadFile": "Reload from disk";
     readonly "files.fileReloaded": "File reloaded";
+    readonly "files.followingLatestRevision": "Showing the latest revision of this structure: {{path}}";
     readonly "files.fileAlreadyCurrent": "Already up to date";
     readonly "files.backToDocument": "Back to {{name}}";
     readonly "files.goForward": "Forward";
@@ -5709,6 +5710,7 @@ declare const zhCN: {
     "files.fileActions": "文件操作";
     "files.reloadFile": "重新读取文件";
     "files.fileReloaded": "文件已更新";
+    "files.followingLatestRevision": "显示此结构的最新版本：{{path}}";
     "files.fileAlreadyCurrent": "文件已是最新";
     "files.backToDocument": "返回 {{name}}";
     "files.goForward": "前进";
@@ -9869,6 +9871,7 @@ declare const resources: {
         readonly "files.fileActions": "File actions";
         readonly "files.reloadFile": "Reload from disk";
         readonly "files.fileReloaded": "File reloaded";
+        readonly "files.followingLatestRevision": "Showing the latest revision of this structure: {{path}}";
         readonly "files.fileAlreadyCurrent": "Already up to date";
         readonly "files.backToDocument": "Back to {{name}}";
         readonly "files.goForward": "Forward";
@@ -14006,6 +14009,7 @@ declare const resources: {
         "files.fileActions": "文件操作";
         "files.reloadFile": "重新读取文件";
         "files.fileReloaded": "文件已更新";
+        "files.followingLatestRevision": "显示此结构的最新版本：{{path}}";
         "files.fileAlreadyCurrent": "文件已是最新";
         "files.backToDocument": "返回 {{name}}";
         "files.goForward": "前进";

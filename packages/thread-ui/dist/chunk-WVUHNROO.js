@@ -9,7 +9,7 @@ import {
 import {
   translate,
   useI18n
-} from "./chunk-JC5AJQQD.js";
+} from "./chunk-KBMR4E3X.js";
 
 // src/components/graph-workspace/GraphMoleculeViewer.tsx
 import {
@@ -1474,6 +1474,16 @@ function frameTarget(snapshot, index, frameCount) {
   if (target.frameIndex === index && target.frameId) return target;
   return void 0;
 }
+function carrySelection(selected, from, to) {
+  const carried = [];
+  for (const index of selected) {
+    const id = from.ids[index];
+    const next = id === void 0 ? -1 : to.ids.indexOf(id);
+    if (next < 0 || to.elements[next] !== from.elements[index]) return null;
+    carried.push(next);
+  }
+  return carried;
+}
 function frameCell(metadata, index) {
   if (!metadata?.frameCells) return metadata?.cell;
   const cell = metadata.frameCells[index];
@@ -1590,6 +1600,7 @@ ${atoms.join("\n")}
 
 // src/components/graph-workspace/GraphMoleculeViewer.tsx
 import { jsx as jsx8, jsxs as jsxs6 } from "react/jsx-runtime";
+var SELECTION_CLEARED_MESSAGE = "The structure changed. Select the atoms again.";
 function GraphMoleculeViewer({
   className = "",
   moleculeId = null,
@@ -1598,6 +1609,7 @@ function GraphMoleculeViewer({
   onSelectionSubmit,
   onReady,
   onActive,
+  onRevisionChange,
   source,
   title = "Molecular structure",
   presentation = "workspace",
@@ -1639,6 +1651,8 @@ function GraphMoleculeViewer({
     color: "yellow"
   });
   const [stagedSelections, setStagedSelections] = useState3({});
+  const stagedRef = useRef3(stagedSelections);
+  stagedRef.current = stagedSelections;
   const [status, setStatus] = useState3(null);
   const [busy, setBusy] = useState3(false);
   const busyRef = useRef3(false);
@@ -1650,6 +1664,9 @@ function GraphMoleculeViewer({
   const applyingCommandRef = useRef3(false);
   const [annotations, setAnnotations] = useState3([]);
   const atomIdsRef = useRef3([]);
+  const atomElementsRef = useRef3([]);
+  const onRevisionChangeRef = useRef3(onRevisionChange);
+  onRevisionChangeRef.current = onRevisionChange;
   const cellRef = useRef3(void 0);
   const renderedTargetRef = useRef3(void 0);
   const [unitCellAvailable, setUnitCellAvailable] = useState3(false);
@@ -2255,14 +2272,55 @@ function GraphMoleculeViewer({
         setCartoonAvailable(
           model.selectedAtoms({}).some((atom) => atom.atom === "CA" || atom.atom === "P")
         );
-        const oldIds = atomIdsRef.current;
+        const from = {
+          ids: atomIdsRef.current,
+          elements: atomElementsRef.current
+        };
         atomIdsRef.current = applyStructureMetadata(model, snapshot?.metadata);
         const atoms = model.selectedAtoms({});
+        atomElementsRef.current = atoms.map((atom) => atom.elem ?? "");
+        const to = { ids: atomIdsRef.current, elements: atomElementsRef.current };
         setFormula(moleculeFormula(atoms));
         setAtomCount(atoms.length);
         const previous = selectedSerialsRef.current;
-        const remapped = previous.map((index) => atomIdsRef.current.indexOf(oldIds[index])).filter((index) => index >= 0);
+        const carried = carrySelection(previous, from, to);
+        const remapped = carried ?? [];
         selectedSerialsRef.current = remapped;
+        const prior = renderedTargetRef.current;
+        if (prior && target && prior.objectId === target.objectId && (prior.sourceRevision !== target.sourceRevision || prior.checksum !== target.checksum) && !snapshot?.frameTargets?.some(
+          (frame) => sameScientificTarget(frame, prior)
+        )) {
+          let stagedCleared = false;
+          const staged = {};
+          for (const [key, entry] of Object.entries(stagedRef.current)) {
+            if (entry.target?.objectId !== target.objectId) {
+              staged[key] = entry;
+              continue;
+            }
+            const atomsCarried = carrySelection(entry.atoms, from, to);
+            if (!atomsCarried) {
+              stagedCleared = true;
+              continue;
+            }
+            staged[JSON.stringify(target)] = {
+              ...entry,
+              atoms: atomsCarried,
+              selectedIds: atomsCarried.map((index) => to.ids[index]),
+              target
+            };
+          }
+          stagedRef.current = staged;
+          setStagedSelections(staged);
+          const cleared = previous.length > 0 && !carried || stagedCleared;
+          const change = {
+            objectId: target.objectId,
+            from: prior.sourceRevision,
+            to: target.sourceRevision,
+            selection: cleared ? "cleared" : previous.length ? "kept" : "none"
+          };
+          if (onRevisionChangeRef.current) onRevisionChangeRef.current(change);
+          else if (cleared) setStatus(SELECTION_CLEARED_MESSAGE);
+        }
         setSelectedSerials(
           previous.length === remapped.length && previous.every((value, index) => value === remapped[index]) ? previous : remapped
         );
@@ -2618,14 +2676,16 @@ function GraphMoleculeViewer({
   };
   function assertSubmissionTargets(entries) {
     if (loading) throw new Error("Wait for the verified structure to load.");
-    entries.forEach((entry) => {
-      if (entry.target?.objectId === target?.objectId && !snapshot?.frameTargets?.some(
-        (frame) => sameScientificTarget(frame, entry.target)
-      ) && (entry.target?.sourceRevision !== target?.sourceRevision || entry.target?.checksum !== target?.checksum))
-        throw new Error(
-          "A staged selection refers to an older source revision. Select its atoms again."
-        );
-    });
+    const stale = (entry) => entry.target?.objectId === target?.objectId && !snapshot?.frameTargets?.some(
+      (frame) => sameScientificTarget(frame, entry.target)
+    ) && (entry.target?.sourceRevision !== target?.sourceRevision || entry.target?.checksum !== target?.checksum);
+    if (!entries.some(stale)) return;
+    setStagedSelections(
+      (current) => Object.fromEntries(
+        Object.entries(current).filter(([, entry]) => !stale(entry))
+      )
+    );
+    throw new Error(SELECTION_CLEARED_MESSAGE);
   }
   function handleToggleUnitCell() {
     if (!unitCellAvailable) {
@@ -3347,7 +3407,13 @@ function GraphMoleculeViewer({
                             role: "group",
                             "aria-label": "Viewer contributions",
                             inert: loading,
-                            style: { visibility: loading ? "hidden" : void 0 },
+                            style: {
+                              visibility: loading ? "hidden" : void 0,
+                              display: "flex",
+                              flexWrap: "wrap",
+                              gap: 6,
+                              minWidth: 0
+                            },
                             children: !viewerInitError && toolbar?.({ target, selectedIds })
                           }
                         ),
@@ -3378,13 +3444,13 @@ function GraphMoleculeViewer({
                               const entries = [selection()];
                               assertSubmissionTargets(entries);
                               await onSelectionSubmit?.({ selections: entries });
-                            }, "Selection submitted."),
+                            }, "Sent."),
                             onSendStaged: () => void runOperation(async () => {
                               const entries = Object.values(stagedSelections);
                               assertSubmissionTargets(entries);
                               await onSelectionSubmit?.({ selections: entries });
                               setStagedSelections({});
-                            }, "Staged selections submitted."),
+                            }, "Sent."),
                             onStageSelection: handleStageSelection,
                             onToggleUnitCell: handleToggleUnitCell,
                             selectedAtomLabels,
@@ -3423,5 +3489,6 @@ export {
   CubeFormatError,
   readCubeHeader,
   readGraphMoleculeViewerData,
+  SELECTION_CLEARED_MESSAGE,
   GraphMoleculeViewer
 };

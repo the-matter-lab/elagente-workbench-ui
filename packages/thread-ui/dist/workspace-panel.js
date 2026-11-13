@@ -30,13 +30,13 @@ import {
   useFilePanel,
   useLongPress,
   useTabScrollEdges
-} from "./chunk-EIIDDZBB.js";
+} from "./chunk-AU66VFNJ.js";
 import {
   CubeFormatError,
   GraphMoleculeViewer,
   MAX_CUBE_GRID_POINTS,
   readCubeHeader
-} from "./chunk-37OYBOEU.js";
+} from "./chunk-WVUHNROO.js";
 import {
   useMenuKeyboard
 } from "./chunk-OCACD4WT.js";
@@ -46,7 +46,7 @@ import {
   isBinaryPreview,
   isDownloadOnlyPath,
   isDrawioPath
-} from "./chunk-3HYBRDXY.js";
+} from "./chunk-VCXD4E4Y.js";
 import {
   IMAGE_EXTENSIONS,
   MOLECULAR_EXTENSIONS,
@@ -70,13 +70,13 @@ import {
   useThemeFeature,
   workspaceRelativeFocusPath,
   workspaceTreeNodeToGraphNode
-} from "./chunk-YGD5SHY7.js";
+} from "./chunk-JBKKEL6X.js";
 import {
   en,
   getLocale,
   translate,
   useI18n
-} from "./chunk-JC5AJQQD.js";
+} from "./chunk-KBMR4E3X.js";
 
 // src/components/ThreadGraphWorkspacePanel.tsx
 import { memo as memo2, useEffect as useEffect12, useMemo as useMemo9, useState as useState11 } from "react";
@@ -4053,15 +4053,20 @@ function formatJsonPreview(content) {
 }
 
 // src/components/graph-workspace/explorer/publishedStructureArtifact.ts
-function publishedArtifactForFile(artifacts, path, checksum) {
-  if (!path || !checksum) return null;
+function firstPublished(artifacts) {
   const unique = /* @__PURE__ */ new Map();
   for (const artifact of artifacts) if (!unique.has(artifact.id)) unique.set(artifact.id, artifact);
-  const published = [...unique.values()];
-  const match = published.findLast((artifact) => artifact.workspacePath === path && artifact.metadata?.checksum === checksum && artifact.metadata.objectId);
-  if (!match) return null;
-  const latest = published.findLast((artifact) => artifact.metadata?.objectId === match.metadata.objectId);
-  return latest?.metadata?.sourceRevision === match.metadata.sourceRevision ? match : null;
+  return [...unique.values()];
+}
+function latestArtifactForObject(artifacts, artifact) {
+  const objectId = artifact.metadata?.objectId;
+  if (!objectId) return artifact;
+  return firstPublished(artifacts).findLast((value) => value.metadata?.objectId === objectId) ?? artifact;
+}
+function followedArtifactForFile(artifacts, path, checksum) {
+  if (!path || !checksum) return null;
+  const match = firstPublished(artifacts).findLast((artifact) => artifact.workspacePath === path && artifact.metadata?.checksum === checksum && artifact.metadata.objectId);
+  return match ? latestArtifactForObject(artifacts, match) : null;
 }
 
 // src/components/graph-workspace/WorkspaceFileTabs.tsx
@@ -4190,7 +4195,7 @@ function WorkspaceFileTabs({
 // src/components/graph-workspace/GraphWorkspacePreviewPane.tsx
 import { Fragment as Fragment6, jsx as jsx12, jsxs as jsxs10 } from "react/jsx-runtime";
 var GraphWorkspaceMonacoEditor = lazy(
-  () => import("./GraphWorkspaceMonacoEditor-SFSNTRXY.js")
+  () => import("./GraphWorkspaceMonacoEditor-4RH52EXL.js")
 );
 var isHostFilePath = (path) => path.startsWith("/") || /^[a-z]:[\\/]/i.test(path);
 function fileSizeLabel(size) {
@@ -4289,7 +4294,7 @@ function translateReadOnly(reason) {
   const key = `files.safeReason.${reason}`;
   return Object.hasOwn(en, key) ? translate(key) : reason;
 }
-var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-SWXN7IL4.js"));
+var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-T5ZX7SHO.js"));
 var SMALL_TEXT_FILE_MAX_BYTES = 50 * 1024;
 var SMALL_TEXT_FILE_MAX_LINES = 1e3;
 var MARKDOWN_EXTENSIONS = /* @__PURE__ */ new Set(["md", "markdown"]);
@@ -4689,15 +4694,18 @@ function GraphWorkspacePreviewPane({
   );
   const [dark, setDark] = useState9(false);
   const activeNode = selectedTarget?.node ?? null;
-  const renderedArtifact = activeNode?.artifact ? plugins.renderArtifact({
-    artifact: activeNode.artifact,
+  const openArtifact = activeNode?.artifact ? latestArtifactForObject(artifacts, activeNode.artifact) : null;
+  const renderedArtifact = openArtifact ? plugins.renderArtifact({
+    artifact: openArtifact,
     expanded: true,
     // ElAgente: scientific renderers lay out for the workspace pane.
     presentation: "workspace",
     onToggleExpanded: () => void 0
   }) : null;
   const moleculeSnapshot = buildMoleculePreviewSnapshot(previewFile ?? null);
-  const fileArtifact = selectedTarget?.kind === "workspace-file" && moleculeSnapshot && previewFile && document2?.phase === "clean" && !document2.needsVerification ? publishedArtifactForFile(artifacts, previewFile.path, document2.snapshot.contentHash) : null;
+  const fileArtifact = selectedTarget?.kind === "workspace-file" && moleculeSnapshot && previewFile && document2?.phase === "clean" && !document2.needsVerification ? followedArtifactForFile(artifacts, previewFile.path, document2.snapshot.contentHash) : null;
+  const followedPath = fileArtifact && fileArtifact.workspacePath !== previewFile?.path ? fileArtifact.workspacePath : openArtifact && openArtifact.id !== activeNode?.artifact?.id ? openArtifact.workspacePath : null;
+  const followedNote = followedPath ? /* @__PURE__ */ jsx12("p", { role: "note", className: "thread-graph-molecule-followed truncate px-3 py-1 text-xs text-slate-500 dark:text-slate-400", title: followedPath, children: translate("files.followingLatestRevision", { path: followedPath }) }) : null;
   const renderedFileArtifact = fileArtifact ? plugins.renderArtifact({
     artifact: fileArtifact,
     expanded: true,
@@ -4931,14 +4939,17 @@ function GraphWorkspacePreviewPane({
             /* @__PURE__ */ jsx12("span", { className: "min-w-0 flex-1", children: translateReadOnly(error) }),
             onDownloadFile && selectedTarget?.kind === "workspace-file" ? /* @__PURE__ */ jsx12(AlertDownloadButton, { name: selectedTarget.node.name, onDownload: onDownloadFile }) : null
           ] }) : null,
-          !selectedTarget && missingPath ? /* @__PURE__ */ jsx12(MissingLinkedFile, { path: missingPath }) : !selectedTarget ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center px-5 text-center text-sm text-slate-400 dark:text-slate-500", children: translate("files.pickALiveMoleculeWorkspaceFileArtifact") }) : selectedTarget.kind === "workspace-file" && previewLoading ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center px-5 text-center text-sm text-slate-400 dark:text-slate-500", children: translate("files.loadingFilePreview") }) : selectedTarget.kind === "workspace-file" && downloadOnly ? /* @__PURE__ */ jsx12(DownloadFilePreview, { node: selectedTarget.node, onDownload: onDownloadFile, ...downloadReason ? { readOnlyReason: downloadReason } : activeFilePath && documents?.documents.get(activeFilePath)?.snapshot.readOnlyReason ? { readOnlyReason: documents.documents.get(activeFilePath).snapshot.readOnlyReason } : {} }, selectedTarget.node.path) : selectedTarget.kind === "workspace-file" && moleculeSnapshot ? /* @__PURE__ */ jsx12("div", { className: "thread-graph-molecule-preview min-h-0 flex-1 overflow-hidden", children: renderedFileArtifact ?? /* @__PURE__ */ jsx12(
-            GraphMoleculeViewer,
-            {
-              source: moleculeSnapshot,
-              moleculeId: moleculeSnapshot.uuid ?? selectedTarget.node.path,
-              title: selectedTarget.node.name
-            }
-          ) }) : selectedTarget.kind === "workspace-file" && imageUrl ? /* @__PURE__ */ jsx12(WorkspaceImagePreview, { src: imageUrl, alt: selectedTarget.node.path || selectedTarget.node.name }, imageUrl) : selectedTarget.kind === "workspace-file" && pdfUrl ? /* @__PURE__ */ jsx12(WorkspacePdfPreview, { src: pdfUrl, node: selectedTarget.node }, pdfUrl) : selectedTarget.kind === "workspace-file" && previewFile ? /* @__PURE__ */ jsxs10("div", { className: "flex min-h-0 flex-1 flex-col", children: [
+          !selectedTarget && missingPath ? /* @__PURE__ */ jsx12(MissingLinkedFile, { path: missingPath }) : !selectedTarget ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center px-5 text-center text-sm text-slate-400 dark:text-slate-500", children: translate("files.pickALiveMoleculeWorkspaceFileArtifact") }) : selectedTarget.kind === "workspace-file" && previewLoading ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center px-5 text-center text-sm text-slate-400 dark:text-slate-500", children: translate("files.loadingFilePreview") }) : selectedTarget.kind === "workspace-file" && downloadOnly ? /* @__PURE__ */ jsx12(DownloadFilePreview, { node: selectedTarget.node, onDownload: onDownloadFile, ...downloadReason ? { readOnlyReason: downloadReason } : activeFilePath && documents?.documents.get(activeFilePath)?.snapshot.readOnlyReason ? { readOnlyReason: documents.documents.get(activeFilePath).snapshot.readOnlyReason } : {} }, selectedTarget.node.path) : selectedTarget.kind === "workspace-file" && moleculeSnapshot ? /* @__PURE__ */ jsxs10("div", { className: "thread-graph-molecule-preview flex min-h-0 flex-1 flex-col overflow-hidden", children: [
+            renderedFileArtifact && followedNote,
+            renderedFileArtifact ?? /* @__PURE__ */ jsx12(
+              GraphMoleculeViewer,
+              {
+                source: moleculeSnapshot,
+                moleculeId: moleculeSnapshot.uuid ?? selectedTarget.node.path,
+                title: selectedTarget.node.name
+              }
+            )
+          ] }) : selectedTarget.kind === "workspace-file" && imageUrl ? /* @__PURE__ */ jsx12(WorkspaceImagePreview, { src: imageUrl, alt: selectedTarget.node.path || selectedTarget.node.name }, imageUrl) : selectedTarget.kind === "workspace-file" && pdfUrl ? /* @__PURE__ */ jsx12(WorkspacePdfPreview, { src: pdfUrl, node: selectedTarget.node }, pdfUrl) : selectedTarget.kind === "workspace-file" && previewFile ? /* @__PURE__ */ jsxs10("div", { className: "flex min-h-0 flex-1 flex-col", children: [
             formattedJson !== null && focusLine == null ? /* @__PURE__ */ jsxs10("div", { className: "workspace-json-view-toolbar", children: [
               /* @__PURE__ */ jsx12("div", { className: "workspace-json-view-toggle rounded", role: "group", "aria-label": translate("files.jsonView"), children: ["formatted", "raw"].map((view) => /* @__PURE__ */ jsx12(
                 "button",
@@ -5083,11 +5094,14 @@ function GraphWorkspacePreviewPane({
                 children: loadingMore ? translate("files.loading") : translate("files.loadMoreBytesRemaining", { value1: (previewFile.size - previewFile.nextOffset).toLocaleString(getLocale()) })
               }
             ) }) : null
-          ] }) : (selectedTarget.kind === "live-molecule" || selectedTarget.kind === "artifact") && selectedTarget.node.artifact ? /* @__PURE__ */ jsx12(
+          ] }) : (selectedTarget.kind === "live-molecule" || selectedTarget.kind === "artifact") && selectedTarget.node.artifact ? /* @__PURE__ */ jsxs10(
             "div",
             {
               className: isMoleculePreview || isLiveArtifactPreview ? "min-h-0 flex-1 overflow-hidden" : "min-h-0 flex-1 overflow-auto p-3",
-              children: renderedArtifact
+              children: [
+                followedNote,
+                renderedArtifact
+              ]
             }
           ) : selectedTarget.kind === "event" ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 flex-col", children: compactViewer ? /* @__PURE__ */ jsx12(GraphWorkspaceCodePreview, { content: eventPreviewContent ?? "", language: "json", focusLine }) : /* @__PURE__ */ jsx12(Suspense, { fallback: /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center text-sm text-[var(--theme-fg-muted)]", children: translate("files.loadingEditor") }), children: /* @__PURE__ */ jsx12(
             GraphWorkspaceMonacoEditor,
@@ -5232,6 +5246,18 @@ function GraphWorkspaceExplorer({
     setBrowsedDirectoryPath(null);
   }, [activeNode?.id, documents.source]);
   const selectedFilePath = activeNode?.kind === "file" ? activeNode.path : null;
+  const documentsRef = useRef10(documents);
+  documentsRef.current = documents;
+  const structurePath = selectedFilePath && MOLECULAR_EXTENSIONS.has(extensionOf(selectedFilePath)) ? selectedFilePath : null;
+  useEffect10(() => {
+    if (!structurePath || !workspaceAdapter?.subscribeWorkspaceChanged) return;
+    return workspaceAdapter.subscribeWorkspaceChanged(
+      workspaceIdentity,
+      () => {
+        void documentsRef.current.checkDisk(structurePath);
+      }
+    ) ?? void 0;
+  }, [structurePath, workspaceAdapter, workspaceIdentity]);
   const workspacePanelRef = useRef10(null);
   const treePanelRef = useRef10(null);
   useLayoutEffect3(() => {

@@ -1,14 +1,16 @@
 import {
   GraphMoleculeViewer,
+  SELECTION_CLEARED_MESSAGE,
   createViewerCommandExecutor,
   readGraphMoleculeViewerData,
   sameScientificTarget,
   validateViewerCommands
-} from "./chunk-37OYBOEU.js";
+} from "./chunk-WVUHNROO.js";
 import "./chunk-OCACD4WT.js";
-import "./chunk-JC5AJQQD.js";
+import "./chunk-KBMR4E3X.js";
 export {
   GraphMoleculeViewer,
+  SELECTION_CLEARED_MESSAGE,
   createViewerCommandExecutor,
   readGraphMoleculeViewerData,
   sameScientificTarget,
