@@ -845,7 +845,8 @@ function GraphMoleculeViewerUpperButtonGroup({
       await navigator.clipboard.writeText(xyzContent);
       onFeedback?.("Coordinates copied.");
     } catch (error) {
-      onFeedback?.(String(error));
+      console.warn("Copying coordinates failed:", error);
+      onFeedback?.("Couldn\u2019t copy the coordinates. Allow clipboard access, then try again.");
     }
   }
   function handleDownloadXYZ() {
@@ -2593,10 +2594,27 @@ function GraphMoleculeViewer({
     };
   };
   captureRef.current = capture;
+  const captureForUser = () => {
+    try {
+      return capture();
+    } catch (error) {
+      console.warn("Viewer capture failed:", error);
+      throw new Error(
+        "Couldn\u2019t capture the view. Wait for the structure to load, then try again."
+      );
+    }
+  };
   const handleScreenshot = async () => {
-    const screenshot = capture();
+    const screenshot = captureForUser();
     const blob = await (await fetch(screenshot.image)).blob();
-    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    } catch (error) {
+      console.warn("Copying the PNG failed:", error);
+      throw new Error(
+        "Couldn\u2019t copy the PNG. Allow clipboard access, then try again."
+      );
+    }
   };
   function assertSubmissionTargets(entries) {
     if (loading) throw new Error("Wait for the verified structure to load.");
@@ -3341,7 +3359,7 @@ function GraphMoleculeViewer({
                             type: "button",
                             disabled: loading || busy || !viewerReady || !target || !renderedReadyRef.current || Boolean(viewerInitError),
                             onClick: () => void runOperation(
-                              () => onScreenshot(capture()),
+                              () => onScreenshot(captureForUser()),
                               "PNG submitted."
                             ),
                             children: "Send screenshot"
