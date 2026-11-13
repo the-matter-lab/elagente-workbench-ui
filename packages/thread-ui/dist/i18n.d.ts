@@ -2023,6 +2023,11 @@ declare const en: {
     readonly "files.source": "{{value1}} source";
     readonly "files.cancelEdits": "Cancel edits";
     readonly "files.editFile": "Edit file";
+    readonly "files.jsonView": "JSON view";
+    readonly "files.jsonFormatted": "Formatted";
+    readonly "files.jsonRaw": "Raw";
+    readonly "files.jsonAlreadyFormatted": "Already formatted";
+    readonly "files.jsonRawAlreadyFormatted": "Already formatted — Raw would look the same.";
     readonly "files.showExplorer": "Show Explorer";
     readonly "files.hideEditor": "Hide Editor";
     readonly "files.preview_f1fbb2": "Preview";
@@ -6156,6 +6161,11 @@ declare const zhCN: {
     "files.source": "{{value1}} 源码";
     "files.cancelEdits": "取消编辑";
     "files.editFile": "编辑文件";
+    "files.jsonView": "JSON 视图";
+    "files.jsonFormatted": "格式化";
+    "files.jsonRaw": "原始";
+    "files.jsonAlreadyFormatted": "已格式化";
+    "files.jsonRawAlreadyFormatted": "已格式化 — 原始视图的显示效果相同。";
     "files.showExplorer": "显示文件浏览器";
     "files.hideEditor": "隐藏编辑器";
     "files.preview_f1fbb2": "预览";
@@ -10311,6 +10321,11 @@ declare const resources: {
         readonly "files.source": "{{value1}} source";
         readonly "files.cancelEdits": "Cancel edits";
         readonly "files.editFile": "Edit file";
+        readonly "files.jsonView": "JSON view";
+        readonly "files.jsonFormatted": "Formatted";
+        readonly "files.jsonRaw": "Raw";
+        readonly "files.jsonAlreadyFormatted": "Already formatted";
+        readonly "files.jsonRawAlreadyFormatted": "Already formatted — Raw would look the same.";
         readonly "files.showExplorer": "Show Explorer";
         readonly "files.hideEditor": "Hide Editor";
         readonly "files.preview_f1fbb2": "Preview";
@@ -14443,6 +14458,11 @@ declare const resources: {
         "files.source": "{{value1}} 源码";
         "files.cancelEdits": "取消编辑";
         "files.editFile": "编辑文件";
+        "files.jsonView": "JSON 视图";
+        "files.jsonFormatted": "格式化";
+        "files.jsonRaw": "原始";
+        "files.jsonAlreadyFormatted": "已格式化";
+        "files.jsonRawAlreadyFormatted": "已格式化 — 原始视图的显示效果相同。";
         "files.showExplorer": "显示文件浏览器";
         "files.hideEditor": "隐藏编辑器";
         "files.preview_f1fbb2": "预览";

@@ -3,6 +3,7 @@ import { ChartNoAxesColumn, FolderOpen, MoreHorizontal, Share } from 'lucide-rea
 import { translate, useI18n } from '../../i18n';
 import type { MatterWorkbenchOptions } from '../MatterWorkbench';
 import { ThreadToolsMenu } from './ThreadToolsMenu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../graph-ui/Tooltip';
 
 /** Opt-in host chrome. The second menu keeps all existing host actions mounted,
  * including dialogs and compute panels, behind Save & export. */
@@ -24,10 +25,20 @@ export function ThreadHeader({ header, title, threadKey, explorerOpen, onToggleE
   useEffect(() => { setMoreOpen(false); setActionsOpen(false); }, [threadKey, disabled]);
   const restoreFocus = (restore: boolean) => { if (restore) toggle.current?.focus(); };
   const moreLabel = translate('workbench.moreActions');
+  const lifecycle = <span className="matter-thread-lifecycle" data-tone={header.tone} role="status"
+    tabIndex={header.statusDescription ? 0 : undefined}>{header.status}</span>;
   return <header className="matter-thread-header" aria-label={translate('workbench.selectedThread')}>
     <div className="matter-thread-header-summary">
       <h1 className="matter-thread-header-title" title={title}>{title}</h1>
-      <span className="matter-thread-lifecycle" data-tone={header.tone} role="status">{header.status}</span>
+      {header.statusDescription ? (
+        <Tooltip delayDuration={180}>
+          <TooltipTrigger asChild>{lifecycle}</TooltipTrigger>
+          <TooltipContent side="bottom" align="start" sideOffset={6} collisionPadding={12}
+            className="matter-thread-lifecycle-tooltip max-w-xs">
+            {header.statusDescription}
+          </TooltipContent>
+        </Tooltip>
+      ) : lifecycle}
     </div>
     <div className="matter-thread-header-actions">
       <button type="button" aria-label={translate('workbench.files')} aria-pressed={explorerOpen} aria-expanded={explorerOpen}

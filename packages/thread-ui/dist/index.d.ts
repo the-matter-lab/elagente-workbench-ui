@@ -618,6 +618,8 @@ interface MatterWorkbenchOptions {
     /** Opt-in thread toolbar below the tabs. Lifecycle belongs to the host. */
     threadHeader?: {
         status: string;
+        /** Optional hover/focus explanation for the lifecycle pill. */
+        statusDescription?: string;
         tone: 'running' | 'stopped' | 'failed' | 'pending';
         /** Defaults to disabled unless running; controls remain visible. */
         toolsDisabled?: boolean;
@@ -1170,6 +1172,8 @@ interface ThreadDetailSurfaceProps {
     liveOutput?: string;
     timelineProps?: Partial<Omit<ThreadTimelineProps, "threadId" | "turns" | "liveOutput" | "adapter">>;
     composerProps?: Omit<ThreadComposerProps, "activeView" | "onSubmit">;
+    /** Host content attached above the chat composer, inside its measured host. */
+    composerNotice?: ReactNode;
     shellComposerProps?: Omit<ThreadComposerProps, "activeView" | "onSubmit">;
     useFloatingMobileComposer?: boolean;
     floatingMobileComposerBottomOffset?: number;
@@ -1196,7 +1200,7 @@ interface ThreadDetailSurfaceProps {
     loadingContent?: ReactNode;
     emptyContent?: ReactNode;
 }
-declare function ThreadDetailSurface({ threads, detail: rawDetail, loading, error, status, plugins: providedPlugins, adapter, metaContent, settingsContent, globalSettingsContent, settingsSections, settingsDialogOpen, onSettingsDialogOpenChange, mobileHeaderAction, appMenuButton, appNavigationMenu, renderNavigationHeader, workspaceReturnHref, restrictedNavigation, scopedSettings, onWorkspaceReturn, threadActionsButton, surfaceActions, workbench, deviceMonitor, floatingPanel, workspaceContent, workspaceTitle, workspaceActions, workspaceFeatures, workspaceFocusPathRequest, workspacePanels, workspacePanelRequest, onNewThreadTitle, beforeTimelineContent, errorContent, workspaceMissingContent, dialogs, currentThreadId, currentWorkspaceId, currentWorkspaceLabel, newThreadLabel, onCloseAppNavigation, presentation, className, activeView, liveOutput, timelineProps, composerProps, shellComposerProps, useFloatingMobileComposer, floatingMobileComposerBottomOffset, composerHostRef, shellPanelRef, shellEffectiveTheme, shellThemeMode, onShellThemeModeChange, onShellStateChange, shellUnavailableContent, shellDisconnectedContent, timelineComponent: TimelineComponent, shellPanelComponent: ShellPanelComponent, shellContent, loadingContent, emptyContent, }: ThreadDetailSurfaceProps): react.JSX.Element;
+declare function ThreadDetailSurface({ threads, detail: rawDetail, loading, error, status, plugins: providedPlugins, adapter, metaContent, settingsContent, globalSettingsContent, settingsSections, settingsDialogOpen, onSettingsDialogOpenChange, mobileHeaderAction, appMenuButton, appNavigationMenu, renderNavigationHeader, workspaceReturnHref, restrictedNavigation, scopedSettings, onWorkspaceReturn, threadActionsButton, surfaceActions, workbench, deviceMonitor, floatingPanel, workspaceContent, workspaceTitle, workspaceActions, workspaceFeatures, workspaceFocusPathRequest, workspacePanels, workspacePanelRequest, onNewThreadTitle, beforeTimelineContent, errorContent, workspaceMissingContent, dialogs, currentThreadId, currentWorkspaceId, currentWorkspaceLabel, newThreadLabel, onCloseAppNavigation, presentation, className, activeView, liveOutput, timelineProps, composerProps, composerNotice, shellComposerProps, useFloatingMobileComposer, floatingMobileComposerBottomOffset, composerHostRef, shellPanelRef, shellEffectiveTheme, shellThemeMode, onShellThemeModeChange, onShellStateChange, shellUnavailableContent, shellDisconnectedContent, timelineComponent: TimelineComponent, shellPanelComponent: ShellPanelComponent, shellContent, loadingContent, emptyContent, }: ThreadDetailSurfaceProps): react.JSX.Element;
 
 declare function usePlugins(): PluginContextValue;
 
@@ -1446,6 +1450,7 @@ interface GraphChatThreadChatPanelProps {
     liveOutput?: string;
     beforeTimelineContent?: ReactNode;
     composerProps?: Omit<ThreadComposerProps, 'activeView' | 'onSubmit'>;
+    composerNotice?: ReactNode;
     timelineProps?: Partial<Omit<ThreadTimelineProps, 'threadId' | 'turns' | 'liveOutput' | 'adapter'>>;
     transcriptItemCount: number;
     useFloatingMobileComposer?: boolean;
@@ -1456,7 +1461,7 @@ interface GraphChatThreadChatPanelProps {
         panel and its composer stay mounted (no flash, the draft keeps its focus). */
     timelinePending?: ReactNode;
 }
-declare function GraphChatThreadChatPanel({ detail, adapter, timelineAdapter, TimelineComponent, liveOutput, beforeTimelineContent, composerProps, timelineProps, transcriptItemCount, useFloatingMobileComposer, floatingDesktopComposer, floatingMobileComposerBottomOffset, composerHostRef, timelinePending, }: GraphChatThreadChatPanelProps): react.JSX.Element;
+declare function GraphChatThreadChatPanel({ detail, adapter, timelineAdapter, TimelineComponent, liveOutput, beforeTimelineContent, composerProps, composerNotice, timelineProps, transcriptItemCount, useFloatingMobileComposer, floatingDesktopComposer, floatingMobileComposerBottomOffset, composerHostRef, timelinePending, }: GraphChatThreadChatPanelProps): react.JSX.Element;
 
 /** Capability flags a theme pack may declare in `theme.json` `features`. Unknown
  *  flags are ignored. Version 1 of the catalog; see docs/theme-packs.md. */

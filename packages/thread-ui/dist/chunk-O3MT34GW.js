@@ -9,7 +9,7 @@ import {
 import {
   translate,
   useI18n
-} from "./chunk-DTT7Q47S.js";
+} from "./chunk-JC5AJQQD.js";
 
 // src/components/graph-workspace/GraphMoleculeViewer.tsx
 import {
@@ -692,6 +692,7 @@ function IsosurfaceControls({
 function GraphMoleculeViewerLowerButtonGroup({
   cameraInfo,
   canSubmit = false,
+  selectionSubmission = true,
   onClearSelection,
   onClearStaged,
   onSendSelection,
@@ -729,42 +730,44 @@ function GraphMoleculeViewerLowerButtonGroup({
           children: /* @__PURE__ */ jsx4(Trash2, { className: "size-4" })
         }
       ),
-      /* @__PURE__ */ jsx4(
-        GraphMoleculeIconButton,
-        {
-          label: "Send selection",
-          disabled: !hasSelection || !canSubmit,
-          onClick: onSendSelection,
-          children: /* @__PURE__ */ jsx4(Send, { className: "size-4" })
-        }
-      ),
-      /* @__PURE__ */ jsx4(
-        GraphMoleculeIconButton,
-        {
-          label: "Stage current selection",
-          disabled: !hasSelection,
-          onClick: onStageSelection,
-          children: /* @__PURE__ */ jsx4(Box, { className: "size-4" })
-        }
-      ),
-      /* @__PURE__ */ jsx4(
-        GraphMoleculeIconButton,
-        {
-          label: "Clear staged selections",
-          disabled: !hasStaged,
-          onClick: onClearStaged,
-          children: /* @__PURE__ */ jsx4(Eraser, { className: "size-4" })
-        }
-      ),
-      /* @__PURE__ */ jsx4(
-        GraphMoleculeIconButton,
-        {
-          label: "Send staged selections",
-          disabled: !hasStaged || !canSubmit,
-          onClick: onSendStaged,
-          children: /* @__PURE__ */ jsx4(ArrowUpRight, { className: "size-4" })
-        }
-      )
+      selectionSubmission ? /* @__PURE__ */ jsxs2(Fragment, { children: [
+        /* @__PURE__ */ jsx4(
+          GraphMoleculeIconButton,
+          {
+            label: "Send selection",
+            disabled: !hasSelection || !canSubmit,
+            onClick: onSendSelection,
+            children: /* @__PURE__ */ jsx4(Send, { className: "size-4" })
+          }
+        ),
+        /* @__PURE__ */ jsx4(
+          GraphMoleculeIconButton,
+          {
+            label: "Stage current selection",
+            disabled: !hasSelection,
+            onClick: onStageSelection,
+            children: /* @__PURE__ */ jsx4(Box, { className: "size-4" })
+          }
+        ),
+        /* @__PURE__ */ jsx4(
+          GraphMoleculeIconButton,
+          {
+            label: "Clear staged selections",
+            disabled: !hasStaged,
+            onClick: onClearStaged,
+            children: /* @__PURE__ */ jsx4(Eraser, { className: "size-4" })
+          }
+        ),
+        /* @__PURE__ */ jsx4(
+          GraphMoleculeIconButton,
+          {
+            label: "Send staged selections",
+            disabled: !hasStaged || !canSubmit,
+            onClick: onSendStaged,
+            children: /* @__PURE__ */ jsx4(ArrowUpRight, { className: "size-4" })
+          }
+        )
+      ] }) : null
     ] }) }),
     cameraInfo ? /* @__PURE__ */ jsxs2("div", { className: "thread-graph-molecule-camera", children: [
       /* @__PURE__ */ jsxs2("div", { children: [
@@ -795,13 +798,13 @@ function GraphMoleculeViewerLowerButtonGroup({
             (serial) => `${selectedAtomLabels[serial] ?? "Atom"}(${serial})`
           ).join(", ") : "None"
         ] }),
-        /* @__PURE__ */ jsxs2("div", { children: [
+        selectionSubmission ? /* @__PURE__ */ jsxs2("div", { children: [
           "Staged: ",
           stagedMolecules,
           " molecule(s), ",
           stagedAtoms,
           " atom(s)"
-        ] })
+        ] }) : null
       ] })
     ] }) : null
   ] });
@@ -3351,6 +3354,7 @@ function GraphMoleculeViewer({
                             cameraInfo,
                             onClearSelection: () => setSelectedSerials([]),
                             onClearStaged: () => setStagedSelections({}),
+                            selectionSubmission: Boolean(onSelectionSubmit),
                             canSubmit: Boolean(onSelectionSubmit && target) && !loading && !busy && !viewerInitError && renderedReadyRef.current,
                             onSendSelection: () => void runOperation(async () => {
                               const entries = [selection()];
