@@ -2,7 +2,7 @@ import * as react from 'react';
 import { ReactNode, MutableRefObject } from 'react';
 import * as _remote_codex_shared from '@remote-codex/shared';
 import { PromptAttachmentManifestEntryDto, ThreadDto, UpdateThreadSettingsInput, ThreadHistoryItemDetailDto, ThreadTurnDto, ThreadShellStateDto, ShellSessionDto, UpdateShellInput, ShellEventEnvelope, PluginDto, ImportPluginInput, UpdatePluginInput, ThreadArtifactDto, ThreadDetailDto, AgentRuntimeStatusDto } from '@remote-codex/shared';
-import { F as FrontendPluginModule, E as ExtensionHostAdapter, m as ViewerToolbarContribution, f as ThreadPanelContribution, a as ExtensionRenderContext, U as UpstreamConnectionHost, T as ThreadPluginAdapter, e as PluginSettingsSnapshot, A as ArtifactRenderContext, I as InlineCodeRenderContext, b as MessagePresentationContext, M as MessagePresentation, P as PluginActionOutputContext, g as ThreadPluginDto, i as ThreadPluginSettingsSnapshot, h as ThreadPluginSettingsInput } from './plugin-types-C1Ip6feU.js';
+import { F as FrontendPluginModule, E as ExtensionHostAdapter, m as ViewerToolbarContribution, f as ThreadPanelContribution, a as ExtensionRenderContext, U as UpstreamConnectionHost, T as ThreadPluginAdapter, e as PluginSettingsSnapshot, A as ArtifactRenderContext, I as InlineCodeRenderContext, b as MessagePresentationContext, M as MessagePresentation, P as PluginActionOutputContext, g as ThreadPluginDto, i as ThreadPluginSettingsSnapshot, h as ThreadPluginSettingsInput } from './plugin-types-BkQJk-w8.js';
 
 interface PromptAttachmentUpload extends PromptAttachmentManifestEntryDto {
     file: File;

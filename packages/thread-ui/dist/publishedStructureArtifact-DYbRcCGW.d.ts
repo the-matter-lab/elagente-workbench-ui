@@ -1,4 +1,4 @@
-import { ArtifactMetadata, ScientificTarget } from '@remote-codex/shared';
+import { ArtifactMetadata, ScientificTarget, ThreadArtifactDto } from '@remote-codex/shared';
 import { GLViewer } from '3dmol';
 
 type ThreeDmolApi = {
@@ -36,4 +36,22 @@ type GraphMoleculeViewerData = {
 };
 declare function readGraphMoleculeViewerData(source: GraphMoleculeViewerSource): GraphMoleculeViewerData;
 
-export { type GraphMoleculeViewerSource as G, type GraphMoleculeViewerSnapshot as a, readGraphMoleculeViewerData as r };
+interface StructureDisplayName {
+    /** What to show: the origin name, with "(edit N)" for a revision in another file. */
+    label: string;
+    /** Basename of the path of the object's earliest published artifact. */
+    originName: string;
+    /** N in "(edit N)", or null when no hint is shown. */
+    edit: number | null;
+    /** The shown artifact's own workspace path, for a tooltip or details. */
+    path: string | null;
+}
+/**
+ * How a structure revision is named to the user (structure edits, UX a): by
+ * its object's origin file, e.g. "ethanol.xyz (edit 2)", never by a revision's
+ * hash-named file. N counts the object's artifacts after the first, in
+ * publication order; a revision written back to the origin path needs no hint.
+ */
+declare function structureDisplayName(artifacts: readonly ThreadArtifactDto[], artifact: ThreadArtifactDto): StructureDisplayName;
+
+export { type GraphMoleculeViewerSource as G, type StructureDisplayName as S, type GraphMoleculeViewerSnapshot as a, readGraphMoleculeViewerData as r, structureDisplayName as s };

@@ -9,7 +9,7 @@ import {
 import {
   translate,
   useI18n
-} from "./chunk-KBMR4E3X.js";
+} from "./chunk-D5VSPJC3.js";
 
 // src/components/graph-workspace/GraphMoleculeViewer.tsx
 import {
@@ -1601,6 +1601,9 @@ ${atoms.join("\n")}
 // src/components/graph-workspace/GraphMoleculeViewer.tsx
 import { jsx as jsx8, jsxs as jsxs6 } from "react/jsx-runtime";
 var SELECTION_CLEARED_MESSAGE = "The structure changed. Select the atoms again.";
+function isViewerInputQueued(error) {
+  return error instanceof Error && error.queued === true;
+}
 function GraphMoleculeViewer({
   className = "",
   moleculeId = null,
@@ -1612,6 +1615,7 @@ function GraphMoleculeViewer({
   onRevisionChange,
   source,
   title = "Molecular structure",
+  titleDetail,
   presentation = "workspace",
   onOpenFile,
   extensionHost,
@@ -2888,7 +2892,7 @@ function GraphMoleculeViewer({
           children: [
             /* @__PURE__ */ jsxs6("div", { className: "thread-graph-molecule-header flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-3 py-2 sm:px-4 sm:py-3", children: [
               /* @__PURE__ */ jsxs6("div", { className: "min-w-0", children: [
-                /* @__PURE__ */ jsx8("h2", { className: "truncate text-sm font-semibold text-slate-900", children: onOpenFile ? /* @__PURE__ */ jsxs6(
+                /* @__PURE__ */ jsx8("h2", { className: "truncate text-sm font-semibold text-slate-900", title: titleDetail, children: onOpenFile ? /* @__PURE__ */ jsxs6(
                   "button",
                   {
                     type: "button",
@@ -3172,7 +3176,7 @@ function GraphMoleculeViewer({
               ),
               /* @__PURE__ */ jsxs6("div", { className: "molecule-caption", children: [
                 /* @__PURE__ */ jsxs6("div", { children: [
-                  /* @__PURE__ */ jsx8("strong", { children: title }),
+                  /* @__PURE__ */ jsx8("strong", { title: titleDetail, children: title }),
                   /* @__PURE__ */ jsxs6("span", { children: [
                     formula.map(({ element, count }) => /* @__PURE__ */ jsxs6("span", { children: [
                       element,
@@ -3448,7 +3452,12 @@ function GraphMoleculeViewer({
                             onSendStaged: () => void runOperation(async () => {
                               const entries = Object.values(stagedSelections);
                               assertSubmissionTargets(entries);
-                              await onSelectionSubmit?.({ selections: entries });
+                              try {
+                                await onSelectionSubmit?.({ selections: entries });
+                              } catch (error) {
+                                if (isViewerInputQueued(error)) setStagedSelections({});
+                                throw error;
+                              }
                               setStagedSelections({});
                             }, "Sent."),
                             onStageSelection: handleStageSelection,
@@ -3490,5 +3499,6 @@ export {
   readCubeHeader,
   readGraphMoleculeViewerData,
   SELECTION_CLEARED_MESSAGE,
+  isViewerInputQueued,
   GraphMoleculeViewer
 };

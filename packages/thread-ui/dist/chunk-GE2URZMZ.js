@@ -1,6 +1,6 @@
 import {
   translate
-} from "./chunk-KBMR4E3X.js";
+} from "./chunk-D5VSPJC3.js";
 
 // src/components/themeHooks.ts
 import { useSyncExternalStore } from "react";
@@ -145,16 +145,17 @@ var IMAGE_EXTENSIONS = /* @__PURE__ */ new Set([
 ]);
 var PDF_EXTENSIONS = /* @__PURE__ */ new Set(["pdf"]);
 function collectArtifacts(detail) {
-  const artifacts = [];
+  const artifacts = [...detail.artifacts ?? []];
+  const listed = new Set(artifacts.map((artifact) => artifact.id));
   for (const turn of detail.turns) {
     for (const item of turn.items) {
-      if (item.kind === "artifact" && item.artifact) {
+      if (item.kind === "artifact" && item.artifact && !listed.has(item.artifact.id)) {
         artifacts.push(item.artifact);
       }
     }
   }
   for (const item of detail.liveItems?.items ?? []) {
-    if (item.kind === "artifact" && item.artifact) {
+    if (item.kind === "artifact" && item.artifact && !listed.has(item.artifact.id)) {
       artifacts.push(item.artifact);
     }
   }
