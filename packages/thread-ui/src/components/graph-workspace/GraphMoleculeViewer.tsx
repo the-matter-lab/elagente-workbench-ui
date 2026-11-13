@@ -73,6 +73,7 @@ import { Button } from '../graph-ui/Button';
 import {
   readGraphMoleculeViewerData,
   applyStructureMetadata,
+  carrySelection,
   frameCell,
   readExtXyzCell,
   frameTarget,
@@ -131,6 +132,18 @@ export type GraphMoleculeViewerHandle = {
   target?: ScientificTarget;
   execute: (request: ViewerRequest) => Promise<ViewerAcknowledgement>;
 };
+/**
+ * The viewer moved to a newer revision of the same object. `selection` says
+ * what the §4.3 rule did with the user's selection and staged selections.
+ */
+export type GraphMoleculeRevisionChange = {
+  objectId: string;
+  from: string;
+  to: string;
+  selection: 'kept' | 'cleared' | 'none';
+};
+export const SELECTION_CLEARED_MESSAGE =
+  'The structure changed. Select the atoms again.';
 export type GraphMoleculeViewerProps = {
   className?: string;
   presentation?: 'timeline' | 'workspace';
@@ -144,6 +157,11 @@ export type GraphMoleculeViewerProps = {
   onReady?: (view: GraphMoleculeViewerHandle) => void;
   /** Personal inspection signal; never a durable input or shared camera event. */
   onActive?: (view: GraphMoleculeViewerHandle) => void;
+  /**
+   * The host explains the change itself. Without it the viewer's status line
+   * asks the user to reselect when the selection was cleared.
+   */
+  onRevisionChange?: (change: GraphMoleculeRevisionChange) => void;
   source: GraphMoleculeViewerSource;
   title?: string | null;
   extensionHost?: ExtensionHostAdapter;
@@ -173,6 +191,7 @@ export function GraphMoleculeViewer({
   onSelectionSubmit,
   onReady,
   onActive,
+  onRevisionChange,
   source,
   title = 'Molecular structure',
   presentation = 'workspace',
@@ -220,6 +239,8 @@ export function GraphMoleculeViewer({
   const [stagedSelections, setStagedSelections] = useState<
     Record<string, GraphMoleculeAtomSelection>
   >({});
+  const stagedRef = useRef(stagedSelections);
+  stagedRef.current = stagedSelections;
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
@@ -232,6 +253,9 @@ export function GraphMoleculeViewer({
   const applyingCommandRef = useRef(false);
   const [annotations, setAnnotations] = useState<ViewerAnnotation[]>([]);
   const atomIdsRef = useRef<string[]>([]);
+  const atomElementsRef = useRef<string[]>([]);
+  const onRevisionChangeRef = useRef(onRevisionChange);
+  onRevisionChangeRef.current = onRevisionChange;
   const cellRef = useRef<ArtifactMetadata['cell']>(undefined);
   const renderedTargetRef = useRef<ScientificTarget | undefined>(undefined);
   const [unitCellAvailable, setUnitCellAvailable] = useState(false);
@@ -947,16 +971,63 @@ export function GraphMoleculeViewer({
             .selectedAtoms({})
             .some((atom) => atom.atom === 'CA' || atom.atom === 'P'),
         );
-        const oldIds = atomIdsRef.current;
+        const from = {
+          ids: atomIdsRef.current,
+          elements: atomElementsRef.current,
+        };
         atomIdsRef.current = applyStructureMetadata(model, snapshot?.metadata);
         const atoms = model.selectedAtoms({});
+        atomElementsRef.current = atoms.map((atom) => atom.elem ?? '');
+        const to = { ids: atomIdsRef.current, elements: atomElementsRef.current };
         setFormula(moleculeFormula(atoms));
         setAtomCount(atoms.length);
         const previous = selectedSerialsRef.current;
-        const remapped = previous
-          .map((index) => atomIdsRef.current.indexOf(oldIds[index]!))
-          .filter((index) => index >= 0);
+        const carried = carrySelection(previous, from, to);
+        const remapped = carried ?? [];
         selectedSerialsRef.current = remapped;
+        const prior = renderedTargetRef.current;
+        if (
+          prior &&
+          target &&
+          prior.objectId === target.objectId &&
+          (prior.sourceRevision !== target.sourceRevision ||
+            prior.checksum !== target.checksum) &&
+          !snapshot?.frameTargets?.some((frame) =>
+            sameScientificTarget(frame, prior),
+          )
+        ) {
+          // A newer revision of the open object: the §4.3 rule, then tell the user.
+          let stagedCleared = false;
+          const staged: typeof stagedSelections = {};
+          for (const [key, entry] of Object.entries(stagedRef.current)) {
+            if (entry.target?.objectId !== target.objectId) {
+              staged[key] = entry;
+              continue;
+            }
+            const atomsCarried = carrySelection(entry.atoms, from, to);
+            if (!atomsCarried) {
+              stagedCleared = true;
+              continue;
+            }
+            staged[JSON.stringify(target)] = {
+              ...entry,
+              atoms: atomsCarried,
+              selectedIds: atomsCarried.map((index) => to.ids[index]!),
+              target,
+            };
+          }
+          stagedRef.current = staged;
+          setStagedSelections(staged);
+          const cleared = (previous.length > 0 && !carried) || stagedCleared;
+          const change: GraphMoleculeRevisionChange = {
+            objectId: target.objectId,
+            from: prior.sourceRevision,
+            to: target.sourceRevision,
+            selection: cleared ? 'cleared' : previous.length ? 'kept' : 'none',
+          };
+          if (onRevisionChangeRef.current) onRevisionChangeRef.current(change);
+          else if (cleared) setStatus(SELECTION_CLEARED_MESSAGE);
+        }
         setSelectedSerials(
           previous.length === remapped.length &&
             previous.every((value, index) => value === remapped[index])
@@ -1418,21 +1489,25 @@ export function GraphMoleculeViewer({
       );
     }
   };
+  // Selections normally follow the viewer to a new revision (§4.3). One made
+  // on a revision this viewer no longer shows can't be carried: drop it and
+  // ask the user to reselect on the current structure.
   function assertSubmissionTargets(entries: GraphMoleculeAtomSelection[]) {
     if (loading) throw new Error('Wait for the verified structure to load.');
-    entries.forEach((entry) => {
-      if (
-        entry.target?.objectId === target?.objectId &&
-        !snapshot?.frameTargets?.some((frame) =>
-          sameScientificTarget(frame, entry.target),
-        ) &&
-        (entry.target?.sourceRevision !== target?.sourceRevision ||
-          entry.target?.checksum !== target?.checksum)
-      )
-        throw new Error(
-          'A staged selection refers to an older source revision. Select its atoms again.',
-        );
-    });
+    const stale = (entry: GraphMoleculeAtomSelection) =>
+      entry.target?.objectId === target?.objectId &&
+      !snapshot?.frameTargets?.some((frame) =>
+        sameScientificTarget(frame, entry.target),
+      ) &&
+      (entry.target?.sourceRevision !== target?.sourceRevision ||
+        entry.target?.checksum !== target?.checksum);
+    if (!entries.some(stale)) return;
+    setStagedSelections((current) =>
+      Object.fromEntries(
+        Object.entries(current).filter(([, entry]) => !stale(entry)),
+      ),
+    );
+    throw new Error(SELECTION_CLEARED_MESSAGE);
   }
   function handleToggleUnitCell() {
     if (!unitCellAvailable) {
@@ -2169,7 +2244,13 @@ export function GraphMoleculeViewer({
                   role="group"
                   aria-label="Viewer contributions"
                   inert={loading}
-                  style={{ visibility: loading ? 'hidden' : undefined }}
+                  style={{
+                    visibility: loading ? 'hidden' : undefined,
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 6,
+                    minWidth: 0,
+                  }}
                 >
                   {/* Keep the contribution's layout while verifying new bytes. A
                 collapsing toolbar resizes and redraws the previous model
@@ -2217,7 +2298,7 @@ export function GraphMoleculeViewer({
                       const entries = [selection()];
                       assertSubmissionTargets(entries);
                       await onSelectionSubmit?.({ selections: entries });
-                    }, 'Selection submitted.')
+                    }, 'Sent.')
                   }
                   onSendStaged={() =>
                     void runOperation(async () => {
@@ -2225,7 +2306,7 @@ export function GraphMoleculeViewer({
                       assertSubmissionTargets(entries);
                       await onSelectionSubmit?.({ selections: entries });
                       setStagedSelections({});
-                    }, 'Staged selections submitted.')
+                    }, 'Sent.')
                   }
                   onStageSelection={handleStageSelection}
                   onToggleUnitCell={handleToggleUnitCell}

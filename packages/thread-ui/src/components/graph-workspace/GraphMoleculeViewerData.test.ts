@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import type { RenderModel } from './GraphMoleculeViewerRenderTypes';
 import {
   applyStructureMetadata,
+  carrySelection,
   frameCell,
   frameTarget,
   readExtXyzCell,
@@ -265,5 +266,18 @@ describe('pre-split trajectories', () => {
   it('still splits multi-frame entries when the source is not pre-split', () => {
     const data = readGraphMoleculeViewerData({ content: [`${xyz}${xyz}`], format: 'xyz' });
     expect(data.frames).toHaveLength(2);
+  });
+});
+
+describe('carrySelection (§4.3)', () => {
+  const from = { ids: ['a', 'b', 'c'], elements: ['O', 'C', 'H'] };
+  it('keeps every selected atom whose stable ID survives with the same element', () => {
+    const to = { ids: ['x', 'c', 'a', 'b'], elements: ['N', 'H', 'O', 'C'] };
+    expect(carrySelection([0, 1], from, to)).toEqual([2, 3]);
+    expect(carrySelection([], from, to)).toEqual([]);
+  });
+  it('drops the whole selection when any atom is gone or changed element', () => {
+    expect(carrySelection([0, 2], from, { ids: ['a', 'b'], elements: ['O', 'C'] })).toBeNull();
+    expect(carrySelection([0], from, { ids: ['a', 'b', 'c'], elements: ['S', 'C', 'H'] })).toBeNull();
   });
 });

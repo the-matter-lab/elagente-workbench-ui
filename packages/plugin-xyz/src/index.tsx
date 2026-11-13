@@ -152,6 +152,7 @@ export function StructureView({
   asset,
   onReady,
   onActive,
+  onRevisionChange,
   onOpenFile,
   presentation = 'timeline',
   extensionHost,
@@ -167,6 +168,7 @@ export function StructureView({
   onOpenFile?: () => void;
   onReady?: ViewerProps['onReady'];
   onActive?: ViewerProps['onActive'];
+  onRevisionChange?: ViewerProps['onRevisionChange'];
   extensionHost?: ExtensionHostAdapter;
   onSelectionSubmit?: ViewerProps['onSelectionSubmit'];
   onSelectionChange?: ViewerProps['onSelectionChange'];
@@ -344,11 +346,8 @@ export function StructureView({
         acknowledgement.error?.message ?? 'The Agent didn’t accept this.',
       );
     }
-    if (acknowledgement.status !== 'applied')
-      throw userError(
-        'The Agent hasn’t confirmed this yet. Send it again to check.',
-        'Viewer input is awaiting native completion. Retry to check its acknowledgement.',
-      );
+    // `accepted` means the coordinator durably took the input and the Agent
+    // applies it in its own turn; a later failure is the host's to report.
     pendingInputs.current.delete(key);
   }
   const selectionCallback: ViewerProps['onSelectionSubmit'] =
@@ -503,6 +502,7 @@ export function StructureView({
         onOpenFile={onOpenFile}
         onReady={onReady}
         onActive={onActive}
+        onRevisionChange={onRevisionChange}
         extensionHost={host}
         loading={loading}
         onSelectionChange={onSelectionChange}

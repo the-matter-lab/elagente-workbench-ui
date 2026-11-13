@@ -350,17 +350,18 @@ it('an update pending verification disables identity-bearing actions while retai
   expect(node.querySelector('[data-testid="viewer"]')).toBe(viewer);
 });
 
-it('retains operation identity after accepted-only input and only completes on applied', async () => {
+it('an accepted input is sent; a transport failure keeps its operation identity for retry', async () => {
   const submitInput = vi
     .fn()
+    .mockRejectedValueOnce(new Error('Network error'))
     .mockImplementationOnce(async (input: ViewerInput) => ({
       ...input,
       status: 'accepted',
     }))
-    .mockImplementation(async (input: ViewerInput) => ({
+    .mockImplementationOnce(async (input: ViewerInput) => ({
       ...input,
-      status: 'applied',
-      result: input.payload,
+      status: 'rejected',
+      error: { code: 'STALE_VIEWER_TARGET', message: 'The structure changed.' },
     }));
   await mount(asset(), {
     discovery: EXTENSION_FIXTURES.grafico.discovery,
@@ -375,16 +376,24 @@ it('retains operation identity after accepted-only input and only completes on a
       { moleculeId: 'water', atoms: [0], selectedIds: ['oxygen'], target },
     ],
   };
-  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
   await expect(rendered.props.onSelectionSubmit!(selection)).rejects.toThrow(
-    'The Agent hasn’t confirmed this yet. Send it again to check.',
+    'Network error',
   );
-  expect(String(warn.mock.calls[0]?.[1])).toContain('awaiting native completion');
-  warn.mockRestore();
-  await rendered.props.onSelectionSubmit!(selection);
+  // `accepted` is durable acceptance, not completion: the viewer shows "Sent".
+  await expect(
+    rendered.props.onSelectionSubmit!(selection),
+  ).resolves.toBeUndefined();
   expect(submitInput.mock.calls[1]![0].operationId).toBe(
     submitInput.mock.calls[0]![0].operationId,
   );
+  // A later send is a new input, and a refusal is shown, never retried.
+  await expect(rendered.props.onSelectionSubmit!(selection)).rejects.toThrow(
+    'The structure changed.',
+  );
+  expect(submitInput.mock.calls[2]![0].operationId).not.toBe(
+    submitInput.mock.calls[0]![0].operationId,
+  );
+  expect(submitInput).toHaveBeenCalledTimes(3);
 });
 
 it('requires host PNG upload for artifact-backed screenshots and forwards personal active-view callback', async () => {

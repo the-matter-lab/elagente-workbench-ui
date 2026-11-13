@@ -64,7 +64,7 @@ import { GraphMoleculeViewer } from './GraphMoleculeViewer';
 import { GraphDrawioPreview } from './GraphDrawioPreview';
 import { isDrawioPath } from './explorer/filePreviewPolicy';
 import { formatJsonPreview } from './explorer/jsonPreview';
-import { publishedArtifactForFile } from './explorer/publishedStructureArtifact';
+import { followedArtifactForFile, latestArtifactForObject } from './explorer/publishedStructureArtifact';
 import {
   WorkspaceFileTabs,
   type WorkspaceFileTab,
@@ -670,9 +670,13 @@ export function GraphWorkspacePreviewPane({
   );
   const [dark, setDark] = useState(false);
   const activeNode = selectedTarget?.node ?? null;
-  const renderedArtifact = activeNode?.artifact
+  // An open structure follows its object to the latest published revision.
+  const openArtifact = activeNode?.artifact
+    ? latestArtifactForObject(artifacts, activeNode.artifact)
+    : null;
+  const renderedArtifact = openArtifact
     ? plugins.renderArtifact({
-        artifact: activeNode.artifact,
+        artifact: openArtifact,
         expanded: true,
         // ElAgente: scientific renderers lay out for the workspace pane.
         presentation: 'workspace',
@@ -681,10 +685,19 @@ export function GraphWorkspacePreviewPane({
     : null;
   const moleculeSnapshot = buildMoleculePreviewSnapshot(previewFile ?? null);
   // A structure file renders as its published artifact only for a verified,
-  // unchanged disk revision; otherwise the plain preview has no target.
+  // unchanged disk revision; otherwise the plain preview has no target. A
+  // superseded revision shows its object's latest revision instead.
   const fileArtifact = selectedTarget?.kind === 'workspace-file' && moleculeSnapshot && previewFile &&
     document?.phase === 'clean' && !document.needsVerification
-    ? publishedArtifactForFile(artifacts, previewFile.path, document.snapshot.contentHash) : null;
+    ? followedArtifactForFile(artifacts, previewFile.path, document.snapshot.contentHash) : null;
+  const followedPath = fileArtifact && fileArtifact.workspacePath !== previewFile?.path
+    ? fileArtifact.workspacePath
+    : openArtifact && openArtifact.id !== activeNode?.artifact?.id ? openArtifact.workspacePath : null;
+  const followedNote = followedPath ? (
+    <p role="note" className="thread-graph-molecule-followed truncate px-3 py-1 text-xs text-slate-500 dark:text-slate-400" title={followedPath}>
+      {translate('files.followingLatestRevision', { path: followedPath })}
+    </p>
+  ) : null;
   const renderedFileArtifact = fileArtifact
     ? plugins.renderArtifact({
         artifact: fileArtifact,
@@ -936,7 +949,8 @@ export function GraphWorkspacePreviewPane({
         ) : selectedTarget.kind === 'workspace-file' && downloadOnly ? (
           <DownloadFilePreview key={selectedTarget.node.path} node={selectedTarget.node} onDownload={onDownloadFile} {...(downloadReason ? { readOnlyReason: downloadReason } : activeFilePath && documents?.documents.get(activeFilePath)?.snapshot.readOnlyReason ? {readOnlyReason:documents.documents.get(activeFilePath)!.snapshot.readOnlyReason!}: {})} />
         ) : selectedTarget.kind === 'workspace-file' && moleculeSnapshot ? (
-          <div className="thread-graph-molecule-preview min-h-0 flex-1 overflow-hidden">
+          <div className="thread-graph-molecule-preview flex min-h-0 flex-1 flex-col overflow-hidden">
+            {renderedFileArtifact && followedNote}
             {renderedFileArtifact ?? (
               <GraphMoleculeViewer
                 source={moleculeSnapshot}
@@ -1089,6 +1103,7 @@ export function GraphWorkspacePreviewPane({
                 : 'min-h-0 flex-1 overflow-auto p-3'
             }
           >
+            {followedNote}
             {renderedArtifact}
           </div>
         ) : selectedTarget.kind === 'event' ? (
