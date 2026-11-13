@@ -363,7 +363,7 @@ function liveStructureTrajectoryPath(row) {
 // src/components/live-structures/LiveStructureFrameViewer.tsx
 import { jsx as jsx3 } from "react/jsx-runtime";
 var GraphMoleculeViewer = lazy(
-  () => import("./GraphMoleculeViewer-AH7IENNY.js").then((module) => ({ default: module.GraphMoleculeViewer }))
+  () => import("./GraphMoleculeViewer-X2VK3WOP.js").then((module) => ({ default: module.GraphMoleculeViewer }))
 );
 function LiveStructureFrameViewer({ frame }) {
   const { t: t2 } = useI18n();
@@ -654,7 +654,7 @@ import { FileText, X as X2 } from "lucide-react";
 import { lazy as lazy2, Suspense as Suspense2, useEffect, useMemo as useMemo3, useRef, useState as useState2 } from "react";
 import { Fragment as Fragment2, jsx as jsx5, jsxs as jsxs3 } from "react/jsx-runtime";
 var GraphMoleculeViewer2 = lazy2(
-  () => import("./GraphMoleculeViewer-AH7IENNY.js").then((module) => ({ default: module.GraphMoleculeViewer }))
+  () => import("./GraphMoleculeViewer-X2VK3WOP.js").then((module) => ({ default: module.GraphMoleculeViewer }))
 );
 var LIVE_TRAJECTORY_UPDATE_MS = 1e3;
 var STATUS_LABEL2 = {
