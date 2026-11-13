@@ -1509,3 +1509,78 @@ describe('per-frame unit cells', () => {
     expect(button('Hide unit cell').disabled).toBe(false);
   });
 });
+
+it('carries the selection to a newer revision of the same object by stable ID and element (§4.3)', async () => {
+  const local = vi.fn(),
+    changes = vi.fn();
+  const single: ScientificTarget = {
+    artifactId: 'a1',
+    objectId: 'o',
+    sourceRevision: 'r1',
+    checksum: 'a'.repeat(64),
+  };
+  const render = (revision: string, ids: string[], content = first) =>
+    act(async () =>
+      root.render(
+        <GraphMoleculeViewer
+          source={{
+            content: [content],
+            target: { ...single, artifactId: `a-${revision}`, sourceRevision: revision },
+            metadata: {
+              version: 1,
+              objectId: 'o',
+              sourceRevision: revision,
+              checksum: 'a'.repeat(64),
+              format: 'xyz',
+              atoms: [
+                { id: ids[0]!, element: 'O' },
+                { id: ids[1]!, element: 'H' },
+              ],
+            } as ArtifactMetadata,
+          }}
+          onSelectionChange={local}
+          onRevisionChange={changes}
+        />,
+      ),
+    );
+  await render('r1', ['atom-o', 'atom-h']);
+  await act(async () =>
+    runtime.click({ index: 0, serial: 9, elem: 'O', x: 0, y: 0, z: 0 }, runtime.viewer),
+  );
+  expect(local.mock.lastCall?.[0]).toMatchObject({ selectedIds: ['atom-o'] });
+  // A new revision keeping the selected atom: kept, now on the new target.
+  await render('r2', ['atom-o', 'atom-h'], first.replace('H 1 0 0', 'H 1.2 0 0'));
+  expect(changes).toHaveBeenLastCalledWith({ objectId: 'o', from: 'r1', to: 'r2', selection: 'kept' });
+  expect(local.mock.lastCall?.[0]).toMatchObject({
+    selectedIds: ['atom-o'],
+    target: expect.objectContaining({ sourceRevision: 'r2' }),
+  });
+  // The selected atom's identity is gone: the whole selection is cleared.
+  await render('r3', ['atom-x', 'atom-h'], first.replace('H 1 0 0', 'H 1.4 0 0'));
+  expect(changes).toHaveBeenLastCalledWith({ objectId: 'o', from: 'r2', to: 'r3', selection: 'cleared' });
+  expect(local.mock.lastCall?.[0]).toMatchObject({ selectedIds: [] });
+});
+
+it('without a host handler the viewer asks the user to reselect after a revision drops the selection', async () => {
+  const render = (revision: string, id: string, content: string) =>
+    act(async () =>
+      root.render(
+        <GraphMoleculeViewer
+          source={{
+            content: [content],
+            target: { artifactId: revision, objectId: 'o', sourceRevision: revision, checksum: 'a'.repeat(64) },
+            metadata: {
+              version: 1, objectId: 'o', sourceRevision: revision, checksum: 'a'.repeat(64), format: 'xyz',
+              atoms: [{ id, element: 'O' }, { id: 'h', element: 'H' }],
+            } as ArtifactMetadata,
+          }}
+        />,
+      ),
+    );
+  await render('r1', 'o1', first);
+  await act(async () =>
+    runtime.click({ index: 0, serial: 9, elem: 'O', x: 0, y: 0, z: 0 }, runtime.viewer),
+  );
+  await render('r2', 'o2', first.replace('H 1 0 0', 'H 1.2 0 0'));
+  expect(node.textContent).toContain('The structure changed. Select the atoms again.');
+});

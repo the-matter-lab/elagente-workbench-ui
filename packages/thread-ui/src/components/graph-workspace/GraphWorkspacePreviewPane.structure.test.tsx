@@ -67,4 +67,13 @@ describe('structure file preview binds published artifacts (ELA-385)', () => {
     expect(element.querySelector('[data-testid="bound-artifact"]')).toBeNull();
     expect(element.querySelector('[data-testid="plain-viewer"]')).not.toBeNull();
   });
+
+  it('follows a superseded revision to its object’s latest revision, and says so', () => {
+    const scanned = artifact('art_scan', current);
+    const edited: ThreadArtifactDto = { ...artifact('art_edit', 'e'.repeat(64)), workspacePath: 'scientific-edits/e1.extxyz',
+      metadata: { ...scanned.metadata!, sourceRevision: 'edit-1', checksum: 'e'.repeat(64) } };
+    const element = pane(documentsFor(current), [scanned, edited]);
+    expect(element.querySelector('[data-testid="bound-artifact"]')?.textContent).toBe('art_edit');
+    expect(element.querySelector('[role="note"]')?.textContent).toContain('scientific-edits/e1.extxyz');
+  });
 });

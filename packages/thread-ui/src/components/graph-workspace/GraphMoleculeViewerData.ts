@@ -96,6 +96,30 @@ export function frameTarget(
   return undefined;
 }
 
+/** Stable atom identity of a rendered revision, in source atom order. */
+export type AtomIdentity = { ids: readonly string[]; elements: readonly string[] };
+
+/**
+ * Carry a selection over to a new revision of the same object (design §4.3).
+ * Every selected atom must keep its stable ID with the same element; if any is
+ * missing or changed, the whole selection is dropped so the user reselects.
+ * Returns the selection as indices into the new revision, or null.
+ */
+export function carrySelection(
+  selected: readonly number[],
+  from: AtomIdentity,
+  to: AtomIdentity,
+): number[] | null {
+  const carried: number[] = [];
+  for (const index of selected) {
+    const id = from.ids[index];
+    const next = id === undefined ? -1 : to.ids.indexOf(id);
+    if (next < 0 || to.elements[next] !== from.elements[index]) return null;
+    carried.push(next);
+  }
+  return carried;
+}
+
 /**
  * The producer's unit cell for trajectory frame `index`: `frameCells[index]`
  * (null = that frame has no cell) when present, otherwise the single `cell`.

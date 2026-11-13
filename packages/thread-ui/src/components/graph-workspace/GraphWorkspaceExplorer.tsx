@@ -15,7 +15,7 @@ import type {
 import type { ThreadWorkspaceAdapter } from '../../adapters';
 import type { WorkspaceExplorerAdapter } from './explorer/workspaceExplorerTypes';
 import type { PluginContextValue } from '../../plugins/plugin-context';
-import { flattenWorkspaceNodes, type WorkspaceTreeNode } from './workspaceTree';
+import { MOLECULAR_EXTENSIONS, extensionOf, flattenWorkspaceNodes, type WorkspaceTreeNode } from './workspaceTree';
 import { useWorkspaceExplorerController } from './explorer/useWorkspaceExplorerController';
 import { useWorkspaceExplorerActions } from './explorer/useWorkspaceExplorerActions';
 import { WorkspaceTrashDialog } from './explorer/WorkspaceTrashDialog';
@@ -115,6 +115,18 @@ export function GraphWorkspaceExplorer({
     [activeNode, browsedDirectoryPath, tree]);
   useLayoutEffect(() => { setBrowsedDirectoryPath(null); }, [activeNode?.id, documents.source]);
   const selectedFilePath = activeNode?.kind === 'file' ? activeNode.path : null;
+  // An open structure file re-checks its disk revision on every workspace
+  // change, so its preview rebinds to the artifact for the new bytes (structure
+  // edits step 3). A clean document adopts them; an edited one shows a conflict.
+  const documentsRef = useRef(documents);
+  documentsRef.current = documents;
+  const structurePath = selectedFilePath && MOLECULAR_EXTENSIONS.has(extensionOf(selectedFilePath))
+    ? selectedFilePath : null;
+  useEffect(() => {
+    if (!structurePath || !workspaceAdapter?.subscribeWorkspaceChanged) return;
+    return workspaceAdapter.subscribeWorkspaceChanged(workspaceIdentity,
+      () => { void documentsRef.current.checkDisk(structurePath); }) ?? undefined;
+  }, [structurePath, workspaceAdapter, workspaceIdentity]);
   // The tree opens at least TREE_MIN_PX wide, so its names and toolbar fit;
   // the reader can still drag it narrower.
   const workspacePanelRef = useRef<HTMLDivElement>(null);
