@@ -4,6 +4,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   GraphMoleculeViewer,
+  isViewerInputQueued,
   type GraphMoleculeViewerHandle,
 } from './GraphMoleculeViewer';
 import type {
@@ -711,6 +712,34 @@ it('stages separate molecules and preserves each target rather than relabeling t
       expect.objectContaining({ target: other, selectedIds: ['1'] }),
     ],
   });
+});
+
+it('clears a staged group the host queued behind a running turn and shows the queued status', async () => {
+  const queued = Object.assign(new Error('Selection queued; it applies after the current turn.'), { queued: true });
+  const submit = vi.fn().mockRejectedValueOnce(queued).mockRejectedValueOnce(new Error('Connection lost'));
+  await act(async () =>
+    root.render(
+      <GraphMoleculeViewer moleculeId={target.objectId} source={{ content: [first], target }} onSelectionSubmit={submit} />,
+    ),
+  );
+  await act(async () => runtime.click({ index: 0 }, runtime.viewer));
+  await click('Stage current selection');
+  await click('Send staged selections');
+  expect(node.textContent).toContain('Selection queued; it applies after the current turn.');
+  const clearStaged = () => node.querySelector<HTMLButtonElement>('button[aria-label="Clear staged selections"]')!;
+  expect(clearStaged().disabled).toBe(true);
+  // Any other failure keeps the staged group for a retry.
+  await act(async () => runtime.click({ index: 1 }, runtime.viewer));
+  await click('Stage current selection');
+  await click('Send staged selections');
+  expect(node.textContent).toContain('Connection lost');
+  expect(clearStaged().disabled).toBe(false);
+});
+
+it('recognizes only an Error with queued: true as the queued signal', () => {
+  expect(isViewerInputQueued(Object.assign(new Error('q'), { queued: true }))).toBe(true);
+  expect(isViewerInputQueued(new Error('q'))).toBe(false);
+  expect(isViewerInputQueued({ queued: true, message: 'q' })).toBe(false);
 });
 
 it('keeps the camera and scrubbed frame while a stream appends, and resumes following through LIVE', async () => {

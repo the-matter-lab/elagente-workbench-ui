@@ -201,6 +201,54 @@ it('partial staged submission retries skip acknowledged objects and reuse the fa
   );
 });
 
+it('submits every entry of a staged group the host queues behind a running turn, then reports queued once', async () => {
+  const queued = () => Object.assign(new Error('Selection queued; it applies after the current turn.'), { queued: true });
+  const submitInput = vi.fn(async () => { throw queued(); });
+  await mount(asset(), {
+    discovery: EXTENSION_FIXTURES.grafico.discovery,
+    submitInput,
+  });
+  const target =
+    typeof rendered.props.source === 'object'
+      ? rendered.props.source!.target!
+      : null!;
+  const selection = {
+    selections: [
+      { moleculeId: 'water', atoms: [0], selectedIds: ['oxygen'], target },
+      {
+        moleculeId: 'other',
+        atoms: [1],
+        selectedIds: ['hydrogen'],
+        target: { ...target, objectId: 'other' },
+      },
+    ],
+  };
+  await expect(rendered.props.onSelectionSubmit!(selection)).rejects.toMatchObject({
+    queued: true,
+    message: 'Selection queued; it applies after the current turn.',
+  });
+  expect(submitInput).toHaveBeenCalledTimes(2);
+  expect(submitInput.mock.calls.map((call) => (call as unknown as [ViewerInput])[0].target.objectId)).toEqual(['water', 'other']);
+  // Queued is durable acceptance: sending the same group again is a new submission.
+  await expect(rendered.props.onSelectionSubmit!(selection)).rejects.toMatchObject({ queued: true });
+  const ids = submitInput.mock.calls.map((call) => (call as unknown as [ViewerInput])[0].operationId);
+  expect(new Set(ids).size).toBe(4);
+});
+
+it('titles the viewer with the object’s display name and keeps the file path as its tooltip', async () => {
+  await act(async () =>
+    root.render(
+      <StructureView asset={asset()} displayName="water.xyz (edit 1)" displayPath="scientific-edits/8e3f.extxyz" />,
+    ),
+  );
+  await vi.waitFor(() => expect(node.textContent).toContain('water'));
+  expect(rendered.props.title).toBe('water.xyz (edit 1)');
+  expect(rendered.props.titleDetail).toBe('scientific-edits/8e3f.extxyz');
+  await act(async () => root.render(<StructureView asset={asset()} />));
+  expect(rendered.props.title).toBe('water.xyz');
+  expect(rendered.props.titleDetail).toBeUndefined();
+});
+
 it('preserves canonical bytes when rendering a separate immutable representation and prevents redundant refetch', async () => {
   const renderText = source.replace('1 0 0', '0.529 0 0');
   const next = {

@@ -210,6 +210,7 @@ export { SettingsPanels, type SettingsSection } from './components/SettingsPanel
 
 export {createExtensionPluginApi, extensionModuleAvailable, type ExtensionPluginApi} from './plugins/extension-api';
 export type {ExtensionHostAdapter, ExtensionRenderContext, ViewerToolbarContext, ViewerToolbarContribution} from './plugins/plugin-types';
+export { structureDisplayName, type StructureDisplayName } from './components/graph-workspace/explorer/publishedStructureArtifact';
 
 
 export { I18nProvider, LanguageSwitcher, useI18n, initializeI18n, getLocale, setLocale, translate, t, formatDate, formatNumber, normalizeLocale, detectLocale, LOCALE_STORAGE_KEY, LOCALE_OPTIONS, SUPPORTED_LOCALES, DEFAULT_LOCALE } from './i18n';

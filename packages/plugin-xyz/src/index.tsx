@@ -6,6 +6,7 @@ import {
 } from '@remote-codex/thread-ui';
 import {
   GraphMoleculeViewer,
+  isViewerInputQueued,
   readGraphMoleculeViewerData,
 } from '@remote-codex/thread-ui/scientific-viewer';
 import {
@@ -162,8 +163,14 @@ export function StructureView({
   toolbar,
   rendererSlot,
   submissionActions,
+  displayName,
+  displayPath,
 }: {
   asset: StructureAsset;
+  /** The object's name for the user, e.g. "ethanol.xyz (edit 2)"; defaults to the file name. */
+  displayName?: string;
+  /** The revision's file path, shown as the title's tooltip. */
+  displayPath?: string;
   presentation?: 'timeline' | 'workspace';
   onOpenFile?: () => void;
   onReady?: ViewerProps['onReady'];
@@ -331,7 +338,14 @@ export function StructureView({
     } catch (error) {
       throw userError('This can’t be sent to the Agent.', error);
     }
-    const acknowledgement = await host.submitInput(input);
+    let acknowledgement;
+    try {
+      acknowledgement = await host.submitInput(input);
+    } catch (error) {
+      // Queued behind a running turn is durable acceptance, as `accepted` is.
+      if (isViewerInputQueued(error)) pendingInputs.current.delete(key);
+      throw error;
+    }
     try {
       validateViewerAcknowledgement(acknowledgement, input, host.discovery);
     } catch (error) {
@@ -389,15 +403,24 @@ export function StructureView({
             completed = new Set<number>();
             pendingGroups.current.set(groupKey, completed);
           }
+          // A queued entry counts as sent: continue with the next one, then
+          // report the queued status once every entry has been taken.
+          let queued: unknown = null;
           for (let index = 0; index < selections.length; index++) {
             if (completed.has(index)) continue;
             const selection = selections[index]!;
-            await submit('selection', selectionAction, selection.target, {
-              selectedIds: selection.selectedIds,
-            });
+            try {
+              await submit('selection', selectionAction, selection.target, {
+                selectedIds: selection.selectedIds,
+              });
+            } catch (error) {
+              if (!isViewerInputQueued(error)) throw error;
+              queued ??= error;
+            }
             completed.add(index);
           }
           pendingGroups.current.delete(groupKey);
+          if (queued) throw queued;
         }
       : undefined);
   const screenshotCallback: ViewerProps['onScreenshot'] =
@@ -497,7 +520,12 @@ export function StructureView({
       <GraphMoleculeViewer
         source={source}
         moleculeId={loaded.target?.objectId ?? loaded.asset.name}
-        title={loaded.asset.name}
+        title={displayName || loaded.asset.name}
+        titleDetail={
+          displayName && displayName !== loaded.asset.name
+            ? (displayPath ?? loaded.asset.name)
+            : undefined
+        }
         presentation={presentation}
         onOpenFile={onOpenFile}
         onReady={onReady}
@@ -558,7 +586,13 @@ export const xyzPlugin: FrontendPluginModule = {
       threadPanels: [],
     },
   },
-  renderArtifact: ({ artifact, presentation, onOpenFile, extensionHost }) => (
+  renderArtifact: ({
+    artifact,
+    presentation,
+    onOpenFile,
+    extensionHost,
+    displayName,
+  }) => (
     <StructureView
       asset={{
         ...(artifact.payload as StructureAsset),
@@ -569,6 +603,8 @@ export const xyzPlugin: FrontendPluginModule = {
       presentation={presentation}
       onOpenFile={onOpenFile}
       extensionHost={extensionHost}
+      displayName={displayName}
+      displayPath={artifact.workspacePath}
     />
   ),
 };

@@ -36,6 +36,7 @@ export function createExtensionPluginApi(modules: FrontendPluginModule[], adapte
       const ack = await adapter.submitInput!(input);
       return validateViewerAcknowledgement(ack, input, adapter.discovery);
     }),
+    adoptStructure: adapter.adoptStructure,
     acknowledgeAction: adapter.acknowledgeAction && (async (request: ViewerRequest, ack: ViewerAcknowledgement) => {
       validateViewerAcknowledgement(ack, request, adapter.discovery);
       await adapter.acknowledgeAction!(request, ack);

@@ -68,18 +68,19 @@ export const IMAGE_EXTENSIONS = new Set([
 export const PDF_EXTENSIONS = new Set(['pdf']);
 
 export function collectArtifacts(detail: ThreadDetailDto): ThreadArtifactDto[] {
-  const artifacts: ThreadArtifactDto[] = [];
+  const artifacts: ThreadArtifactDto[] = [...(detail.artifacts ?? [])];
+  const listed = new Set(artifacts.map((artifact) => artifact.id));
 
   for (const turn of detail.turns) {
     for (const item of turn.items) {
-      if (item.kind === 'artifact' && item.artifact) {
+      if (item.kind === 'artifact' && item.artifact && !listed.has(item.artifact.id)) {
         artifacts.push(item.artifact);
       }
     }
   }
 
   for (const item of detail.liveItems?.items ?? []) {
-    if (item.kind === 'artifact' && item.artifact) {
+    if (item.kind === 'artifact' && item.artifact && !listed.has(item.artifact.id)) {
       artifacts.push(item.artifact);
     }
   }

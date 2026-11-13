@@ -16,7 +16,11 @@ export const filesEn = {
   "files.fileActions": "File actions",
   "files.reloadFile": "Reload from disk",
   "files.fileReloaded": "File reloaded",
-  "files.followingLatestRevision": "Showing the latest revision of this structure: {{path}}",
+  "files.followingLatestRevision": "Showing the latest revision: {{name}}",
+  "files.structureEditName": "{{name}} (edit {{edit}})",
+  "files.adoptTooLarge": "This file is too large to edit.",
+  "files.adoptUnsupportedFormat": "This Agent can’t edit this format.",
+  "files.adoptTurnBusy": "Editing becomes available after the current turn.",
   "files.fileAlreadyCurrent": "Already up to date",
 
   "files.backToDocument": "Back to {{name}}",
