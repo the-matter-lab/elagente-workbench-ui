@@ -123,9 +123,15 @@ export interface MatterWorkbenchOptions {
   sidebarFooter?: ReactNode;
   renderNavigationHeader?: (input: { collapsed: boolean; closeNavigation: () => void }) => ReactNode;
   panels?: WorkbenchPanelsOptions;
-  /** Opt-in thread toolbar below the tabs. Lifecycle belongs to the host. */
+  /** Opt-in thread toolbar. Lifecycle belongs to the host. */
   threadHeader?: {
+    /** Desktop: replace the tab row with one 44px header. Search and collapsed
+        sidebar navigation stay in this row; phone navigation is unchanged.
+        Empty workspaces omit both rows. Defaults to false. */
+    singleRow?: boolean;
     status: string;
+    /** Optional hover/focus explanation for the lifecycle pill. */
+    statusDescription?: string;
     tone: 'running' | 'stopped' | 'failed' | 'pending';
     /** Defaults to disabled unless running; controls remain visible. */
     toolsDisabled?: boolean;
@@ -304,6 +310,7 @@ export function MatterWorkbench({
   // A setting (Settings → Preferences), on by default; off keeps the classic phone bars.
   const shellNav = useAppShellNav();
   const dock = mobile && (shellNav?.phoneDock ?? true);
+  const singleRowHeader = !mobile && Boolean(o.threadHeader?.singleRow);
   // Left-handed: the dock, the composer's buttons and the turn strip are mirrored.
   const leftHanded = dock && shellNav?.phoneHand === 'left';
   const openThreadMap = shellNav?.openThreadMap;
@@ -676,7 +683,8 @@ export function MatterWorkbench({
   // Desktop navigation: the sidebar switch, Back and Forward head the sidebar,
   // level with the tabs row; with the sidebar folded they lead the tabs row.
   const navStrip = (
-    <div className="matter-nav-strip" role="group" aria-label={translate('workbench.pageNavigation')}>
+    <div className="matter-nav-strip" role="group" aria-label={translate('workbench.pageNavigation')}
+      style={singleRowHeader && sidebarHidden ? { height: 30, borderBottom: 0, padding: 0 } : undefined}>
       <button aria-label={translate("workbench.toggleShortcutsSidebar")} aria-expanded={!sidebarHidden}
         title={translate("workbench.toggleShortcutsSidebar")} onClick={() => setSidebarHidden(!sidebarHidden)}>
         <PanelLeft data-icon="sidebar" />
@@ -1066,7 +1074,7 @@ export function MatterWorkbench({
           onLostPointerCapture={() => { sidebarDrag.current = null; }}
           onDoubleClick={() => resizeSidebar(null)}
           onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { event.preventDefault(); resizeSidebar((sidebarWidth ?? sidebarRef.current?.offsetWidth ?? 236) + (event.key === 'ArrowLeft' ? -16 : 16)); } }} />}
-        {!dock && <div className="matter-tabs-row">
+        {!dock && !singleRowHeader && <div className="matter-tabs-row">
         {!mobile && sidebarHidden && navStrip}
         <div className="matter-tabs-main">
         {/* Desktop: search opens over the tabs rather than pushing them aside. */}
@@ -1109,7 +1117,12 @@ export function MatterWorkbench({
           {o.hideRail && !o.threadHeader && localSettings}
         </div>}
         </div>}
-        {o.threadHeader && <ThreadHeader header={o.threadHeader} title={title || currentThread?.title || ''} threadKey={o.currentKey}
+        {o.threadHeader && !(singleRowHeader && o.emptyWorkspace) && <ThreadHeader header={o.threadHeader} title={title || currentThread?.title || ''} threadKey={o.currentKey}
+          singleRow={singleRowHeader} navigation={singleRowHeader && sidebarHidden ? navStrip : null}
+          search={singleRowHeader && (o.search || showSearch) ? <div className={`matter-tabs-search ${o.searchOpen ? 'is-open' : ''}`}>{o.search ?? <button
+            className="matter-search-trigger" aria-label={searchLabel} title={`${searchLabel} (Ctrl+F)`}
+            onClick={o.onSearch}><Search data-icon="search" /><span>{searchLabel}</span></button>}</div> : null}
+          indicators={singleRowHeader ? <><div className="matter-connection">{connection}</div>{bell}</> : null}
           explorerOpen={explorerOpen} onToggleExplorer={() => setExplorerOpen(open => !open)} options={o}
           actions={<>{actions}{threadMenu}</>} />}
         <PhoneDockContext.Provider value={dock}>

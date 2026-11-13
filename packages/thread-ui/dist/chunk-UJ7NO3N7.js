@@ -1,18 +1,19 @@
 import {
   codeLanguage
-} from "./chunk-PL6NV6OT.js";
+} from "./chunk-3HYBRDXY.js";
 import {
   cssHexVariable,
   useDocumentThemeRevision
-} from "./chunk-RZJR24UV.js";
+} from "./chunk-YGD5SHY7.js";
 import {
   translate,
   useI18n
-} from "./chunk-DTT7Q47S.js";
+} from "./chunk-JC5AJQQD.js";
 
 // src/components/graph-workspace/GraphWorkspaceMonacoEditor.tsx
 import { useEffect, useRef } from "react";
 import * as monaco from "monaco-editor/editor/editor.api.js";
+import "monaco-editor/features/folding/register.js";
 import "monaco-editor/languages/definitions/cpp/register.js";
 import "monaco-editor/languages/definitions/css/register.js";
 import "monaco-editor/languages/definitions/html/register.js";

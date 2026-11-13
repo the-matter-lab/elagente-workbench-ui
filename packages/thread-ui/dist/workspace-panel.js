@@ -30,13 +30,13 @@ import {
   useFilePanel,
   useLongPress,
   useTabScrollEdges
-} from "./chunk-IHGK6WBS.js";
+} from "./chunk-EIIDDZBB.js";
 import {
   CubeFormatError,
   GraphMoleculeViewer,
   MAX_CUBE_GRID_POINTS,
   readCubeHeader
-} from "./chunk-BZKC3B6Q.js";
+} from "./chunk-O3MT34GW.js";
 import {
   useMenuKeyboard
 } from "./chunk-OCACD4WT.js";
@@ -46,7 +46,7 @@ import {
   isBinaryPreview,
   isDownloadOnlyPath,
   isDrawioPath
-} from "./chunk-PL6NV6OT.js";
+} from "./chunk-3HYBRDXY.js";
 import {
   IMAGE_EXTENSIONS,
   MOLECULAR_EXTENSIONS,
@@ -70,13 +70,13 @@ import {
   useThemeFeature,
   workspaceRelativeFocusPath,
   workspaceTreeNodeToGraphNode
-} from "./chunk-RZJR24UV.js";
+} from "./chunk-YGD5SHY7.js";
 import {
   en,
   getLocale,
   translate,
   useI18n
-} from "./chunk-DTT7Q47S.js";
+} from "./chunk-JC5AJQQD.js";
 
 // src/components/ThreadGraphWorkspacePanel.tsx
 import { memo as memo2, useEffect as useEffect12, useMemo as useMemo9, useState as useState11 } from "react";
@@ -3866,6 +3866,7 @@ function ExplorerMoreMenu({ triggerClassName, children }) {
 import {
   createContext,
   useContext,
+  useId,
   lazy,
   memo,
   Suspense,
@@ -4012,6 +4013,57 @@ function GraphDrawioPreview({ content, name, truncated }) {
   );
 }
 
+// src/components/graph-workspace/explorer/jsonPreview.ts
+var MAX_JSON_PREVIEW_CHARS = 1024 * 1024;
+var MAX_FORMATTED_CHARS = 4 * MAX_JSON_PREVIEW_CHARS;
+var MAX_DEPTH = 100;
+function formatJsonPreview(content) {
+  if (content.length > MAX_JSON_PREVIEW_CHARS) return null;
+  try {
+    JSON.parse(content);
+  } catch {
+    return null;
+  }
+  const tokens = content.match(/"(?:[^"\\]|\\.)*"|[{}\[\],:]|[^\s{}\[\],:]+/g) ?? [];
+  const parts = [];
+  let depth = 0;
+  let length = 0;
+  for (let index = 0; index < tokens.length; index++) {
+    const token = tokens[index];
+    const next = tokens[index + 1];
+    let part = token;
+    if (token === "{" || token === "[") {
+      if (++depth > MAX_DEPTH) return null;
+      if (next !== "}" && next !== "]") part += "\n" + "  ".repeat(depth);
+    } else if (token === "}" || token === "]") {
+      depth--;
+      const previous = tokens[index - 1];
+      if (previous !== "{" && previous !== "[")
+        part = "\n" + "  ".repeat(depth) + token;
+    } else if (token === ",") {
+      part += "\n" + "  ".repeat(depth);
+    } else if (token === ":") {
+      part += " ";
+    }
+    length += part.length;
+    if (length > MAX_FORMATTED_CHARS) return null;
+    parts.push(part);
+  }
+  return parts.join("");
+}
+
+// src/components/graph-workspace/explorer/publishedStructureArtifact.ts
+function publishedArtifactForFile(artifacts, path, checksum) {
+  if (!path || !checksum) return null;
+  const unique = /* @__PURE__ */ new Map();
+  for (const artifact of artifacts) if (!unique.has(artifact.id)) unique.set(artifact.id, artifact);
+  const published = [...unique.values()];
+  const match = published.findLast((artifact) => artifact.workspacePath === path && artifact.metadata?.checksum === checksum && artifact.metadata.objectId);
+  if (!match) return null;
+  const latest = published.findLast((artifact) => artifact.metadata?.objectId === match.metadata.objectId);
+  return latest?.metadata?.sourceRevision === match.metadata.sourceRevision ? match : null;
+}
+
 // src/components/graph-workspace/WorkspaceFileTabs.tsx
 import { Circle, FileCode2 as FileCode23, X as X3 } from "lucide-react";
 import { useEffect as useEffect8, useRef as useRef8, useState as useState8 } from "react";
@@ -4138,7 +4190,7 @@ function WorkspaceFileTabs({
 // src/components/graph-workspace/GraphWorkspacePreviewPane.tsx
 import { Fragment as Fragment6, jsx as jsx12, jsxs as jsxs10 } from "react/jsx-runtime";
 var GraphWorkspaceMonacoEditor = lazy(
-  () => import("./GraphWorkspaceMonacoEditor-S37E3RXZ.js")
+  () => import("./GraphWorkspaceMonacoEditor-SFSNTRXY.js")
 );
 var isHostFilePath = (path) => path.startsWith("/") || /^[a-z]:[\\/]/i.test(path);
 function fileSizeLabel(size) {
@@ -4237,7 +4289,7 @@ function translateReadOnly(reason) {
   const key = `files.safeReason.${reason}`;
   return Object.hasOwn(en, key) ? translate(key) : reason;
 }
-var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-6ATRGI4H.js"));
+var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-SWXN7IL4.js"));
 var SMALL_TEXT_FILE_MAX_BYTES = 50 * 1024;
 var SMALL_TEXT_FILE_MAX_LINES = 1e3;
 var MARKDOWN_EXTENSIONS = /* @__PURE__ */ new Set(["md", "markdown"]);
@@ -4574,6 +4626,7 @@ function MissingLinkedFile({ path }) {
 }
 function GraphWorkspacePreviewPane({
   activeFilePath,
+  artifacts = [],
   breadcrumbNode,
   dirtyFilePaths = /* @__PURE__ */ new Set(),
   error,
@@ -4611,7 +4664,7 @@ function GraphWorkspacePreviewPane({
   const { locale: i18nLocale } = useI18n();
   const filePanel = useFilePanel();
   const surfaceRef = useRef9(null);
-  const document2 = previewFile ? documents?.documents.get(previewFile.path) : void 0;
+  const document2 = selectedTarget?.kind === "workspace-file" && previewFile ? documents?.documents.get(previewFile.path) : void 0;
   const editing = document2?.editing ?? false;
   const draftContent = document2?.content ?? previewFile?.content ?? "";
   const saving = document2?.phase === "saving";
@@ -4629,6 +4682,8 @@ function GraphWorkspacePreviewPane({
   const [markdownView, setMarkdownView] = useState9(
     "preview"
   );
+  const [jsonView, setJsonView] = useState9("formatted");
+  const jsonPreviewId = useId();
   const [compactViewer, setCompactViewer] = useState9(
     () => typeof window === "undefined" || typeof window.matchMedia !== "function" || window.matchMedia("(max-width: 639px)").matches
   );
@@ -4642,13 +4697,36 @@ function GraphWorkspacePreviewPane({
     onToggleExpanded: () => void 0
   }) : null;
   const moleculeSnapshot = buildMoleculePreviewSnapshot(previewFile ?? null);
+  const fileArtifact = selectedTarget?.kind === "workspace-file" && moleculeSnapshot && previewFile && document2?.phase === "clean" && !document2.needsVerification ? publishedArtifactForFile(artifacts, previewFile.path, document2.snapshot.contentHash) : null;
+  const renderedFileArtifact = fileArtifact ? plugins.renderArtifact({
+    artifact: fileArtifact,
+    expanded: true,
+    presentation: "workspace",
+    onToggleExpanded: () => void 0
+  }) : null;
   const fileLanguage = previewFile?.language || languageForPath(previewFile?.path ?? "");
   const extension = previewFile ? extensionOf(previewFile.path) : "";
   const isMarkdownFile = MARKDOWN_EXTENSIONS.has(extension);
   const isDrawioFile = isDrawioPath(previewFile?.path ?? "");
+  const formattedJson = useMemo6(
+    () => selectedTarget?.kind === "workspace-file" && extension === "json" && previewFile && !previewFile.truncated && !editing ? formatJsonPreview(previewFile.content) : null,
+    [selectedTarget?.kind, extension, previewFile?.content, previewFile?.truncated, editing]
+  );
+  const jsonAlreadyFormatted = formattedJson !== null && formattedJson === previewFile?.content.trimEnd();
+  const activeJsonView = jsonAlreadyFormatted ? "formatted" : jsonView;
+  const showingFormattedJson = formattedJson !== null && activeJsonView === "formatted" && focusLine == null;
+  const previewContent = showingFormattedJson ? formattedJson : previewFile?.content ?? "";
+  const editorResourceKey = document2?.key ?? `${resourceScopeKey}:${previewFile?.path}`;
+  const previewResourceKey = showingFormattedJson ? JSON.stringify([editorResourceKey, "formatted-json", jsonPreviewId]) : editorResourceKey;
+  const eventContent = selectedTarget?.kind === "event" ? selectedTarget.node.detail ?? selectedTarget.node.preview ?? selectedTarget.node.name : null;
+  const eventPreviewContent = useMemo6(
+    () => eventContent === null ? null : focusLine == null ? formatJsonPreview(eventContent) ?? eventContent : eventContent,
+    [eventContent, focusLine]
+  );
+  const eventResourceKey = JSON.stringify([resourceScopeKey, "event-json", activeNode?.id, activeNode?.path, jsonPreviewId]);
   const renderedViewLabel = isDrawioFile ? translate("files.diagram") : "Markdown";
   const title = previewTargetTitle(selectedTarget);
-  const canEditFile = Boolean(previewFile && canSaveDocument && document2 && !document2.snapshot.readOnlyReason && document2.snapshot.contentHash) && !(previewFile && MOLECULAR_EXTENSIONS.has(extension)) && isSmallEditableTextFile(previewFile);
+  const canEditFile = selectedTarget?.kind === "workspace-file" && Boolean(previewFile && canSaveDocument && document2 && !document2.snapshot.readOnlyReason && document2.snapshot.contentHash) && !(previewFile && MOLECULAR_EXTENSIONS.has(extension)) && isSmallEditableTextFile(previewFile);
   const isLiveArtifactPreview = selectedTarget?.kind === "live-molecule";
   const isArtifactPreview = Boolean(activeNode?.artifact && renderedArtifact);
   const isMoleculePreview = Boolean(moleculeSnapshot) || isArtifactPreview;
@@ -4681,10 +4759,11 @@ function GraphWorkspacePreviewPane({
   }, []);
   useEffect9(() => {
     setMarkdownView("preview");
+    setJsonView("formatted");
     setShowConflict(true);
     setDiffMode("draftDisk");
     setActionsOpen(false);
-  }, [activeNode?.path]);
+  }, [activeNode?.path, resourceScopeKey]);
   useEffect9(() => {
     if (!actionsOpen) return;
     const escape = (event) => {
@@ -4700,7 +4779,7 @@ function GraphWorkspacePreviewPane({
   async function handleSaveFile() {
     if (previewFile) await documents?.save(previewFile.path);
   }
-  const fileToolbar = previewFile && (isMarkdownFile || isDrawioFile || canEditFile) ? /* @__PURE__ */ jsxs10("div", { className: "flex shrink-0 items-center gap-1", children: [
+  const fileToolbar = selectedTarget?.kind === "workspace-file" && previewFile && (isMarkdownFile || isDrawioFile || canEditFile) ? /* @__PURE__ */ jsxs10("div", { className: "flex shrink-0 items-center gap-1", children: [
     (isMarkdownFile || isDrawioFile) && !editing ? /* @__PURE__ */ jsx12("button", { type: "button", className: "thread-graph-editor-toolbar-button workspace-mobile-view-toggle", "aria-label": translate(markdownView === "preview" ? "files.source" : "files.preview", { value1: renderedViewLabel }), title: translate(markdownView === "preview" ? "files.source" : "files.preview", { value1: renderedViewLabel }), onClick: () => setMarkdownView((view) => view === "preview" ? "source" : "preview"), children: markdownView === "preview" ? /* @__PURE__ */ jsx12(Code2, { "data-icon": "source", size: 16 }) : /* @__PURE__ */ jsx12(BookOpen, { "data-icon": "preview", size: 16 }) }) : null,
     canEditFile ? /* @__PURE__ */ jsx12("div", { className: "flex shrink-0 items-center gap-0.5", children: editing ? /* @__PURE__ */ jsxs10(Fragment6, { children: [
       /* @__PURE__ */ jsx12(
@@ -4852,7 +4931,7 @@ function GraphWorkspacePreviewPane({
             /* @__PURE__ */ jsx12("span", { className: "min-w-0 flex-1", children: translateReadOnly(error) }),
             onDownloadFile && selectedTarget?.kind === "workspace-file" ? /* @__PURE__ */ jsx12(AlertDownloadButton, { name: selectedTarget.node.name, onDownload: onDownloadFile }) : null
           ] }) : null,
-          !selectedTarget && missingPath ? /* @__PURE__ */ jsx12(MissingLinkedFile, { path: missingPath }) : !selectedTarget ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center px-5 text-center text-sm text-slate-400 dark:text-slate-500", children: translate("files.pickALiveMoleculeWorkspaceFileArtifact") }) : selectedTarget.kind === "workspace-file" && previewLoading ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center px-5 text-center text-sm text-slate-400 dark:text-slate-500", children: translate("files.loadingFilePreview") }) : selectedTarget.kind === "workspace-file" && downloadOnly ? /* @__PURE__ */ jsx12(DownloadFilePreview, { node: selectedTarget.node, onDownload: onDownloadFile, ...downloadReason ? { readOnlyReason: downloadReason } : activeFilePath && documents?.documents.get(activeFilePath)?.snapshot.readOnlyReason ? { readOnlyReason: documents.documents.get(activeFilePath).snapshot.readOnlyReason } : {} }, selectedTarget.node.path) : selectedTarget.kind === "workspace-file" && moleculeSnapshot ? /* @__PURE__ */ jsx12("div", { className: "thread-graph-molecule-preview min-h-0 flex-1 overflow-hidden", children: /* @__PURE__ */ jsx12(
+          !selectedTarget && missingPath ? /* @__PURE__ */ jsx12(MissingLinkedFile, { path: missingPath }) : !selectedTarget ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center px-5 text-center text-sm text-slate-400 dark:text-slate-500", children: translate("files.pickALiveMoleculeWorkspaceFileArtifact") }) : selectedTarget.kind === "workspace-file" && previewLoading ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center px-5 text-center text-sm text-slate-400 dark:text-slate-500", children: translate("files.loadingFilePreview") }) : selectedTarget.kind === "workspace-file" && downloadOnly ? /* @__PURE__ */ jsx12(DownloadFilePreview, { node: selectedTarget.node, onDownload: onDownloadFile, ...downloadReason ? { readOnlyReason: downloadReason } : activeFilePath && documents?.documents.get(activeFilePath)?.snapshot.readOnlyReason ? { readOnlyReason: documents.documents.get(activeFilePath).snapshot.readOnlyReason } : {} }, selectedTarget.node.path) : selectedTarget.kind === "workspace-file" && moleculeSnapshot ? /* @__PURE__ */ jsx12("div", { className: "thread-graph-molecule-preview min-h-0 flex-1 overflow-hidden", children: renderedFileArtifact ?? /* @__PURE__ */ jsx12(
             GraphMoleculeViewer,
             {
               source: moleculeSnapshot,
@@ -4860,6 +4939,28 @@ function GraphWorkspacePreviewPane({
               title: selectedTarget.node.name
             }
           ) }) : selectedTarget.kind === "workspace-file" && imageUrl ? /* @__PURE__ */ jsx12(WorkspaceImagePreview, { src: imageUrl, alt: selectedTarget.node.path || selectedTarget.node.name }, imageUrl) : selectedTarget.kind === "workspace-file" && pdfUrl ? /* @__PURE__ */ jsx12(WorkspacePdfPreview, { src: pdfUrl, node: selectedTarget.node }, pdfUrl) : selectedTarget.kind === "workspace-file" && previewFile ? /* @__PURE__ */ jsxs10("div", { className: "flex min-h-0 flex-1 flex-col", children: [
+            formattedJson !== null && focusLine == null ? /* @__PURE__ */ jsxs10("div", { className: "workspace-json-view-toolbar", children: [
+              /* @__PURE__ */ jsx12("div", { className: "workspace-json-view-toggle rounded", role: "group", "aria-label": translate("files.jsonView"), children: ["formatted", "raw"].map((view) => /* @__PURE__ */ jsx12(
+                "button",
+                {
+                  type: "button",
+                  "aria-pressed": activeJsonView === view,
+                  "aria-disabled": view === "raw" && jsonAlreadyFormatted ? true : void 0,
+                  "aria-describedby": view === "raw" && jsonAlreadyFormatted ? `${jsonPreviewId}-formatted-status` : void 0,
+                  title: view === "raw" && jsonAlreadyFormatted ? translate("files.jsonRawAlreadyFormatted") : void 0,
+                  className: "rounded",
+                  onClick: () => {
+                    if (view !== "raw" || !jsonAlreadyFormatted) setJsonView(view);
+                  },
+                  children: translate(view === "formatted" ? "files.jsonFormatted" : "files.jsonRaw")
+                },
+                view
+              )) }),
+              jsonAlreadyFormatted ? /* @__PURE__ */ jsxs10("span", { id: `${jsonPreviewId}-formatted-status`, className: "workspace-json-formatted-status", children: [
+                /* @__PURE__ */ jsx12(Check3, { size: 13, "aria-hidden": "true" }),
+                translate("files.jsonAlreadyFormatted")
+              ] }) : null
+            ] }) : null,
             document2 && (document2.snapshot.readOnlyReason || ["conflict", "unknown", "error"].includes(document2.phase)) ? /* @__PURE__ */ jsxs10("div", { className: "workspace-document-status", role: "status", children: [
               /* @__PURE__ */ jsxs10("span", { children: [
                 document2.snapshot.readOnlyReason ? translate("files.safeReadOnly", { reason: translateReadOnly(document2.snapshot.readOnlyReason) }) : translate(document2.needsVerification && document2.phase === "clean" ? "files.safeAdoptedSnapshot" : `files.safePhase.${document2.phase}`),
@@ -4944,7 +5045,7 @@ function GraphWorkspacePreviewPane({
             ) : compactViewer ? /* @__PURE__ */ jsx12(
               GraphWorkspaceCodePreview,
               {
-                content: previewFile.content,
+                content: previewContent,
                 focusLine,
                 language: fileLanguage
               }
@@ -4955,18 +5056,17 @@ function GraphWorkspacePreviewPane({
                 children: /* @__PURE__ */ jsx12(
                   GraphWorkspaceMonacoEditor,
                   {
-                    resourceKey: document2?.key ?? `${resourceScopeKey}:${previewFile.path}`,
-                    retainModel: Boolean(document2),
-                    content: editing ? draftContent : previewFile.content,
+                    resourceKey: previewResourceKey,
+                    retainModel: Boolean(document2) && !showingFormattedJson,
+                    content: editing ? draftContent : previewContent,
                     dark,
                     focusLine,
                     language: fileLanguage,
-                    onChange: setDraftContent,
-                    onSave: () => void handleSaveFile(),
+                    ...editing ? { onChange: setDraftContent, onSave: () => void handleSaveFile() } : {},
                     path: previewFile.path,
                     readOnly: !editing
                   },
-                  document2?.key ?? `${resourceScopeKey}:${previewFile.path}`
+                  previewResourceKey
                 )
               }
             ),
@@ -4989,13 +5089,25 @@ function GraphWorkspacePreviewPane({
               className: isMoleculePreview || isLiveArtifactPreview ? "min-h-0 flex-1 overflow-hidden" : "min-h-0 flex-1 overflow-auto p-3",
               children: renderedArtifact
             }
-          ) : selectedTarget.kind === "meta" ? /* @__PURE__ */ jsx12("div", { className: "min-h-0 flex-1 overflow-auto p-3", children: /* @__PURE__ */ jsx12("div", { className: "grid gap-3", children: /* @__PURE__ */ jsx12(WorkspaceInfoCard, { label: translate("files.workspaceData"), children: /* @__PURE__ */ jsx12(
+          ) : selectedTarget.kind === "event" ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 flex-col", children: compactViewer ? /* @__PURE__ */ jsx12(GraphWorkspaceCodePreview, { content: eventPreviewContent ?? "", language: "json", focusLine }) : /* @__PURE__ */ jsx12(Suspense, { fallback: /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center text-sm text-[var(--theme-fg-muted)]", children: translate("files.loadingEditor") }), children: /* @__PURE__ */ jsx12(
+            GraphWorkspaceMonacoEditor,
+            {
+              resourceKey: eventResourceKey,
+              content: eventPreviewContent ?? "",
+              dark,
+              focusLine,
+              language: "json",
+              path: selectedTarget.node.path,
+              readOnly: true
+            },
+            eventResourceKey
+          ) }) }) : selectedTarget.kind === "meta" ? /* @__PURE__ */ jsx12("div", { className: "min-h-0 flex-1 overflow-auto p-3", children: /* @__PURE__ */ jsx12("div", { className: "grid gap-3", children: /* @__PURE__ */ jsx12(WorkspaceInfoCard, { label: translate("files.workspaceData"), children: /* @__PURE__ */ jsx12(
             GraphWorkspaceCodePreview,
             {
               content: selectedTarget.node.detail ?? ""
             }
           ) }) }) }) : /* @__PURE__ */ jsxs10("div", { className: "flex min-h-0 flex-1 flex-col", children: [
-            selectedTarget.kind !== "event" && /* @__PURE__ */ jsx12("div", { className: "thread-graph-file-preview-header border-b px-4 py-3 text-xs uppercase tracking-[0.12em]", children: selectedTarget.node.kind }),
+            /* @__PURE__ */ jsx12("div", { className: "thread-graph-file-preview-header border-b px-4 py-3 text-xs uppercase tracking-[0.12em]", children: selectedTarget.node.kind }),
             /* @__PURE__ */ jsx12(
               GraphWorkspaceCodePreview,
               {
@@ -5614,6 +5726,7 @@ function GraphWorkspaceExplorer({
   const viewerPanel = /* @__PURE__ */ jsx14(
     GraphWorkspacePreviewPane,
     {
+      artifacts,
       mobileNavigation: isMobileViewport,
       readingPositions,
       ...navigation.index > 0 ? { onNavigateBack: () => navigatePreview(-1), previousFilePath: navigation.paths[navigation.index - 1] } : {},

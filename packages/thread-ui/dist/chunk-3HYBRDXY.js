@@ -1,6 +1,6 @@
 import {
   extensionOf
-} from "./chunk-RZJR24UV.js";
+} from "./chunk-YGD5SHY7.js";
 
 // src/components/graph-workspace/explorer/filePreviewPolicy.ts
 var DRAWIO_MAX_BYTES = 8 * 1024 * 1024;

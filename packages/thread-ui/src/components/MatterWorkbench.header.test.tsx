@@ -205,6 +205,96 @@ describe('opt-in selected thread header', () => {
   });
 });
 
+describe('single desktop header', () => {
+  beforeEach(() => { options = { ...base, workspaceThreads: base.threads, threadHeader: { ...base.threadHeader!, status: 'Idle', singleRow: true } }; });
+
+  it('renders one 44px row with the full selected title, status and existing tools, while keeping sidebar conversations', () => {
+    render({ title: 'Estructural 2026-11-12 08:41 EST' });
+    expect(host.querySelector('.matter-tabs-row, .matter-thread-tabs')).toBeNull();
+    expect(host.querySelectorAll('.matter-main > header')).toHaveLength(1);
+    expect(header().style.height).toBe('44px');
+    expect(header().style.flexWrap).toBe('nowrap');
+    expect(header().querySelector('h1')?.textContent).toBe('Estructural 2026-11-12 08:41 EST');
+    expect(header().querySelector('[role="status"]')?.textContent).toBe('Idle');
+    const sidebar = host.querySelector('.matter-sidebar')!;
+    expect(sidebar.querySelector('a[href="/threads/a"]')).not.toBeNull();
+    const other = sidebar.querySelector<HTMLAnchorElement>('a[href="/threads/b"]')!;
+    act(() => other.click()); expect(base.onNavigate).toHaveBeenCalled();
+    act(() => header().querySelector<HTMLButtonElement>('[aria-label="Files"]')!.click());
+    expect(host.querySelector('.matter-explorer')).not.toBeNull();
+    act(() => more().click()); act(() => menuItem('Tool Usage').click());
+    expect(usage).toHaveBeenCalledOnce();
+  });
+
+  it('moves the sidebar toggle and history navigation into the same row when collapsed and restores the sidebar', () => {
+    render();
+    act(() => host.querySelector<SVGElement>('.matter-sidebar [data-icon="sidebar"]')!.closest('button')!.click());
+    expect(host.querySelector('.matter-workbench')?.classList.contains('is-sidebar-hidden')).toBe(true);
+    const toggle = header().querySelector<SVGElement>('[data-icon="sidebar"]')!.closest('button')!;
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.getAttribute('aria-label')).toBeTruthy();
+    const back = vi.spyOn(history, 'back').mockImplementation(() => {});
+    const forward = vi.spyOn(history, 'forward').mockImplementation(() => {});
+    act(() => header().querySelector<SVGElement>('[data-icon="back"]')!.closest('button')!.click());
+    act(() => header().querySelector<SVGElement>('[data-icon="forward"]')!.closest('button')!.click());
+    expect(back).toHaveBeenCalledOnce(); expect(forward).toHaveBeenCalledOnce();
+    act(() => toggle.click());
+    expect(host.querySelector('.matter-workbench')?.classList.contains('is-sidebar-hidden')).toBe(false);
+    expect(header().querySelector('[data-icon="sidebar"]')).toBeNull();
+    back.mockRestore(); forward.mockRestore();
+  });
+
+  it('retains the search button and Ctrl/Cmd+F without a tab row', () => {
+    render();
+    const search = header().querySelector<HTMLButtonElement>('.matter-search-trigger')!;
+    expect(search.getAttribute('aria-label')).toBe('Search conversation');
+    act(() => search.click()); expect(base.onSearch).toHaveBeenCalledOnce();
+    for (const modifier of ['ctrlKey', 'metaKey']) {
+      const event = new KeyboardEvent('keydown', { key: 'f', [modifier]: true, bubbles: true, cancelable: true });
+      act(() => window.dispatchEvent(event)); expect(event.defaultPrevented).toBe(true);
+    }
+    expect(base.onSearch).toHaveBeenCalledTimes(3);
+  });
+
+  it('mounts the existing host search once in the summary, preserves its state and focuses/selects its input on Ctrl+F', () => {
+    function SearchSlot() {
+      const [value, setValue] = useState('molecule');
+      return <div className="workbench-search is-open"><input aria-label="Find in conversation" value={value} onChange={e => setValue(e.target.value)} /><button aria-label="Close search" onClick={() => { options = { ...options, searchOpen: false, search: undefined }; render(); }}>Close</button></div>;
+    }
+    options = { ...options, searchOpen: true, search: <SearchSlot /> }; render();
+    const field = header().querySelector<HTMLInputElement>('input')!;
+    expect(host.querySelectorAll('.workbench-search')).toHaveLength(1);
+    expect(field.closest('.matter-thread-header-summary')).not.toBeNull();
+    render({ title: 'Updated title' }); expect(header().querySelector('input')).toBe(field);
+    act(() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'f', ctrlKey: true, bubbles: true })));
+    expect(document.activeElement).toBe(field);
+    expect(field.selectionStart).toBe(0); expect(field.selectionEnd).toBe('molecule'.length);
+    expect(base.onSearch).not.toHaveBeenCalled();
+    act(() => header().querySelector<HTMLButtonElement>('[aria-label="Close search"]')!.click());
+    expect(header().querySelector('input')).toBeNull();
+    expect(header().querySelector('h1')?.textContent).toBe('Thread a');
+    expect(header().querySelector('.matter-search-trigger')).not.toBeNull();
+  });
+
+  it('omits desktop header and tabs in an empty workspace while leaving sidebar navigation available', () => {
+    options = { ...options, emptyWorkspace: true }; render();
+    expect(host.querySelector('.matter-tabs-row, .matter-thread-header')).toBeNull();
+    expect(host.querySelector('.matter-sidebar [data-icon="sidebar"]')).not.toBeNull();
+  });
+
+  it('keeps the phone header, dock and conversations sheet accessible', () => {
+    vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }));
+    render();
+    expect(header().hasAttribute('data-single-row')).toBe(false);
+    expect(header().style.height).toBe('');
+    expect(host.querySelector('.matter-phone-dock')).not.toBeNull();
+    const threads = host.querySelector<HTMLButtonElement>('.matter-phone-thread');
+    expect(threads).not.toBeNull();
+    act(() => threads!.click());
+    expect(host.querySelector('.matter-phone-sheet a[href="/threads/a"]')).not.toBeNull();
+  });
+});
+
 describe('global settings portal', () => {
   it('finds a host slot rendered after the workbench on initial mount and opens existing settings', () => {
     options.settingsPortalTargetId = 'chat-appearance-settings'; render({ slot: true });
