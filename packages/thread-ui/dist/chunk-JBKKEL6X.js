@@ -1,6 +1,6 @@
 import {
   translate
-} from "./chunk-JC5AJQQD.js";
+} from "./chunk-KBMR4E3X.js";
 
 // src/components/themeHooks.ts
 import { useSyncExternalStore } from "react";
