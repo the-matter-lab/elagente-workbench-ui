@@ -615,8 +615,12 @@ interface MatterWorkbenchOptions {
         closeNavigation: () => void;
     }) => ReactNode;
     panels?: WorkbenchPanelsOptions;
-    /** Opt-in thread toolbar below the tabs. Lifecycle belongs to the host. */
+    /** Opt-in thread toolbar. Lifecycle belongs to the host. */
     threadHeader?: {
+        /** Desktop: replace the tab row with one 44px header. Search and collapsed
+            sidebar navigation stay in this row; phone navigation is unchanged.
+            Empty workspaces omit both rows. Defaults to false. */
+        singleRow?: boolean;
         status: string;
         /** Optional hover/focus explanation for the lifecycle pill. */
         statusDescription?: string;

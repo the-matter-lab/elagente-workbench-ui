@@ -7,7 +7,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../graph-ui/Tooltip';
 
 /** Opt-in host chrome. The second menu keeps all existing host actions mounted,
  * including dialogs and compute panels, behind Save & export. */
-export function ThreadHeader({ header, title, threadKey, explorerOpen, onToggleExplorer, options, actions }: {
+export function ThreadHeader({ header, title, threadKey, explorerOpen, onToggleExplorer, options, actions,
+  singleRow = false, navigation, search, indicators }: {
   header: NonNullable<MatterWorkbenchOptions['threadHeader']>;
   title: string;
   threadKey: string;
@@ -15,6 +16,10 @@ export function ThreadHeader({ header, title, threadKey, explorerOpen, onToggleE
   onToggleExplorer: () => void;
   options: MatterWorkbenchOptions;
   actions: ReactNode;
+  singleRow?: boolean;
+  navigation?: ReactNode;
+  search?: ReactNode;
+  indicators?: ReactNode;
 }) {
   useI18n();
   const id = useId();
@@ -27,8 +32,12 @@ export function ThreadHeader({ header, title, threadKey, explorerOpen, onToggleE
   const moreLabel = translate('workbench.moreActions');
   const lifecycle = <span className="matter-thread-lifecycle" data-tone={header.tone} role="status"
     tabIndex={header.statusDescription ? 0 : undefined}>{header.status}</span>;
-  return <header className="matter-thread-header" aria-label={translate('workbench.selectedThread')}>
-    <div className="matter-thread-header-summary">
+  return <header className="matter-thread-header" aria-label={translate('workbench.selectedThread')}
+    data-single-row={singleRow || undefined}
+    style={singleRow ? { height: 44, boxSizing: 'border-box', flexWrap: 'nowrap', padding: '6px 16px' } : undefined}>
+    {navigation}
+    <div className={`matter-thread-header-summary${singleRow ? ' matter-tabs-main' : ''}`}>
+      {search}
       <h1 className="matter-thread-header-title" title={title}>{title}</h1>
       {header.statusDescription ? (
         <Tooltip delayDuration={180}>
@@ -41,6 +50,7 @@ export function ThreadHeader({ header, title, threadKey, explorerOpen, onToggleE
       ) : lifecycle}
     </div>
     <div className="matter-thread-header-actions">
+      {indicators}
       <button type="button" aria-label={translate('workbench.files')} aria-pressed={explorerOpen} aria-expanded={explorerOpen}
         disabled={disabled} onClick={onToggleExplorer}>
         <FolderOpen data-icon="explorer" aria-hidden="true" /><span>{translate('workbench.files')}</span>

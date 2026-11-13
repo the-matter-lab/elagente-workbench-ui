@@ -10503,7 +10503,19 @@ function ThreadToolsMenu({ id, open, anchorRef, path, title, favorite, favoriteB
 import { useEffect as useEffect19, useId as useId5, useRef as useRef22, useState as useState29 } from "react";
 import { ChartNoAxesColumn, FolderOpen as FolderOpen3, MoreHorizontal as MoreHorizontal2, Share } from "lucide-react";
 import { jsx as jsx46, jsxs as jsxs40 } from "react/jsx-runtime";
-function ThreadHeader({ header, title, threadKey, explorerOpen, onToggleExplorer, options, actions }) {
+function ThreadHeader({
+  header,
+  title,
+  threadKey,
+  explorerOpen,
+  onToggleExplorer,
+  options,
+  actions,
+  singleRow = false,
+  navigation,
+  search: search2,
+  indicators
+}) {
   useI18n();
   const id = useId5();
   const toggle = useRef22(null);
@@ -10528,120 +10540,132 @@ function ThreadHeader({ header, title, threadKey, explorerOpen, onToggleExplorer
       children: header.status
     }
   );
-  return /* @__PURE__ */ jsxs40("header", { className: "matter-thread-header", "aria-label": translate("workbench.selectedThread"), children: [
-    /* @__PURE__ */ jsxs40("div", { className: "matter-thread-header-summary", children: [
-      /* @__PURE__ */ jsx46("h1", { className: "matter-thread-header-title", title, children: title }),
-      header.statusDescription ? /* @__PURE__ */ jsxs40(Tooltip, { delayDuration: 180, children: [
-        /* @__PURE__ */ jsx46(TooltipTrigger, { asChild: true, children: lifecycle }),
-        /* @__PURE__ */ jsx46(
-          TooltipContent,
+  return /* @__PURE__ */ jsxs40(
+    "header",
+    {
+      className: "matter-thread-header",
+      "aria-label": translate("workbench.selectedThread"),
+      "data-single-row": singleRow || void 0,
+      style: singleRow ? { height: 44, boxSizing: "border-box", flexWrap: "nowrap", padding: "6px 16px" } : void 0,
+      children: [
+        navigation,
+        /* @__PURE__ */ jsxs40("div", { className: `matter-thread-header-summary${singleRow ? " matter-tabs-main" : ""}`, children: [
+          search2,
+          /* @__PURE__ */ jsx46("h1", { className: "matter-thread-header-title", title, children: title }),
+          header.statusDescription ? /* @__PURE__ */ jsxs40(Tooltip, { delayDuration: 180, children: [
+            /* @__PURE__ */ jsx46(TooltipTrigger, { asChild: true, children: lifecycle }),
+            /* @__PURE__ */ jsx46(
+              TooltipContent,
+              {
+                side: "bottom",
+                align: "start",
+                sideOffset: 6,
+                collisionPadding: 12,
+                className: "matter-thread-lifecycle-tooltip max-w-xs",
+                children: header.statusDescription
+              }
+            )
+          ] }) : lifecycle
+        ] }),
+        /* @__PURE__ */ jsxs40("div", { className: "matter-thread-header-actions", children: [
+          indicators,
+          /* @__PURE__ */ jsxs40(
+            "button",
+            {
+              type: "button",
+              "aria-label": translate("workbench.files"),
+              "aria-pressed": explorerOpen,
+              "aria-expanded": explorerOpen,
+              disabled,
+              onClick: onToggleExplorer,
+              children: [
+                /* @__PURE__ */ jsx46(FolderOpen3, { "data-icon": "explorer", "aria-hidden": "true" }),
+                /* @__PURE__ */ jsx46("span", { children: translate("workbench.files") })
+              ]
+            }
+          ),
+          /* @__PURE__ */ jsx46(
+            "button",
+            {
+              ref: toggle,
+              type: "button",
+              "aria-label": moreLabel,
+              title: moreLabel,
+              "aria-haspopup": "menu",
+              "aria-controls": `${id}-${actionsOpen ? "actions" : "more"}`,
+              "aria-expanded": moreOpen || actionsOpen,
+              disabled,
+              onClick: () => {
+                if (actionsOpen) setActionsOpen(false);
+                else setMoreOpen((open) => !open);
+              },
+              onKeyDown: (event) => {
+                if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+                  event.preventDefault();
+                  setMoreOpen(true);
+                  setActionsOpen(false);
+                }
+              },
+              children: /* @__PURE__ */ jsx46(MoreHorizontal2, { "data-icon": "more", "aria-hidden": "true" })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs40(
+          ThreadToolsMenu,
           {
-            side: "bottom",
-            align: "start",
-            sideOffset: 6,
-            collisionPadding: 12,
-            className: "matter-thread-lifecycle-tooltip max-w-xs",
-            children: header.statusDescription
+            id: `${id}-more`,
+            open: moreOpen && !disabled,
+            anchorRef: toggle,
+            path: "",
+            title,
+            favorite: false,
+            showHeader: false,
+            label: moreLabel,
+            onClose: (restore) => {
+              setMoreOpen(false);
+              restoreFocus(restore);
+            },
+            children: [
+              /* @__PURE__ */ jsxs40("button", { type: "button", role: "menuitem", onClick: () => {
+                setMoreOpen(false);
+                if (header.onSaveExport) header.onSaveExport();
+                else setActionsOpen(true);
+              }, children: [
+                /* @__PURE__ */ jsx46(Share, { "aria-hidden": "true" }),
+                /* @__PURE__ */ jsx46("span", { children: translate("workbench.saveExport") })
+              ] }),
+              /* @__PURE__ */ jsxs40("button", { type: "button", role: "menuitem", disabled: !header.onOpenToolUsage, onClick: () => {
+                setMoreOpen(false);
+                header.onOpenToolUsage?.();
+              }, children: [
+                /* @__PURE__ */ jsx46(ChartNoAxesColumn, { "aria-hidden": "true" }),
+                /* @__PURE__ */ jsx46("span", { children: translate("workbench.toolUsage") })
+              ] })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsx46(
+          ThreadToolsMenu,
+          {
+            id: `${id}-actions`,
+            open: actionsOpen && !disabled,
+            anchorRef: toggle,
+            path: options.workspacePath,
+            title,
+            favorite: options.favorite,
+            favoriteBusy: options.favoriteBusy,
+            onToggleFavorite: options.showShortcuts === false ? void 0 : options.onToggleFavorite,
+            panels: options.statusActions,
+            onClose: (restore) => {
+              setActionsOpen(false);
+              restoreFocus(restore);
+            },
+            children: actions
           }
         )
-      ] }) : lifecycle
-    ] }),
-    /* @__PURE__ */ jsxs40("div", { className: "matter-thread-header-actions", children: [
-      /* @__PURE__ */ jsxs40(
-        "button",
-        {
-          type: "button",
-          "aria-label": translate("workbench.files"),
-          "aria-pressed": explorerOpen,
-          "aria-expanded": explorerOpen,
-          disabled,
-          onClick: onToggleExplorer,
-          children: [
-            /* @__PURE__ */ jsx46(FolderOpen3, { "data-icon": "explorer", "aria-hidden": "true" }),
-            /* @__PURE__ */ jsx46("span", { children: translate("workbench.files") })
-          ]
-        }
-      ),
-      /* @__PURE__ */ jsx46(
-        "button",
-        {
-          ref: toggle,
-          type: "button",
-          "aria-label": moreLabel,
-          title: moreLabel,
-          "aria-haspopup": "menu",
-          "aria-controls": `${id}-${actionsOpen ? "actions" : "more"}`,
-          "aria-expanded": moreOpen || actionsOpen,
-          disabled,
-          onClick: () => {
-            if (actionsOpen) setActionsOpen(false);
-            else setMoreOpen((open) => !open);
-          },
-          onKeyDown: (event) => {
-            if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-              event.preventDefault();
-              setMoreOpen(true);
-              setActionsOpen(false);
-            }
-          },
-          children: /* @__PURE__ */ jsx46(MoreHorizontal2, { "data-icon": "more", "aria-hidden": "true" })
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsxs40(
-      ThreadToolsMenu,
-      {
-        id: `${id}-more`,
-        open: moreOpen && !disabled,
-        anchorRef: toggle,
-        path: "",
-        title,
-        favorite: false,
-        showHeader: false,
-        label: moreLabel,
-        onClose: (restore) => {
-          setMoreOpen(false);
-          restoreFocus(restore);
-        },
-        children: [
-          /* @__PURE__ */ jsxs40("button", { type: "button", role: "menuitem", onClick: () => {
-            setMoreOpen(false);
-            if (header.onSaveExport) header.onSaveExport();
-            else setActionsOpen(true);
-          }, children: [
-            /* @__PURE__ */ jsx46(Share, { "aria-hidden": "true" }),
-            /* @__PURE__ */ jsx46("span", { children: translate("workbench.saveExport") })
-          ] }),
-          /* @__PURE__ */ jsxs40("button", { type: "button", role: "menuitem", disabled: !header.onOpenToolUsage, onClick: () => {
-            setMoreOpen(false);
-            header.onOpenToolUsage?.();
-          }, children: [
-            /* @__PURE__ */ jsx46(ChartNoAxesColumn, { "aria-hidden": "true" }),
-            /* @__PURE__ */ jsx46("span", { children: translate("workbench.toolUsage") })
-          ] })
-        ]
-      }
-    ),
-    /* @__PURE__ */ jsx46(
-      ThreadToolsMenu,
-      {
-        id: `${id}-actions`,
-        open: actionsOpen && !disabled,
-        anchorRef: toggle,
-        path: options.workspacePath,
-        title,
-        favorite: options.favorite,
-        favoriteBusy: options.favoriteBusy,
-        onToggleFavorite: options.showShortcuts === false ? void 0 : options.onToggleFavorite,
-        panels: options.statusActions,
-        onClose: (restore) => {
-          setActionsOpen(false);
-          restoreFocus(restore);
-        },
-        children: actions
-      }
-    )
-  ] });
+      ]
+    }
+  );
 }
 
 // src/components/MatterWorkbench.tsx
@@ -11421,6 +11445,7 @@ function MatterWorkbench({
   const drawerTools = useThemeFeature("workbench.phoneDrawerTools") && mobile;
   const shellNav = useAppShellNav();
   const dock = mobile && (shellNav?.phoneDock ?? true);
+  const singleRowHeader = !mobile && Boolean(o.threadHeader?.singleRow);
   const leftHanded = dock && shellNav?.phoneHand === "left";
   const openThreadMap = shellNav?.openThreadMap;
   const [threadsOpen, setThreadsOpen] = useState33(false);
@@ -11807,21 +11832,30 @@ function MatterWorkbench({
   const attention2 = (thread) => thread.status === "running" ? 0 : thread.status === "unread" || thread.status === "failed" ? 1 : 2;
   const currentRootKey = tabs.find((thread) => thread.key === o.currentKey)?.rootKey ?? o.currentKey;
   const inCurrentGroup = (thread) => thread.key === o.currentKey || thread.key === currentRootKey || thread.rootKey === currentRootKey;
-  const navStrip = /* @__PURE__ */ jsxs44("div", { className: "matter-nav-strip", role: "group", "aria-label": translate("workbench.pageNavigation"), children: [
-    /* @__PURE__ */ jsx50(
-      "button",
-      {
-        "aria-label": translate("workbench.toggleShortcutsSidebar"),
-        "aria-expanded": !sidebarHidden,
-        title: translate("workbench.toggleShortcutsSidebar"),
-        onClick: () => setSidebarHidden(!sidebarHidden),
-        children: /* @__PURE__ */ jsx50(PanelLeft, { "data-icon": "sidebar" })
-      }
-    ),
-    /* @__PURE__ */ jsx50("button", { "aria-label": translate("workbench.goBack"), title: translate("workbench.goBack"), onClick: () => history.back(), children: /* @__PURE__ */ jsx50(ArrowLeft, { "data-icon": "back" }) }),
-    /* @__PURE__ */ jsx50("button", { "data-action": "go-forward", "aria-label": translate("workbench.goForward"), title: translate("workbench.goForward"), onClick: () => history.forward(), children: /* @__PURE__ */ jsx50(ArrowRight, { "data-icon": "forward" }) }),
-    homeHref && /* @__PURE__ */ jsx50("a", { href: homeHref, onClick: goHome, "aria-label": translate("workbench.backToWorkspaces"), title: translate("workbench.workspaces"), children: /* @__PURE__ */ jsx50(Home, { "data-icon": "home" }) })
-  ] });
+  const navStrip = /* @__PURE__ */ jsxs44(
+    "div",
+    {
+      className: "matter-nav-strip",
+      role: "group",
+      "aria-label": translate("workbench.pageNavigation"),
+      style: singleRowHeader && sidebarHidden ? { height: 30, borderBottom: 0, padding: 0 } : void 0,
+      children: [
+        /* @__PURE__ */ jsx50(
+          "button",
+          {
+            "aria-label": translate("workbench.toggleShortcutsSidebar"),
+            "aria-expanded": !sidebarHidden,
+            title: translate("workbench.toggleShortcutsSidebar"),
+            onClick: () => setSidebarHidden(!sidebarHidden),
+            children: /* @__PURE__ */ jsx50(PanelLeft, { "data-icon": "sidebar" })
+          }
+        ),
+        /* @__PURE__ */ jsx50("button", { "aria-label": translate("workbench.goBack"), title: translate("workbench.goBack"), onClick: () => history.back(), children: /* @__PURE__ */ jsx50(ArrowLeft, { "data-icon": "back" }) }),
+        /* @__PURE__ */ jsx50("button", { "data-action": "go-forward", "aria-label": translate("workbench.goForward"), title: translate("workbench.goForward"), onClick: () => history.forward(), children: /* @__PURE__ */ jsx50(ArrowRight, { "data-icon": "forward" }) }),
+        homeHref && /* @__PURE__ */ jsx50("a", { href: homeHref, onClick: goHome, "aria-label": translate("workbench.backToWorkspaces"), title: translate("workbench.workspaces"), children: /* @__PURE__ */ jsx50(Home, { "data-icon": "home" }) })
+      ]
+    }
+  );
   const [contextMenu, setContextMenu] = useState33(null);
   const openThreadMenuAt = (thread, x, y, returnFocus) => {
     setContextMenu({ thread, x, y, ...returnFocus ? { returnFocus } : {}, id: Date.now() });
@@ -12291,7 +12325,7 @@ ${thread.subtitle} \xB7 ${activity.label}`,
               }
             }
           ),
-          !dock && /* @__PURE__ */ jsxs44("div", { className: "matter-tabs-row", children: [
+          !dock && !singleRowHeader && /* @__PURE__ */ jsxs44("div", { className: "matter-tabs-row", children: [
             !mobile && sidebarHidden && navStrip,
             /* @__PURE__ */ jsxs44("div", { className: "matter-tabs-main", children: [
               !mobile && (o.search || showSearch) && /* @__PURE__ */ jsx50("div", { className: `matter-tabs-search ${o.searchOpen ? "is-open" : ""}`, children: o.search ?? /* @__PURE__ */ jsxs44(
@@ -12365,12 +12399,31 @@ ${thread.subtitle} \xB7 ${activity.label}`,
               o.hideRail && !o.threadHeader && localSettings
             ] })
           ] }),
-          o.threadHeader && /* @__PURE__ */ jsx50(
+          o.threadHeader && !(singleRowHeader && o.emptyWorkspace) && /* @__PURE__ */ jsx50(
             ThreadHeader,
             {
               header: o.threadHeader,
               title: title || currentThread?.title || "",
               threadKey: o.currentKey,
+              singleRow: singleRowHeader,
+              navigation: singleRowHeader && sidebarHidden ? navStrip : null,
+              search: singleRowHeader && (o.search || showSearch) ? /* @__PURE__ */ jsx50("div", { className: `matter-tabs-search ${o.searchOpen ? "is-open" : ""}`, children: o.search ?? /* @__PURE__ */ jsxs44(
+                "button",
+                {
+                  className: "matter-search-trigger",
+                  "aria-label": searchLabel,
+                  title: `${searchLabel} (Ctrl+F)`,
+                  onClick: o.onSearch,
+                  children: [
+                    /* @__PURE__ */ jsx50(Search2, { "data-icon": "search" }),
+                    /* @__PURE__ */ jsx50("span", { children: searchLabel })
+                  ]
+                }
+              ) }) : null,
+              indicators: singleRowHeader ? /* @__PURE__ */ jsxs44(Fragment17, { children: [
+                /* @__PURE__ */ jsx50("div", { className: "matter-connection", children: connection }),
+                bell
+              ] }) : null,
               explorerOpen,
               onToggleExplorer: () => setExplorerOpen((open) => !open),
               options: o,
