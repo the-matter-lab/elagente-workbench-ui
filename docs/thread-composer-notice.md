@@ -17,7 +17,7 @@ and keyboard-overlap measurements. Updating it preserves the mounted composer.
 Both additions are optional. The package contains no idle policy, countdown, or
 keepalive implementation. Hosts supply descriptions, notices, and actions.
 
-The review package is `@remote-codex/thread-ui@0.1.26-idle.1`, built from the
+The review package is `@remote-codex/thread-ui@0.1.26-idle.2`, built from the
 actual production 0.1.26 release base (`511481e5a0ba4748e1dc75a3a789e9f789049017`). Consumers only need to replace their thread-ui tarball URL;
 shared, plugin-runtime, plugin-terminal, and plugin-xyz pins can remain unchanged.
 
@@ -34,10 +34,26 @@ archive, not the older checked-in dist snapshot.
 The packed prerelease contains the same 53 file names as published 0.1.26. Exactly
 three payloads differ: `dist/index.js`, `dist/index.d.ts`, and `package.json`
 (version only). All 50 other payloads, including every stylesheet and runtime
-chunk, are byte-identical. The runtime diff contains only the tooltip and notice
-slot changes; the timeline and failure-card runtime is preserved.
+chunk, are byte-identical. The runtime diff contains only the tooltip, composer notice and opt-in
+single-row header changes; the timeline and failure-card runtime is preserved.
 
-Focused validation: the tooltip, notice, chat navigation, and ThreadTimeline suites
-pass (64 tests across four files), alongside thread-ui typecheck and build. Full CI
+Focused validation: the header, tooltip, notice, chat navigation, host layout and
+ThreadTimeline suites pass (92 tests across six files), alongside thread-ui typecheck and build. Full CI
 and browser QA are not run for this authorized preview. The GitHub prerelease
 carries the archive, SHA256SUMS, provenance JSON, and payload/runtime diff proof.
+
+`MatterWorkbenchOptions.threadHeader.singleRow?: boolean` replaces the desktop
+conversation tabs and secondary toolbar with one 44px header. It retains the full
+selected title, host lifecycle pill, Files and more actions. The existing search
+component stays mounted in the header summary and overlays the title while open;
+the search button and Ctrl/Cmd+F continue to work. A collapsed sidebar's reopen,
+Back and Forward controls move into this row. Connection/notification indicators
+stay available. Conversations remain in the sidebar and phone sheet. Empty
+workspaces omit desktop tabs and header chrome in this mode. Omitted/false keeps
+the original two desktop rows; phone layout and navigation remain unchanged.
+The host opts in with `threadHeader: { singleRow: true, status: 'Idle',
+tone: 'running', statusDescription: '…' }`; idle policy remains host-owned.
+
+The production backport is `0.1.26-idle.2`, built from the actual 0.1.26 baseline.
+Only thread-ui changes; preserve every production sibling package pin. Both
+artifacts preserve all unrelated tarball payloads, including existing styles.
