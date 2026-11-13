@@ -3,47 +3,73 @@ import { localFileHref, relativeWorkspacePath } from './workspacePaths';
 
 export type WorkspacePathResolver = (path: string) => Promise<boolean>;
 
-/** A resolver belongs to one adapter/device/workspace; never cache across scopes. */
+type WorkspacePathAdapter = Pick<ThreadWorkspaceAdapter, 'listTree' | 'statLinkedFile' | 'hiddenFiles'>;
+interface ResolverScope {
+  cache: Map<string, { expires: number; result: Promise<Set<string>> }>;
+  active: number;
+  queue: Array<() => void>;
+}
+// Listings are shared by every resolver for the same adapter and workspace. A host
+// may rebuild its resolver on each streamed update (ELA-311); a cache owned by one
+// resolver was then dropped every time, and each render listed every parent again.
+const scopes = new WeakMap<object, Map<string, ResolverScope>>();
+function scopeFor(adapter: WorkspacePathAdapter, key: string) {
+  let byKey = scopes.get(adapter);
+  if (!byKey) scopes.set(adapter, (byKey = new Map()));
+  let scope = byKey.get(key);
+  if (!scope) byKey.set(key, (scope = { cache: new Map(), active: 0, queue: [] }));
+  return scope;
+}
+
+/** Listings are cached per adapter/device/workspace; never across scopes. */
 export function createWorkspacePathResolver(
-  adapter: Pick<ThreadWorkspaceAdapter, 'listTree' | 'statLinkedFile' | 'hiddenFiles'>,
+  adapter: WorkspacePathAdapter,
   identity: { threadId: string; workspaceId?: string | null },
   workspaceRoot: string,
 ): WorkspacePathResolver {
-  const cache = new Map<string, { expires: number; result: Promise<Set<string>> }>();
-  let active = 0;
-  const queue: Array<() => void> = [];
+  const scope = scopeFor(adapter, JSON.stringify([identity.threadId, identity.workspaceId ?? null, workspaceRoot, Boolean(adapter.hiddenFiles)]));
   const run = async (load: () => Promise<Set<string>>) => {
-    if (active >= 4) await new Promise<void>(resolve => queue.push(resolve));
-    else active++;
+    if (scope.active >= 4) await new Promise<void>(resolve => scope.queue.push(resolve));
+    else scope.active++;
     try { return await load(); }
     finally {
-      const next = queue.shift();
+      const next = scope.queue.shift();
       if (next) next();
-      else active--;
+      else scope.active--;
     }
   };
+  const entries = (key: string, load: () => Promise<Set<string>>) => {
+    let entry = scope.cache.get(key);
+    if (!entry || entry.expires < Date.now()) {
+      entry = { expires: Date.now() + 15_000, result: run(load).catch(() => new Set<string>()) };
+      if (scope.cache.size >= 64) scope.cache.delete(scope.cache.keys().next().value!);
+      scope.cache.set(key, entry);
+    }
+    return entry.result;
+  };
+  // A reply may name a file under a folder hidden by default (`.workbenchignore`);
+  // the Explorer can still open it, so verify against the listing with hidden entries.
+  const list = (dir: string) => entries(dir, async () => {
+    const tree = await adapter.listTree({ ...identity, path: dir, ...(adapter.hiddenFiles ? { showHidden: true } : {}) });
+    return new Set((tree.children ?? []).map(node => relativeWorkspacePath(node.path, workspaceRoot) ?? node.path));
+  });
   return async path => {
     const relative = relativeWorkspacePath(path, workspaceRoot);
-    // Parent listings verify files and directories without reading file content.
-    const parent = relative === null ? `host:${path}` : relative.split('/').slice(0, -1).join('/');
-    let entry = cache.get(parent);
-    if (!entry || entry.expires < Date.now()) {
-      const result = run(async () => {
-        if (relative === null) {
-          if (!adapter.statLinkedFile) return new Set<string>();
-          const node = await adapter.statLinkedFile({ threadId: identity.threadId, path });
-          return new Set([node.path]);
-        }
-        // A reply may name a file under a folder hidden by default (`.workbenchignore`);
-        // the Explorer can still open it, so verify against the listing with hidden entries.
-        const tree = await adapter.listTree({ ...identity, path: parent, ...(adapter.hiddenFiles ? { showHidden: true } : {}) });
-        return new Set((tree.children ?? []).map(node => relativeWorkspacePath(node.path, workspaceRoot) ?? node.path));
-      }).catch(() => new Set<string>());
-      entry = { expires: Date.now() + 15_000, result };
-      if (cache.size >= 64) cache.delete(cache.keys().next().value!);
-      cache.set(parent, entry);
+    if (relative === null) {
+      return (await entries(`host:${path}`, async () => {
+        if (!adapter.statLinkedFile) return new Set<string>();
+        const node = await adapter.statLinkedFile({ threadId: identity.threadId, path });
+        return new Set([node.path]);
+      })).has(path);
     }
-    return (await entry.result).has(relative ?? path);
+    // Parent listings verify files and directories without reading file content.
+    const segments = relative.split('/');
+    const parent = segments.slice(0, -1).join('/');
+    // Prose such as PBE0-D4/def2-SVP or input/log matches the path syntax. Its first
+    // segment is not in the workspace root, so the shared root listing rules it out
+    // without listing a parent that does not exist.
+    if (parent && !(await list('')).has(segments[0]!)) return false;
+    return (await list(parent)).has(relative);
   };
 }
 
