@@ -16,7 +16,11 @@ export const filesZhCN = {
   "files.fileActions": "文件操作",
   "files.reloadFile": "重新读取文件",
   "files.fileReloaded": "文件已更新",
-  "files.followingLatestRevision": "显示此结构的最新版本：{{path}}",
+  "files.followingLatestRevision": "显示最新版本：{{name}}",
+  "files.structureEditName": "{{name}}（编辑 {{edit}}）",
+  "files.adoptTooLarge": "此文件太大，无法编辑。",
+  "files.adoptUnsupportedFormat": "此 Agent 无法编辑这种格式。",
+  "files.adoptTurnBusy": "当前轮次结束后即可编辑。",
   "files.fileAlreadyCurrent": "文件已是最新",
 
   "files.backToDocument": "返回 {{name}}",

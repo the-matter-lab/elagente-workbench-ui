@@ -19,6 +19,11 @@ describe('reviewed extension plugin API', () => {
     expect(api.getViewerToolbar()).toEqual([]);
     expect(api.getExtensionPanels()).toHaveLength(1);
   });
+  it('passes the optional adoptStructure callback through unchanged, and omits it when absent', () => {
+    const adoptStructure = async () => undefined;
+    expect(createExtensionPluginApi([module], {discovery: f.discovery, adoptStructure}).extensionHost!.adoptStructure).toBe(adoptStructure);
+    expect(createExtensionPluginApi([module], {discovery: f.discovery}).extensionHost!.adoptStructure).toBeUndefined();
+  });
   it('preserves legacy panels with optional APIs absent', () => {
     const legacy = {...module, manifest: {...module.manifest, contribution: undefined}};
     expect(createExtensionPluginApi([legacy]).getExtensionPanels()).toHaveLength(1);

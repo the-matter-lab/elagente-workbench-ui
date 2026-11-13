@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { compareWorkspaceNodes, workspaceRelativeFocusPath, workspaceTreeNodeToGraphNode } from './workspaceTree';
+import type { ThreadArtifactDto, ThreadDetailDto } from '@remote-codex/shared';
+import { collectArtifacts, compareWorkspaceNodes, workspaceRelativeFocusPath, workspaceTreeNodeToGraphNode } from './workspaceTree';
 
 describe('workspaceTreeNodeToGraphNode', () => {
   it('aligns dot-prefixed API paths with link focus and subtree keys', () => {
@@ -56,5 +57,24 @@ describe('workspace ordering', () => {
     expect(entries.sort(compareWorkspaceNodes).map(node => node.id)).toEqual([
       'workspace:thread-events', 'workspace:a.txt', 'workspace:z.xyz', 'thread-events',
     ]);
+  });
+});
+
+describe('collectArtifacts', () => {
+  const artifact = (id: string) => ({ id, name: `${id}.xyz` }) as unknown as ThreadArtifactDto;
+  const detail = (turnArtifacts: string[], artifacts?: string[]) =>
+    ({
+      turns: [{ items: turnArtifacts.map((id) => ({ kind: 'artifact', artifact: artifact(id) })) }],
+      liveItems: { items: [{ kind: 'artifact', artifact: artifact('live') }] },
+      ...(artifacts ? { artifacts: artifacts.map(artifact) } : {}),
+    }) as unknown as ThreadDetailDto;
+
+  it('reads turn items and live items without a thread-level list', () => {
+    expect(collectArtifacts(detail(['a', 'b'])).map((a) => a.id)).toEqual(['a', 'b', 'live']);
+  });
+
+  it('keeps the host publication order and adds artifacts published outside a turn', () => {
+    // `adopted` was published between turns (structure/adopt); it has no turn item.
+    expect(collectArtifacts(detail(['a', 'b'], ['a', 'adopted', 'b'])).map((a) => a.id)).toEqual(['a', 'adopted', 'b', 'live']);
   });
 });

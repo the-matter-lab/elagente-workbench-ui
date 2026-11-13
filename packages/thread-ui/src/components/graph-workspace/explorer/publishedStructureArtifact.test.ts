@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { ThreadArtifactDto } from '@remote-codex/shared';
 
-import { followedArtifactForFile, latestArtifactForObject } from './publishedStructureArtifact';
+import { followedArtifactForFile, latestArtifactForObject, structureDisplayName } from './publishedStructureArtifact';
 
 const artifact = (id: string, path: string, checksum: string, objectId = 'urn:object', sourceRevision = checksum): ThreadArtifactDto => ({
   id, pluginId: 'elagente.xyz', type: 'chem.structure', title: path, workspacePath: path, payload: {}, createdAt: '2026-11-12T00:00:00Z',
@@ -46,5 +46,36 @@ describe('latestArtifactForObject', () => {
     expect(latestArtifactForObject([first, other, second], other)).toBe(other);
     const plain = { ...first, metadata: undefined };
     expect(latestArtifactForObject([first, second], plain)).toBe(plain);
+  });
+});
+
+describe('structureDisplayName (UX a)', () => {
+  const origin = artifact('art_origin', 'out/ethanol.xyz', 'a'.repeat(64));
+  const edit1 = artifact('art_e1', 'scientific-edits/8e3f5680.extxyz', 'b'.repeat(64), 'urn:object', 'edit-1');
+  const rewrite = artifact('art_rw', 'out/ethanol.xyz', 'c'.repeat(64));
+  const edit3 = artifact('art_e3', 'scientific-edits/77a60af7.extxyz', 'd'.repeat(64), 'urn:object', 'edit-3');
+  const list = [origin, edit1, rewrite, edit3];
+
+  it('names the origin file without a hint', () => {
+    expect(structureDisplayName(list, origin)).toEqual({ label: 'ethanol.xyz', originName: 'ethanol.xyz', edit: null, path: 'out/ethanol.xyz' });
+  });
+
+  it('names a revision in another file by its origin and edit number', () => {
+    expect(structureDisplayName(list, edit1)).toMatchObject({ label: 'ethanol.xyz (edit 1)', edit: 1, path: 'scientific-edits/8e3f5680.extxyz' });
+    // Every revision after the first counts, including a rewrite of the origin file.
+    expect(structureDisplayName(list, edit3).label).toBe('ethanol.xyz (edit 3)');
+    // A republished ID keeps its first position.
+    expect(structureDisplayName([...list, origin, edit1], edit3).label).toBe('ethanol.xyz (edit 3)');
+  });
+
+  it('needs no hint for a revision written back to the origin path', () => {
+    expect(structureDisplayName(list, rewrite)).toMatchObject({ label: 'ethanol.xyz', edit: null });
+  });
+
+  it('falls back to the artifact’s own file name without an object or list entry', () => {
+    const plain = { ...artifact('art_plain', 'out/water.xyz', 'e'.repeat(64)), metadata: undefined };
+    expect(structureDisplayName(list, plain).label).toBe('water.xyz');
+    const fresh = artifact('art_new', 'uploads/benzene.xyz', 'f'.repeat(64), 'urn:new');
+    expect(structureDisplayName(list, fresh)).toMatchObject({ label: 'benzene.xyz', edit: null });
   });
 });

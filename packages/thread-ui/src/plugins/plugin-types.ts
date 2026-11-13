@@ -17,6 +17,17 @@ import type {
 export interface ExtensionHostAdapter {
   discovery: ExtensionDiscovery;
   submitInput?: (input: ViewerInput) => Promise<ViewerAcknowledgement>;
+  /**
+   * Optional (structure edits step 4, `structure/adopt`): publish an artifact
+   * for a structure file revision that was never published, so it becomes an
+   * editable target. `revision` is the file's sha256 as read. Resolves with the
+   * published artifact, or nothing (it also arrives in the thread's artifact
+   * list). Rejects with an Error whose `code` is one of `FILE_CONFLICT`,
+   * `UNSUPPORTED_CAPABILITY`, `FILE_TOO_LARGE`, `INPUT_UNSUPPORTED`,
+   * `INVALID_XYZ`, `TURN_BUSY` or `FILE_NOT_FOUND`. Hosts without it keep
+   * the plain, view-only preview for such files.
+   */
+  adoptStructure?: (path: string, revision: string) => Promise<ThreadArtifactDto | void>;
   acknowledgeAction?: (request: ViewerRequest, acknowledgement: ViewerAcknowledgement) => Promise<void>;
 }
 
@@ -45,6 +56,12 @@ export interface ArtifactRenderContext {
   onOpenFile?: () => void;
   onToggleExpanded: () => void;
   extensionHost?: ExtensionHostAdapter;
+  /**
+   * The object's display name (`structureDisplayName(...).label`, e.g.
+   * "ethanol.xyz (edit 2)"); renderers show it instead of the revision's file
+   * name and keep the file path as a tooltip.
+   */
+  displayName?: string;
 }
 
 export interface InlineCodeRenderContext {

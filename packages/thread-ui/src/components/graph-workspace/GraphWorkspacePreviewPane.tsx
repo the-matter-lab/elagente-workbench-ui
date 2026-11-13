@@ -64,7 +64,8 @@ import { GraphMoleculeViewer } from './GraphMoleculeViewer';
 import { GraphDrawioPreview } from './GraphDrawioPreview';
 import { isDrawioPath } from './explorer/filePreviewPolicy';
 import { formatJsonPreview } from './explorer/jsonPreview';
-import { followedArtifactForFile, latestArtifactForObject } from './explorer/publishedStructureArtifact';
+import { followedArtifactForFile, latestArtifactForObject, structureDisplayName } from './explorer/publishedStructureArtifact';
+import { useStructureAdoption } from './explorer/useStructureAdoption';
 import {
   WorkspaceFileTabs,
   type WorkspaceFileTab,
@@ -681,21 +682,45 @@ export function GraphWorkspacePreviewPane({
         // ElAgente: scientific renderers lay out for the workspace pane.
         presentation: 'workspace',
         onToggleExpanded: () => undefined,
+        displayName: structureDisplayName(artifacts, openArtifact).label,
       })
     : null;
   const moleculeSnapshot = buildMoleculePreviewSnapshot(previewFile ?? null);
   // A structure file renders as its published artifact only for a verified,
   // unchanged disk revision; otherwise the plain preview has no target. A
-  // superseded revision shows its object's latest revision instead.
-  const fileArtifact = selectedTarget?.kind === 'workspace-file' && moleculeSnapshot && previewFile &&
-    document?.phase === 'clean' && !document.needsVerification
-    ? followedArtifactForFile(artifacts, previewFile.path, document.snapshot.contentHash) : null;
-  const followedPath = fileArtifact && fileArtifact.workspacePath !== previewFile?.path
-    ? fileArtifact.workspacePath
-    : openArtifact && openArtifact.id !== activeNode?.artifact?.id ? openArtifact.workspacePath : null;
-  const followedNote = followedPath ? (
-    <p role="note" className="thread-graph-molecule-followed truncate px-3 py-1 text-xs text-slate-500 dark:text-slate-400" title={followedPath}>
-      {translate('files.followingLatestRevision', { path: followedPath })}
+  // superseded revision shows its object's latest revision instead. A revision
+  // that was never published is adopted when the host can (step 4).
+  const structureRevision = selectedTarget?.kind === 'workspace-file' && moleculeSnapshot && previewFile &&
+    document?.phase === 'clean' && !document.needsVerification ? document.snapshot.contentHash || null : null;
+  const structurePath = structureRevision ? previewFile!.path : null;
+  const documentsRef = useRef(documents);
+  documentsRef.current = documents;
+  const hostArtifact = structurePath ? followedArtifactForFile(artifacts, structurePath, structureRevision) : null;
+  const adoption = useStructureAdoption({
+    adopt: plugins.extensions?.extensionHost?.adoptStructure,
+    path: structurePath,
+    revision: structureRevision,
+    bound: Boolean(hostArtifact),
+    epoch: document?.revision ?? 0,
+    recheck: () => structurePath ? documentsRef.current?.checkDisk(structurePath) : undefined,
+    currentRevision: () => structurePath ? documentsRef.current?.documents.get(structurePath)?.snapshot.contentHash : null,
+  });
+  // The adopted artifact binds at once; the thread's list catches up later.
+  const fileArtifacts = adoption.artifact && !hostArtifact ? [...artifacts, adoption.artifact] : artifacts;
+  const fileArtifact = hostArtifact ?? (structurePath && adoption.artifact
+    ? followedArtifactForFile(fileArtifacts, structurePath, structureRevision) : null);
+  const followedArtifact = fileArtifact && fileArtifact.workspacePath !== previewFile?.path
+    ? fileArtifact
+    : openArtifact && openArtifact.id !== activeNode?.artifact?.id ? openArtifact : null;
+  const followedName = followedArtifact ? structureDisplayName(fileArtifacts, followedArtifact) : null;
+  const followedNote = followedName ? (
+    <p role="note" className="thread-graph-molecule-followed whitespace-normal break-words px-3 py-1 text-xs text-slate-500 dark:text-slate-400" title={followedName.path ?? undefined}>
+      {translate('files.followingLatestRevision', { name: followedName.label })}
+    </p>
+  ) : null;
+  const adoptionNote = adoption.message ? (
+    <p role="note" className="thread-graph-molecule-adoption whitespace-normal break-words px-3 py-1 text-xs text-slate-500 dark:text-slate-400">
+      {adoption.message}
     </p>
   ) : null;
   const renderedFileArtifact = fileArtifact
@@ -704,6 +729,7 @@ export function GraphWorkspacePreviewPane({
         expanded: true,
         presentation: 'workspace',
         onToggleExpanded: () => undefined,
+        displayName: structureDisplayName(fileArtifacts, fileArtifact).label,
       })
     : null;
   const fileLanguage =
@@ -950,7 +976,7 @@ export function GraphWorkspacePreviewPane({
           <DownloadFilePreview key={selectedTarget.node.path} node={selectedTarget.node} onDownload={onDownloadFile} {...(downloadReason ? { readOnlyReason: downloadReason } : activeFilePath && documents?.documents.get(activeFilePath)?.snapshot.readOnlyReason ? {readOnlyReason:documents.documents.get(activeFilePath)!.snapshot.readOnlyReason!}: {})} />
         ) : selectedTarget.kind === 'workspace-file' && moleculeSnapshot ? (
           <div className="thread-graph-molecule-preview flex min-h-0 flex-1 flex-col overflow-hidden">
-            {renderedFileArtifact && followedNote}
+            {renderedFileArtifact ? followedNote : adoptionNote}
             {renderedFileArtifact ?? (
               <GraphMoleculeViewer
                 source={moleculeSnapshot}

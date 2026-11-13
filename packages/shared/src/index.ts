@@ -961,6 +961,12 @@ export interface ThreadDetailDto {
   goalHistory?: ThreadGoalDto[];
   livePlan?: ThreadLivePlanDto | null;
   liveItems?: ThreadLiveItemsDto | null;
+  /**
+   * Every published artifact in the host's publication order, including those
+   * published outside a turn (an adopted structure). When present it is the
+   * artifact list; turn items only add artifacts it lacks.
+   */
+  artifacts?: ThreadArtifactDto[];
 }
 
 export interface ThreadExportTurnOptionDto {

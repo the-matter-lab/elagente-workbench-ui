@@ -144,6 +144,14 @@ export type GraphMoleculeRevisionChange = {
 };
 export const SELECTION_CLEARED_MESSAGE =
   'The structure changed. Select the atoms again.';
+/**
+ * A host's "accepted, queued behind the running turn" signal: an Error with
+ * `queued: true`. Its message is the status to show. The input counts as sent,
+ * so a staged group continues with its next entry and is cleared afterwards.
+ */
+export function isViewerInputQueued(error: unknown): error is Error & { queued: true } {
+  return error instanceof Error && (error as { queued?: unknown }).queued === true;
+}
 export type GraphMoleculeViewerProps = {
   className?: string;
   presentation?: 'timeline' | 'workspace';
@@ -164,6 +172,8 @@ export type GraphMoleculeViewerProps = {
   onRevisionChange?: (change: GraphMoleculeRevisionChange) => void;
   source: GraphMoleculeViewerSource;
   title?: string | null;
+  /** Tooltip for the title, e.g. the revision's file path behind a display name. */
+  titleDetail?: string;
   extensionHost?: ExtensionHostAdapter;
   /** Build-time reviewed UI slots. Runtime data never selects executable code. */
   toolbar?: (context: {
@@ -194,6 +204,7 @@ export function GraphMoleculeViewer({
   onRevisionChange,
   source,
   title = 'Molecular structure',
+  titleDetail,
   presentation = 'workspace',
   onOpenFile,
   extensionHost,
@@ -1730,7 +1741,7 @@ export function GraphMoleculeViewer({
       >
         <div className="thread-graph-molecule-header flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 px-3 py-2 sm:px-4 sm:py-3">
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-slate-900">
+            <h2 className="truncate text-sm font-semibold text-slate-900" title={titleDetail}>
               {onOpenFile ? (
                 <button
                   type="button"
@@ -2003,7 +2014,7 @@ export function GraphMoleculeViewer({
 
           <div className="molecule-caption">
             <div>
-              <strong>{title}</strong>
+              <strong title={titleDetail}>{title}</strong>
               <span>
                 {formula.map(({ element, count }) => (
                   <span key={element}>
@@ -2304,7 +2315,13 @@ export function GraphMoleculeViewer({
                     void runOperation(async () => {
                       const entries = Object.values(stagedSelections);
                       assertSubmissionTargets(entries);
-                      await onSelectionSubmit?.({ selections: entries });
+                      try {
+                        await onSelectionSubmit?.({ selections: entries });
+                      } catch (error) {
+                        // Queued counts as sent: the host took every entry.
+                        if (isViewerInputQueued(error)) setStagedSelections({});
+                        throw error;
+                      }
                       setStagedSelections({});
                     }, 'Sent.')
                   }
