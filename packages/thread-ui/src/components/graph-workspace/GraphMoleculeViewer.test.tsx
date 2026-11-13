@@ -1048,10 +1048,13 @@ it('reports screenshot upload/native rejection and rejects invalid PNG/camera wi
   expect(submit).toHaveBeenCalledTimes(1);
   submit.mockClear();
   runtime.viewer.pngURI = () => 'data:image/png;base64,AA==';
+  const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
   await act(async () => send());
-  expect(node.querySelector('[role="status"]')?.textContent).toContain(
-    'valid PNG',
+  expect(node.querySelector('[role="status"]')?.textContent).toBe(
+    'Couldn’t capture the view. Wait for the structure to load, then try again.',
   );
+  expect(String(warn.mock.calls[0]?.[1])).toContain('valid PNG');
+  warn.mockRestore();
   expect(submit).not.toHaveBeenCalled();
   runtime.viewer.pngURI = () => png;
   camera = [NaN];

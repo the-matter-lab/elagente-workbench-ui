@@ -54,7 +54,8 @@ export default function GraphMoleculeViewerUpperButtonGroup({
       await navigator.clipboard.writeText(xyzContent);
       onFeedback?.('Coordinates copied.');
     } catch (error) {
-      onFeedback?.(String(error));
+      console.warn('Copying coordinates failed:', error);
+      onFeedback?.('Couldn’t copy the coordinates. Allow clipboard access, then try again.');
     }
   }
 

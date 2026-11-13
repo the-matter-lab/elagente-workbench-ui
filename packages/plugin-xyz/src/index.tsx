@@ -98,6 +98,12 @@ async function verifiedBytes(
   return bytes;
 }
 
+// The viewer shows the message; the developer detail goes to the console only.
+function userError(message: string, detail: unknown): Error {
+  console.warn(`[plugin-xyz] ${message}`, detail);
+  return new Error(message);
+}
+
 function sourceTarget(asset: StructureAsset): ScientificTarget | undefined {
   if (asset.metadata) validateArtifactMetadata(asset.metadata);
   const canonicalChecksum = asset.source?.checksum ?? asset.checksum;
@@ -243,7 +249,9 @@ export function StructureView({
       if (!controller.signal.aborted)
         setLoaded({ asset, target, bytes, key: assetKey, content });
     })().catch((reason) => {
-      if (!controller.signal.aborted) setError(String(reason));
+      if (controller.signal.aborted) return;
+      console.error('[plugin-xyz] Structure verification failed:', reason);
+      setError(String(reason));
     });
     return () => controller.abort();
   }, [assetKey, inlineEnabled]);
@@ -291,14 +299,18 @@ export function StructureView({
       loading ||
       latestAsset.current !== loaded?.key
     )
-      throw new Error(
+      throw userError(
+        'Wait for the structure to finish loading, then try again.',
         'An immutable current target and host submission callback are required.',
       );
     const key = JSON.stringify({ kind, actionId, target, payload });
     let input = pendingInputs.current.get(key);
     if (!input) {
       if (pendingInputs.current.size >= 128)
-        throw new Error('Viewer submission retry quota reached.');
+        throw userError(
+          'Too many unsent requests. Reload the page, then try again.',
+          'Viewer submission retry quota reached.',
+        );
       const id = crypto.randomUUID();
       input = {
         version: 1,
@@ -312,17 +324,29 @@ export function StructureView({
       };
       pendingInputs.current.set(key, input);
     }
-    validateViewerInput(input, host.discovery);
+    try {
+      validateViewerInput(input, host.discovery);
+    } catch (error) {
+      throw userError('This can’t be sent to the Agent.', error);
+    }
     const acknowledgement = await host.submitInput(input);
-    validateViewerAcknowledgement(acknowledgement, input, host.discovery);
+    try {
+      validateViewerAcknowledgement(acknowledgement, input, host.discovery);
+    } catch (error) {
+      throw userError(
+        'The Agent’s reply doesn’t match this structure. Reopen it, then try again.',
+        error,
+      );
+    }
     if (acknowledgement.status === 'rejected') {
       pendingInputs.current.delete(key);
       throw new Error(
-        acknowledgement.error?.message ?? 'Viewer input rejected.',
+        acknowledgement.error?.message ?? 'The Agent didn’t accept this.',
       );
     }
     if (acknowledgement.status !== 'applied')
-      throw new Error(
+      throw userError(
+        'The Agent hasn’t confirmed this yet. Send it again to check.',
         'Viewer input is awaiting native completion. Retry to check its acknowledgement.',
       );
     pendingInputs.current.delete(key);
@@ -335,7 +359,10 @@ export function StructureView({
           // carries its own immutable target. Native submission is per object.
           selections.forEach((selection) => {
             if (!selection.target)
-              throw new Error('Selection has no immutable target');
+              throw userError(
+                'Select the atoms again, then send.',
+                'Selection has no immutable target',
+              );
             const input: ViewerInput = {
               version: 1,
               requestId: 'validation',
@@ -346,13 +373,20 @@ export function StructureView({
               target: selection.target,
               payload: { selectedIds: selection.selectedIds },
             };
-            validateViewerInput(input, host!.discovery);
+            try {
+              validateViewerInput(input, host!.discovery);
+            } catch (error) {
+              throw userError('This selection can’t be sent to the Agent.', error);
+            }
           });
           const groupKey = JSON.stringify(selections);
           let completed = pendingGroups.current.get(groupKey);
           if (!completed) {
             if (pendingGroups.current.size >= 128)
-              throw new Error('Staged selection retry quota reached.');
+              throw userError(
+                'Too many unsent selections. Reload the page, then try again.',
+                'Staged selection retry quota reached.',
+              );
             completed = new Set<number>();
             pendingGroups.current.set(groupKey, completed);
           }
@@ -398,9 +432,34 @@ export function StructureView({
     anchor.click();
     URL.revokeObjectURL(url);
   }
+  // A missing action is a normal Agent configuration and shows nothing. A
+  // hint appears only when the Agent offers the action but this structure has
+  // no published target, which the user can fix by opening an Agent's structure.
+  const unsentActions = [
+    !selectionCallback && available(selectionAction) && !loaded?.target
+      ? 'a selection'
+      : null,
+    !screenshotCallback && available(screenshotAction) && !loaded?.target
+      ? 'a screenshot'
+      : null,
+  ].filter(Boolean);
+  const hasSelectionCallback = Boolean(selectionCallback);
+  const hasScreenshotCallback = Boolean(screenshotCallback);
+  useEffect(() => {
+    if (!loaded) return;
+    if (!hasSelectionCallback)
+      console.debug(
+        '[plugin-xyz] Selection submission is unavailable: the host must advertise an action and provide an immutable target.',
+      );
+    if (!hasScreenshotCallback)
+      console.debug(
+        '[plugin-xyz] PNG submission is unavailable: the host must provide an upload callback or advertise a PNG input action.',
+      );
+  }, [loaded, hasSelectionCallback, hasScreenshotCallback]);
+  const loadFailure = 'Unable to load this structure. Reopen it to try again.';
   if (!loaded)
     return error ? (
-      <p role="alert">{error}</p>
+      <p role="alert">{loadFailure}</p>
     ) : (
       <p>Loading molecular structure…</p>
     );
@@ -417,7 +476,7 @@ export function StructureView({
         minHeight: 0,
       }}
     >
-      {error && <p role="alert">{error}</p>}
+      {error && <p role="alert">{loadFailure}</p>}
       {loading && !error && (
         <p
           role="status"
@@ -469,16 +528,10 @@ export function StructureView({
         )}
         rendererSlot={rendererSlot}
       />
-      {!selectionCallback && (
-        <p>
-          Selection submission is unavailable: the host must advertise an action
-          and provide an immutable target.
-        </p>
-      )}
-      {!screenshotCallback && (
-        <p>
-          PNG submission is unavailable: the host must provide an upload
-          callback or advertise a PNG input action.
+      {unsentActions.length > 0 && (
+        <p role="note">
+          Open a structure the Agent has produced to send{' '}
+          {unsentActions.join(' or ')}.
         </p>
       )}
     </div>
