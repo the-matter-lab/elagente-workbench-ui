@@ -1,9 +1,9 @@
 import * as react from 'react';
 import { ReactNode } from 'react';
 import { ScientificTarget, ViewerRequest, ViewerAcknowledgement, ExtensionDiscovery } from '@remote-codex/shared';
-import { E as ExtensionHostAdapter } from './plugin-types-C1Ip6feU.js';
-import { G as GraphMoleculeViewerSource } from './GraphMoleculeViewerData-DHnrXMbl.js';
-export { r as readGraphMoleculeViewerData } from './GraphMoleculeViewerData-DHnrXMbl.js';
+import { E as ExtensionHostAdapter } from './plugin-types-BkQJk-w8.js';
+import { G as GraphMoleculeViewerSource } from './publishedStructureArtifact-DYbRcCGW.js';
+export { S as StructureDisplayName, r as readGraphMoleculeViewerData, s as structureDisplayName } from './publishedStructureArtifact-DYbRcCGW.js';
 import '3dmol';
 
 type GraphMoleculeScreenshot = {
@@ -47,6 +47,14 @@ type GraphMoleculeRevisionChange = {
     selection: 'kept' | 'cleared' | 'none';
 };
 declare const SELECTION_CLEARED_MESSAGE = "The structure changed. Select the atoms again.";
+/**
+ * A host's "accepted, queued behind the running turn" signal: an Error with
+ * `queued: true`. Its message is the status to show. The input counts as sent,
+ * so a staged group continues with its next entry and is cleared afterwards.
+ */
+declare function isViewerInputQueued(error: unknown): error is Error & {
+    queued: true;
+};
 type GraphMoleculeViewerProps = {
     className?: string;
     presentation?: 'timeline' | 'workspace';
@@ -65,6 +73,8 @@ type GraphMoleculeViewerProps = {
     onRevisionChange?: (change: GraphMoleculeRevisionChange) => void;
     source: GraphMoleculeViewerSource;
     title?: string | null;
+    /** Tooltip for the title, e.g. the revision's file path behind a display name. */
+    titleDetail?: string;
     extensionHost?: ExtensionHostAdapter;
     /** Build-time reviewed UI slots. Runtime data never selects executable code. */
     toolbar?: (context: {
@@ -83,7 +93,7 @@ type GraphMoleculeViewerProps = {
      */
     followControl?: boolean;
 };
-declare function GraphMoleculeViewer({ className, moleculeId, onScreenshot, onSelectionChange, onSelectionSubmit, onReady, onActive, onRevisionChange, source, title, presentation, onOpenFile, extensionHost, toolbar, rendererSlot, onDownloadSource, loading, followControl, }: GraphMoleculeViewerProps): react.JSX.Element;
+declare function GraphMoleculeViewer({ className, moleculeId, onScreenshot, onSelectionChange, onSelectionSubmit, onReady, onActive, onRevisionChange, source, title, titleDetail, presentation, onOpenFile, extensionHost, toolbar, rendererSlot, onDownloadSource, loading, followControl, }: GraphMoleculeViewerProps): react.JSX.Element;
 
 type ViewerStyle = 'ball-stick' | 'stick' | 'spacefill' | 'cartoon' | 'surface';
 type ViewerAnnotation = {
@@ -122,4 +132,4 @@ declare function createViewerCommandExecutor(getState: () => {
     cellAvailable?: boolean;
 }, apply: (commands: ViewerCommand[]) => void | Promise<void>): (request: ViewerRequest) => Promise<ViewerAcknowledgement>;
 
-export { type GraphMoleculeAtomSelection, type GraphMoleculeRevisionChange, type GraphMoleculeScreenshot, type GraphMoleculeSelectionSubmission, GraphMoleculeViewer, type GraphMoleculeViewerHandle, type GraphMoleculeViewerProps, SELECTION_CLEARED_MESSAGE, type ViewerAnnotation, type ViewerCommand, type ViewerStyle, createViewerCommandExecutor, sameScientificTarget, validateViewerCommands };
+export { type GraphMoleculeAtomSelection, type GraphMoleculeRevisionChange, type GraphMoleculeScreenshot, type GraphMoleculeSelectionSubmission, GraphMoleculeViewer, type GraphMoleculeViewerHandle, type GraphMoleculeViewerProps, SELECTION_CLEARED_MESSAGE, type ViewerAnnotation, type ViewerCommand, type ViewerStyle, createViewerCommandExecutor, isViewerInputQueued, sameScientificTarget, validateViewerCommands };

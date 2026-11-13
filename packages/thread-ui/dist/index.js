@@ -37,7 +37,10 @@ import {
   useLongPress,
   useModalFocus,
   useTabScrollEdges
-} from "./chunk-AU66VFNJ.js";
+} from "./chunk-EAQDO4PS.js";
+import {
+  structureDisplayName
+} from "./chunk-XYEZGBFO.js";
 import {
   Button,
   Tooltip,
@@ -57,7 +60,7 @@ import {
   shellThemeProps,
   useDocumentThemeRevision,
   useThemeFeature
-} from "./chunk-JBKKEL6X.js";
+} from "./chunk-GE2URZMZ.js";
 import {
   DEFAULT_LOCALE,
   I18nProvider,
@@ -76,7 +79,7 @@ import {
   t,
   translate,
   useI18n
-} from "./chunk-KBMR4E3X.js";
+} from "./chunk-D5VSPJC3.js";
 
 // #style-inject:#style-inject
 function styleInject(css, { insertAt } = {}) {
@@ -363,7 +366,7 @@ function liveStructureTrajectoryPath(row) {
 // src/components/live-structures/LiveStructureFrameViewer.tsx
 import { jsx as jsx3 } from "react/jsx-runtime";
 var GraphMoleculeViewer = lazy(
-  () => import("./GraphMoleculeViewer-UMHOMFT5.js").then((module) => ({ default: module.GraphMoleculeViewer }))
+  () => import("./GraphMoleculeViewer-E5XWHEHA.js").then((module) => ({ default: module.GraphMoleculeViewer }))
 );
 function LiveStructureFrameViewer({ frame }) {
   const { t: t2 } = useI18n();
@@ -654,7 +657,7 @@ import { FileText, X as X2 } from "lucide-react";
 import { lazy as lazy2, Suspense as Suspense2, useEffect, useMemo as useMemo3, useRef, useState as useState2 } from "react";
 import { Fragment as Fragment2, jsx as jsx5, jsxs as jsxs3 } from "react/jsx-runtime";
 var GraphMoleculeViewer2 = lazy2(
-  () => import("./GraphMoleculeViewer-UMHOMFT5.js").then((module) => ({ default: module.GraphMoleculeViewer }))
+  () => import("./GraphMoleculeViewer-E5XWHEHA.js").then((module) => ({ default: module.GraphMoleculeViewer }))
 );
 var LIVE_TRAJECTORY_UPDATE_MS = 1e3;
 var STATUS_LABEL2 = {
@@ -14230,6 +14233,7 @@ function createExtensionPluginApi(modules, adapter) {
       const ack = await adapter.submitInput(input);
       return validateViewerAcknowledgement(ack, input, adapter.discovery);
     }),
+    adoptStructure: adapter.adoptStructure,
     acknowledgeAction: adapter.acknowledgeAction && (async (request, ack) => {
       validateViewerAcknowledgement(ack, request, adapter.discovery);
       await adapter.acknowledgeAction(request, ack);
@@ -36139,6 +36143,7 @@ export {
   normalizeLocale,
   sameLiveStructure,
   setLocale,
+  structureDisplayName,
   t,
   themeAgentKey,
   themeAgentName,

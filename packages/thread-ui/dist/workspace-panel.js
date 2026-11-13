@@ -30,13 +30,18 @@ import {
   useFilePanel,
   useLongPress,
   useTabScrollEdges
-} from "./chunk-AU66VFNJ.js";
+} from "./chunk-EAQDO4PS.js";
+import {
+  followedArtifactForFile,
+  latestArtifactForObject,
+  structureDisplayName
+} from "./chunk-XYEZGBFO.js";
 import {
   CubeFormatError,
   GraphMoleculeViewer,
   MAX_CUBE_GRID_POINTS,
   readCubeHeader
-} from "./chunk-WVUHNROO.js";
+} from "./chunk-N4F533XD.js";
 import {
   useMenuKeyboard
 } from "./chunk-OCACD4WT.js";
@@ -46,7 +51,7 @@ import {
   isBinaryPreview,
   isDownloadOnlyPath,
   isDrawioPath
-} from "./chunk-VCXD4E4Y.js";
+} from "./chunk-RSJGL24T.js";
 import {
   IMAGE_EXTENSIONS,
   MOLECULAR_EXTENSIONS,
@@ -70,16 +75,16 @@ import {
   useThemeFeature,
   workspaceRelativeFocusPath,
   workspaceTreeNodeToGraphNode
-} from "./chunk-JBKKEL6X.js";
+} from "./chunk-GE2URZMZ.js";
 import {
   en,
   getLocale,
   translate,
   useI18n
-} from "./chunk-KBMR4E3X.js";
+} from "./chunk-D5VSPJC3.js";
 
 // src/components/ThreadGraphWorkspacePanel.tsx
-import { memo as memo2, useEffect as useEffect12, useMemo as useMemo9, useState as useState11 } from "react";
+import { memo as memo2, useEffect as useEffect13, useMemo as useMemo9, useState as useState11 } from "react";
 import {
   GitBranch,
   Paperclip,
@@ -336,7 +341,7 @@ function useWorkspaceDocuments(adapter, identity) {
 }
 
 // src/components/graph-workspace/GraphWorkspaceExplorer.tsx
-import { useEffect as useEffect10, useLayoutEffect as useLayoutEffect3, useMemo as useMemo7, useRef as useRef10, useState as useState10 } from "react";
+import { useEffect as useEffect11, useLayoutEffect as useLayoutEffect3, useMemo as useMemo7, useRef as useRef11, useState as useState10 } from "react";
 
 // src/components/graph-workspace/explorer/useWorkspaceExplorerController.ts
 import { useCallback as useCallback2, useEffect as useEffect2, useMemo as useMemo2, useRef, useState } from "react";
@@ -3870,10 +3875,10 @@ import {
   lazy,
   memo,
   Suspense,
-  useEffect as useEffect9,
+  useEffect as useEffect10,
   useLayoutEffect as useLayoutEffect2,
   useMemo as useMemo6,
-  useRef as useRef9,
+  useRef as useRef10,
   useState as useState9
 } from "react";
 import {
@@ -4052,26 +4057,84 @@ function formatJsonPreview(content) {
   return parts.join("");
 }
 
-// src/components/graph-workspace/explorer/publishedStructureArtifact.ts
-function firstPublished(artifacts) {
-  const unique = /* @__PURE__ */ new Map();
-  for (const artifact of artifacts) if (!unique.has(artifact.id)) unique.set(artifact.id, artifact);
-  return [...unique.values()];
+// src/components/graph-workspace/explorer/useStructureAdoption.ts
+import { useEffect as useEffect8, useReducer as useReducer2, useRef as useRef8 } from "react";
+var MESSAGES = {
+  FILE_TOO_LARGE: "files.adoptTooLarge",
+  INPUT_UNSUPPORTED: "files.adoptUnsupportedFormat",
+  INVALID_XYZ: "files.adoptUnsupportedFormat",
+  TURN_BUSY: "files.adoptTurnBusy"
+};
+var MAX_ATTEMPTS = 64;
+var codeOf = (error) => {
+  const code = error?.code;
+  return typeof code === "string" ? code : null;
+};
+function structureAdoptionMessage(code) {
+  const key = code ? MESSAGES[code] : void 0;
+  return key ? translate(key) : null;
 }
-function latestArtifactForObject(artifacts, artifact) {
-  const objectId = artifact.metadata?.objectId;
-  if (!objectId) return artifact;
-  return firstPublished(artifacts).findLast((value) => value.metadata?.objectId === objectId) ?? artifact;
-}
-function followedArtifactForFile(artifacts, path, checksum) {
-  if (!path || !checksum) return null;
-  const match = firstPublished(artifacts).findLast((artifact) => artifact.workspacePath === path && artifact.metadata?.checksum === checksum && artifact.metadata.objectId);
-  return match ? latestArtifactForObject(artifacts, match) : null;
+function useStructureAdoption({
+  adopt,
+  path,
+  revision,
+  bound,
+  epoch,
+  recheck,
+  currentRevision
+}) {
+  const attempts = useRef8(/* @__PURE__ */ new Map());
+  const [, rerender] = useReducer2((value) => value + 1, 0);
+  const latest = useRef8({ epoch, recheck, currentRevision });
+  latest.current = { epoch, recheck, currentRevision };
+  const key = path && revision ? JSON.stringify([path, revision]) : null;
+  useEffect8(() => {
+    if (!adopt || !key || !path || !revision || bound) return;
+    const prior = attempts.current.get(key);
+    if (prior && !(prior.state === "failed" && prior.code === "TURN_BUSY" && prior.epoch !== epoch)) return;
+    const record = (attempt2) => {
+      if (!attempts.current.has(key) && attempts.current.size >= MAX_ATTEMPTS)
+        attempts.current.delete(attempts.current.keys().next().value);
+      attempts.current.set(key, attempt2);
+      rerender();
+    };
+    record({ state: "pending" });
+    void (async () => {
+      try {
+        record({ state: "adopted", artifact: await adopt(path, revision) || null });
+        return;
+      } catch (error) {
+        let code = codeOf(error);
+        if (code === "FILE_CONFLICT") {
+          try {
+            await latest.current.recheck?.();
+          } catch {
+          }
+          if (latest.current.currentRevision?.() !== revision) {
+            record({ state: "failed", code: null, epoch: latest.current.epoch });
+            return;
+          }
+          try {
+            record({ state: "adopted", artifact: await adopt(path, revision) || null });
+            return;
+          } catch (retryError) {
+            code = codeOf(retryError);
+          }
+        }
+        record({ state: "failed", code, epoch: latest.current.epoch });
+      }
+    })();
+  }, [adopt, key, path, revision, bound, epoch]);
+  const attempt = key ? attempts.current.get(key) : void 0;
+  return {
+    artifact: attempt?.state === "adopted" ? attempt.artifact : null,
+    message: attempt?.state === "failed" && !bound ? structureAdoptionMessage(attempt.code) : null
+  };
 }
 
 // src/components/graph-workspace/WorkspaceFileTabs.tsx
 import { Circle, FileCode2 as FileCode23, X as X3 } from "lucide-react";
-import { useEffect as useEffect8, useRef as useRef8, useState as useState8 } from "react";
+import { useEffect as useEffect9, useRef as useRef9, useState as useState8 } from "react";
 import { jsx as jsx11, jsxs as jsxs9 } from "react/jsx-runtime";
 function WorkspaceFileTabs({
   activePath,
@@ -4085,9 +4148,9 @@ function WorkspaceFileTabs({
   blockedClosePaths = /* @__PURE__ */ new Set()
 }) {
   useI18n();
-  const tabsRef = useRef8(null);
+  const tabsRef = useRef9(null);
   const scrollEdges = useTabScrollEdges(tabsRef);
-  useEffect8(() => {
+  useEffect9(() => {
     tabsRef.current?.querySelector('[aria-selected="true"]')?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
   }, [activePath, tabs.length]);
   const [pendingClosePath, setPendingClosePath] = useState8(null);
@@ -4195,7 +4258,7 @@ function WorkspaceFileTabs({
 // src/components/graph-workspace/GraphWorkspacePreviewPane.tsx
 import { Fragment as Fragment6, jsx as jsx12, jsxs as jsxs10 } from "react/jsx-runtime";
 var GraphWorkspaceMonacoEditor = lazy(
-  () => import("./GraphWorkspaceMonacoEditor-4RH52EXL.js")
+  () => import("./GraphWorkspaceMonacoEditor-UMLY3PKF.js")
 );
 var isHostFilePath = (path) => path.startsWith("/") || /^[a-z]:[\\/]/i.test(path);
 function fileSizeLabel(size) {
@@ -4294,7 +4357,7 @@ function translateReadOnly(reason) {
   const key = `files.safeReason.${reason}`;
   return Object.hasOwn(en, key) ? translate(key) : reason;
 }
-var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-T5ZX7SHO.js"));
+var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-ELT4GTAA.js"));
 var SMALL_TEXT_FILE_MAX_BYTES = 50 * 1024;
 var SMALL_TEXT_FILE_MAX_LINES = 1e3;
 var MARKDOWN_EXTENSIONS = /* @__PURE__ */ new Set(["md", "markdown"]);
@@ -4381,10 +4444,10 @@ var GraphWorkspaceCodePreview = memo(function GraphWorkspaceCodePreview2({
   language = "text"
 }) {
   const { locale: i18nLocale } = useI18n();
-  const rootRef = useRef9(null);
+  const rootRef = useRef10(null);
   const [highlighter, setHighlighter] = useState9(null);
   const [dark, setDark] = useState9(false);
-  useEffect9(() => {
+  useEffect10(() => {
     let alive = true;
     getGraphChatHighlighter().then((loadedHighlighter) => {
       if (alive) {
@@ -4395,7 +4458,7 @@ var GraphWorkspaceCodePreview = memo(function GraphWorkspaceCodePreview2({
       alive = false;
     };
   }, []);
-  useEffect9(() => {
+  useEffect10(() => {
     const shell = rootRef.current?.closest(".thread-ui-shell");
     const readDark = () => shell ? shell.getAttribute("data-theme-effective") === "dark" || shell.classList.contains("dark") || shell.classList.contains("thread-ui-theme-dark") : document.documentElement.classList.contains("dark");
     setDark(readDark());
@@ -4433,7 +4496,7 @@ var GraphWorkspaceCodePreview = memo(function GraphWorkspaceCodePreview2({
       );
     }
   }, [content, highlighter, language, syntaxTheme]);
-  useEffect9(() => {
+  useEffect10(() => {
     const root = rootRef.current;
     root?.querySelectorAll(".is-focused-line").forEach((element) => element.classList.remove("is-focused-line"));
     if (!root || !focusLine || focusLine < 1) {
@@ -4520,8 +4583,8 @@ var GraphWorkspaceMarkdownPreview = memo(
     workspaceRootPath
   }) {
     const { locale: i18nLocale } = useI18n();
-    const scrollRef = useRef9(null);
-    const lastScrollTop = useRef9(0);
+    const scrollRef = useRef10(null);
+    const lastScrollTop = useRef10(0);
     useLayoutEffect2(() => {
       const element = scrollRef.current;
       if (!element) return;
@@ -4565,9 +4628,9 @@ var GraphWorkspaceMarkdownPreview = memo(
 function PreviewContentsCopyButton({ content }) {
   useI18n();
   const [state, setState] = useState9("idle");
-  const pending = useRef9(false);
-  const generation = useRef9(0);
-  useEffect9(() => {
+  const pending = useRef10(false);
+  const generation = useRef10(0);
+  useEffect10(() => {
     generation.current++;
     pending.current = false;
     setState("idle");
@@ -4668,7 +4731,7 @@ function GraphWorkspacePreviewPane({
 }) {
   const { locale: i18nLocale } = useI18n();
   const filePanel = useFilePanel();
-  const surfaceRef = useRef9(null);
+  const surfaceRef = useRef10(null);
   const document2 = selectedTarget?.kind === "workspace-file" && previewFile ? documents?.documents.get(previewFile.path) : void 0;
   const editing = document2?.editing ?? false;
   const draftContent = document2?.content ?? previewFile?.content ?? "";
@@ -4680,7 +4743,7 @@ function GraphWorkspacePreviewPane({
   const setEditing = (value) => {
     if (previewFile) documents?.setEditing(previewFile.path, value);
   };
-  const actionTrigger = useRef9(null);
+  const actionTrigger = useRef10(null);
   const [actionsOpen, setActionsOpen] = useState9(false);
   const [showConflict, setShowConflict] = useState9(true);
   const [diffMode, setDiffMode] = useState9("draftDisk");
@@ -4700,17 +4763,36 @@ function GraphWorkspacePreviewPane({
     expanded: true,
     // ElAgente: scientific renderers lay out for the workspace pane.
     presentation: "workspace",
-    onToggleExpanded: () => void 0
+    onToggleExpanded: () => void 0,
+    displayName: structureDisplayName(artifacts, openArtifact).label
   }) : null;
   const moleculeSnapshot = buildMoleculePreviewSnapshot(previewFile ?? null);
-  const fileArtifact = selectedTarget?.kind === "workspace-file" && moleculeSnapshot && previewFile && document2?.phase === "clean" && !document2.needsVerification ? followedArtifactForFile(artifacts, previewFile.path, document2.snapshot.contentHash) : null;
-  const followedPath = fileArtifact && fileArtifact.workspacePath !== previewFile?.path ? fileArtifact.workspacePath : openArtifact && openArtifact.id !== activeNode?.artifact?.id ? openArtifact.workspacePath : null;
-  const followedNote = followedPath ? /* @__PURE__ */ jsx12("p", { role: "note", className: "thread-graph-molecule-followed truncate px-3 py-1 text-xs text-slate-500 dark:text-slate-400", title: followedPath, children: translate("files.followingLatestRevision", { path: followedPath }) }) : null;
+  const structureRevision = selectedTarget?.kind === "workspace-file" && moleculeSnapshot && previewFile && document2?.phase === "clean" && !document2.needsVerification ? document2.snapshot.contentHash || null : null;
+  const structurePath = structureRevision ? previewFile.path : null;
+  const documentsRef = useRef10(documents);
+  documentsRef.current = documents;
+  const hostArtifact = structurePath ? followedArtifactForFile(artifacts, structurePath, structureRevision) : null;
+  const adoption = useStructureAdoption({
+    adopt: plugins.extensions?.extensionHost?.adoptStructure,
+    path: structurePath,
+    revision: structureRevision,
+    bound: Boolean(hostArtifact),
+    epoch: document2?.revision ?? 0,
+    recheck: () => structurePath ? documentsRef.current?.checkDisk(structurePath) : void 0,
+    currentRevision: () => structurePath ? documentsRef.current?.documents.get(structurePath)?.snapshot.contentHash : null
+  });
+  const fileArtifacts = adoption.artifact && !hostArtifact ? [...artifacts, adoption.artifact] : artifacts;
+  const fileArtifact = hostArtifact ?? (structurePath && adoption.artifact ? followedArtifactForFile(fileArtifacts, structurePath, structureRevision) : null);
+  const followedArtifact = fileArtifact && fileArtifact.workspacePath !== previewFile?.path ? fileArtifact : openArtifact && openArtifact.id !== activeNode?.artifact?.id ? openArtifact : null;
+  const followedName = followedArtifact ? structureDisplayName(fileArtifacts, followedArtifact) : null;
+  const followedNote = followedName ? /* @__PURE__ */ jsx12("p", { role: "note", className: "thread-graph-molecule-followed whitespace-normal break-words px-3 py-1 text-xs text-slate-500 dark:text-slate-400", title: followedName.path ?? void 0, children: translate("files.followingLatestRevision", { name: followedName.label }) }) : null;
+  const adoptionNote = adoption.message ? /* @__PURE__ */ jsx12("p", { role: "note", className: "thread-graph-molecule-adoption whitespace-normal break-words px-3 py-1 text-xs text-slate-500 dark:text-slate-400", children: adoption.message }) : null;
   const renderedFileArtifact = fileArtifact ? plugins.renderArtifact({
     artifact: fileArtifact,
     expanded: true,
     presentation: "workspace",
-    onToggleExpanded: () => void 0
+    onToggleExpanded: () => void 0,
+    displayName: structureDisplayName(fileArtifacts, fileArtifact).label
   }) : null;
   const fileLanguage = previewFile?.language || languageForPath(previewFile?.path ?? "");
   const extension = previewFile ? extensionOf(previewFile.path) : "";
@@ -4739,7 +4821,7 @@ function GraphWorkspacePreviewPane({
   const isArtifactPreview = Boolean(activeNode?.artifact && renderedArtifact);
   const isMoleculePreview = Boolean(moleculeSnapshot) || isArtifactPreview;
   const copyContents = selectedTarget?.kind === "workspace-file" ? !previewLoading && !downloadOnly && !imageUrl && !pdfUrl && previewFile && previewFile.path === activeNode?.path ? document2?.content ?? previewFile.content : null : activeNode?.detail ?? (activeNode?.item ? JSON.stringify(activeNode.item, null, 2) : activeNode?.preview ?? null);
-  useEffect9(() => {
+  useEffect10(() => {
     if (typeof window.matchMedia !== "function") {
       return;
     }
@@ -4749,7 +4831,7 @@ function GraphWorkspacePreviewPane({
     mediaQuery.addEventListener?.("change", update);
     return () => mediaQuery.removeEventListener?.("change", update);
   }, []);
-  useEffect9(() => {
+  useEffect10(() => {
     const shell = surfaceRef.current?.closest(".thread-ui-shell");
     const update = () => setDark(
       shell?.getAttribute("data-theme-effective") === "dark" || shell?.classList.contains("dark") || shell?.classList.contains("thread-ui-theme-dark") || false
@@ -4765,14 +4847,14 @@ function GraphWorkspacePreviewPane({
     });
     return () => observer.disconnect();
   }, []);
-  useEffect9(() => {
+  useEffect10(() => {
     setMarkdownView("preview");
     setJsonView("formatted");
     setShowConflict(true);
     setDiffMode("draftDisk");
     setActionsOpen(false);
   }, [activeNode?.path, resourceScopeKey]);
-  useEffect9(() => {
+  useEffect10(() => {
     if (!actionsOpen) return;
     const escape = (event) => {
       if (event.key !== "Escape" || event.target instanceof HTMLElement && event.target.closest(".monaco-editor")) return;
@@ -4940,7 +5022,7 @@ function GraphWorkspacePreviewPane({
             onDownloadFile && selectedTarget?.kind === "workspace-file" ? /* @__PURE__ */ jsx12(AlertDownloadButton, { name: selectedTarget.node.name, onDownload: onDownloadFile }) : null
           ] }) : null,
           !selectedTarget && missingPath ? /* @__PURE__ */ jsx12(MissingLinkedFile, { path: missingPath }) : !selectedTarget ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center px-5 text-center text-sm text-slate-400 dark:text-slate-500", children: translate("files.pickALiveMoleculeWorkspaceFileArtifact") }) : selectedTarget.kind === "workspace-file" && previewLoading ? /* @__PURE__ */ jsx12("div", { className: "flex min-h-0 flex-1 items-center justify-center px-5 text-center text-sm text-slate-400 dark:text-slate-500", children: translate("files.loadingFilePreview") }) : selectedTarget.kind === "workspace-file" && downloadOnly ? /* @__PURE__ */ jsx12(DownloadFilePreview, { node: selectedTarget.node, onDownload: onDownloadFile, ...downloadReason ? { readOnlyReason: downloadReason } : activeFilePath && documents?.documents.get(activeFilePath)?.snapshot.readOnlyReason ? { readOnlyReason: documents.documents.get(activeFilePath).snapshot.readOnlyReason } : {} }, selectedTarget.node.path) : selectedTarget.kind === "workspace-file" && moleculeSnapshot ? /* @__PURE__ */ jsxs10("div", { className: "thread-graph-molecule-preview flex min-h-0 flex-1 flex-col overflow-hidden", children: [
-            renderedFileArtifact && followedNote,
+            renderedFileArtifact ? followedNote : adoptionNote,
             renderedFileArtifact ?? /* @__PURE__ */ jsx12(
               GraphMoleculeViewer,
               {
@@ -5246,10 +5328,10 @@ function GraphWorkspaceExplorer({
     setBrowsedDirectoryPath(null);
   }, [activeNode?.id, documents.source]);
   const selectedFilePath = activeNode?.kind === "file" ? activeNode.path : null;
-  const documentsRef = useRef10(documents);
+  const documentsRef = useRef11(documents);
   documentsRef.current = documents;
   const structurePath = selectedFilePath && MOLECULAR_EXTENSIONS.has(extensionOf(selectedFilePath)) ? selectedFilePath : null;
-  useEffect10(() => {
+  useEffect11(() => {
     if (!structurePath || !workspaceAdapter?.subscribeWorkspaceChanged) return;
     return workspaceAdapter.subscribeWorkspaceChanged(
       workspaceIdentity,
@@ -5258,20 +5340,20 @@ function GraphWorkspaceExplorer({
       }
     ) ?? void 0;
   }, [structurePath, workspaceAdapter, workspaceIdentity]);
-  const workspacePanelRef = useRef10(null);
-  const treePanelRef = useRef10(null);
+  const workspacePanelRef = useRef11(null);
+  const treePanelRef = useRef11(null);
   useLayoutEffect3(() => {
     const width = workspacePanelRef.current?.clientWidth ?? 0;
     const tree2 = treePanelRef.current;
     if (!tree2 || width <= 0 || tree2.getSize() / 100 * width >= TREE_MIN_PX) return;
     tree2.resize(Math.min(50, TREE_MIN_PX / width * 100));
   }, []);
-  const activeFileChange = useRef10(onActiveFileChange);
+  const activeFileChange = useRef11(onActiveFileChange);
   activeFileChange.current = onActiveFileChange;
-  useEffect10(() => {
+  useEffect11(() => {
     activeFileChange.current?.(selectedFilePath ? relativeWorkspacePath(selectedFilePath, detail.workspace.absPath) : null);
   }, [selectedFilePath, detail.workspace.absPath]);
-  useEffect10(() => () => activeFileChange.current?.(null), []);
+  useEffect11(() => () => activeFileChange.current?.(null), []);
   useLayoutEffect3(() => {
     setNavigation((current) => {
       if (current.scope !== documents.source) return { scope: documents.source, paths: selectedFilePath ? [selectedFilePath] : [], index: selectedFilePath ? 0 : -1 };
@@ -5293,9 +5375,9 @@ function GraphWorkspaceExplorer({
   const [createError, setCreateError] = useState10(null);
   const [creatingFile, setCreatingFile] = useState10(false);
   const createSource = JSON.stringify([workspaceAdapter?.resourceScopeKey, workspaceIdentity.workspaceId, workspaceIdentity.threadId]);
-  const createOwnerRef = useRef10({ source: createSource, busy: false });
+  const createOwnerRef = useRef11({ source: createSource, busy: false });
   if (createOwnerRef.current.source !== createSource) createOwnerRef.current = { source: createSource, busy: false };
-  useEffect10(() => {
+  useEffect11(() => {
     setNewFilePath(null);
     setCreateError(null);
     setCreatingFile(false);
@@ -5372,21 +5454,21 @@ function GraphWorkspaceExplorer({
   );
   const dirtyFilePaths = new Set([...documents.documents].filter(([, doc]) => isProtected(doc)).map(([path]) => path));
   const dirtyKey = [...dirtyFilePaths].join("\0");
-  useEffect10(() => {
+  useEffect11(() => {
     setFileTabs((tabs) => tabs.map((tab) => dirtyFilePaths.has(tab.path) ? { ...tab, pinned: true } : tab));
   }, [dirtyKey]);
   const [isMobileViewport, setIsMobileViewport] = useState10(() => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(max-width: 639px)").matches);
-  const explorerScrollerRef = useRef10(null);
-  const explorerScrollTopRef = useRef10(0);
-  const restoredRevealRef = useRef10(null);
-  const scrollRestoreGenerationRef = useRef10(0);
+  const explorerScrollerRef = useRef11(null);
+  const explorerScrollTopRef = useRef11(0);
+  const restoredRevealRef = useRef11(null);
+  const scrollRestoreGenerationRef = useRef11(0);
   useLayoutEffect3(() => {
     ++scrollRestoreGenerationRef.current;
     return () => {
       ++scrollRestoreGenerationRef.current;
     };
   }, [focusPathRequest]);
-  const pendingExplorerScrollRestoreRef = useRef10(null);
+  const pendingExplorerScrollRestoreRef = useRef11(null);
   const {
     downloadOnly,
     downloadReason,
@@ -5466,10 +5548,10 @@ function GraphWorkspaceExplorer({
   const canTrashFiles = Boolean(capabilities?.trash?.files && workspaceAdapter?.trashFile);
   const canDeleteFiles = Boolean(capabilities?.delete === "file" && !capabilities.trash && workspaceAdapter?.deleteFile);
   const canMoveFiles = Boolean(capabilities?.move === "file-new-destination" && workspaceAdapter?.moveFile);
-  useEffect10(() => {
+  useEffect11(() => {
     setFileOperation(null);
   }, [activeNode?.path]);
-  useEffect10(() => {
+  useEffect11(() => {
     explorerScrollTopRef.current = 0;
     pendingExplorerScrollRestoreRef.current = null;
     setFileOperation(null);
@@ -5478,7 +5560,7 @@ function GraphWorkspaceExplorer({
     ++scrollRestoreGenerationRef.current;
     setFileTabs([]);
   }, [workspaceIdentity.threadId, workspaceIdentity.workspaceId]);
-  useEffect10(() => {
+  useEffect11(() => {
     if (activeNode?.kind !== "file" || !activeNode.path) {
       return;
     }
@@ -5491,14 +5573,14 @@ function GraphWorkspaceExplorer({
   }, [activeNode]);
   const filePanel = useFilePanel();
   const minimized = Boolean(filePanel?.minimized);
-  const pathWhenMinimized = useRef10(null);
-  useEffect10(() => {
+  const pathWhenMinimized = useRef11(null);
+  useEffect11(() => {
     if (minimized) pathWhenMinimized.current = activeNode?.path ?? null;
   }, [minimized]);
-  useEffect10(() => {
+  useEffect11(() => {
     if (minimized && activeNode?.kind === "file" && activeNode.path !== pathWhenMinimized.current) filePanel?.setMinimized?.(false);
   }, [activeNode?.path]);
-  useEffect10(() => {
+  useEffect11(() => {
     if (focusPathRequest) {
       setFocusedLine(focusPathRequest.line ?? null);
       setCollapsedPanel(isMobileViewport && activeNode?.kind !== "directory" ? "explorer" : null);
@@ -5551,7 +5633,7 @@ function GraphWorkspaceExplorer({
     };
     window.requestAnimationFrame(restore);
   }
-  const treeShownForRevealRef = useRef10(null);
+  const treeShownForRevealRef = useRef11(null);
   useLayoutEffect3(() => {
     if (collapsedPanel === "explorer" || focusPathRequest && restoredRevealRef.current !== focusPathRequest.requestId) {
       return;
@@ -5567,7 +5649,7 @@ function GraphWorkspaceExplorer({
       restoredRevealRef.current = focusPathRequest.requestId;
     }
   }, [focusPathRequest, loadingTree, activeNode]);
-  useEffect10(() => {
+  useEffect11(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
       return;
     }
@@ -5898,7 +5980,7 @@ function GraphWorkspaceExplorer({
 }
 
 // src/components/graph-chat/GraphVisualization.tsx
-import { useCallback as useCallback5, useEffect as useEffect11, useMemo as useMemo8 } from "react";
+import { useCallback as useCallback5, useEffect as useEffect12, useMemo as useMemo8 } from "react";
 import {
   addEdge,
   Background,
@@ -6222,7 +6304,7 @@ function GraphVisualization({ nodes: inputNodes }) {
     }),
     []
   );
-  useEffect11(() => {
+  useEffect12(() => {
     setFlowNodes(graph.nodes);
     setFlowEdges(graph.edges);
   }, [graph.edges, graph.nodes, setFlowEdges, setFlowNodes]);
@@ -6508,12 +6590,12 @@ function ThreadGraphWorkspacePanel({
     }
     return tabs;
   }, [features.extensions, features.threadGraph, i18nLocale]);
-  useEffect12(() => {
+  useEffect13(() => {
     if (!activeTab || !isWorkspaceTabEnabled(features, activeTab)) {
       setActiveTab(firstEnabledWorkspaceTab(features, featureConfig?.defaultTab));
     }
   }, [activeTab, featureConfig?.defaultTab, features]);
-  useEffect12(() => {
+  useEffect13(() => {
     if (focusPathRequest && features.workspace) {
       setActiveTab("workspace");
       setActiveHostPanel(null);
@@ -6521,7 +6603,7 @@ function ThreadGraphWorkspacePanel({
   }, [features.workspace, focusPathRequest?.requestId]);
   const requestedPanel = hostPanelRequest?.id ?? null;
   const panelRequestId = hostPanelRequest?.requestId ?? null;
-  useEffect12(() => {
+  useEffect13(() => {
     if (requestedPanel !== null) setActiveHostPanel(requestedPanel);
   }, [requestedPanel, panelRequestId]);
   const shownHostPanel = hostPanels.some((panel) => panel.id === activeHostPanel) ? activeHostPanel : null;
