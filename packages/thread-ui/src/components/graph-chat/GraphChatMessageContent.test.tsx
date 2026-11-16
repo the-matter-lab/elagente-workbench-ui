@@ -270,6 +270,31 @@ it('makes verified inline and plain paths clickable while leaving missing paths,
   expect(open).toHaveBeenCalledWith({ path: 'docs/readme.md' });
 });
 
+it('restores the XYZ file link after a transient listing failure without remounting the reply', async () => {
+  vi.useFakeTimers();
+  try {
+    const path = 'water_comparison_repeat_01/optimization/h2o_gfn2_opt.xyz';
+    const listTree = vi.fn().mockRejectedValueOnce({ code: 'request_timeout' }).mockResolvedValue({
+      name: 'optimization', path: 'water_comparison_repeat_01/optimization', kind: 'directory',
+      children: [{ name: 'h2o_gfn2_opt.xyz', path, kind: 'file' }],
+    });
+    const resolve = createWorkspacePathResolver({ listTree }, { threadId: 't' }, '/workspace');
+    const open = vi.fn();
+    let element!: HTMLDivElement;
+    await act(async () => {
+      element = render(<GraphChatMessageContent workspaceRootPath="/workspace" resolveWorkspacePath={resolve}
+        onOpenWorkspaceFile={open} content={`Saved files: \`${path}\``} />);
+    });
+    expect(element.querySelector('a')).toBeNull();
+    expect(element.textContent).toContain(path);
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+    expect(element.querySelector('a')?.textContent).toBe(path);
+    act(() => element.querySelector('a')!.click());
+    expect(open).toHaveBeenCalledWith({ path });
+    expect(listTree).toHaveBeenCalledTimes(2);
+  } finally { vi.useRealTimers(); }
+});
+
 it('links an auto-detected path under a folder hidden by default (ELA-260)', async () => {
   const open = vi.fn();
   // runs/ is in .workbenchignore: only a listing with hidden entries contains it.
