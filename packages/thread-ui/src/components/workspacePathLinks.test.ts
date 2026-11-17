@@ -2,6 +2,49 @@ import { describe, expect, it, vi } from 'vitest';
 import { createWorkspacePathResolver, parseWorkspacePathText } from './workspacePathLinks';
 
 describe('workspace path resolution', () => {
+  it('shares one delayed retry after an interrupted XYZ directory check', async () => {
+    vi.useFakeTimers();
+    try {
+      const parent = 'water_comparison_repeat_01/optimization';
+      const listTree = vi.fn()
+        .mockRejectedValueOnce(Object.assign(new Error('connection unavailable'), { code: 'agent_unavailable' }))
+        .mockResolvedValue({ path: parent, name: 'optimization', kind: 'directory', children: [
+          { path: `${parent}/h2o_gfn2_opt.xyz`, name: 'h2o_gfn2_opt.xyz', kind: 'file' },
+        ] });
+      const resolve = createWorkspacePathResolver({ listTree }, { threadId: 't' }, '/workspace');
+      const xyz = resolve(`${parent}/h2o_gfn2_opt.xyz`);
+      const missing = resolve(`${parent}/missing.xyz`);
+      await vi.advanceTimersByTimeAsync(14_999);
+      expect(listTree).toHaveBeenCalledTimes(1);
+      // A new subscriber while the backoff is pending shares the same request.
+      const absolute = resolve(`/workspace/${parent}/h2o_gfn2_opt.xyz`);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(await Promise.all([xyz, missing, absolute])).toEqual([true, false, true]);
+      expect(listTree).toHaveBeenCalledTimes(2);
+      expect(await resolve(`${parent}/h2o_gfn2_opt.xyz`)).toBe(true);
+      expect(listTree).toHaveBeenCalledTimes(2);
+    } finally { vi.useRealTimers(); }
+  });
+  it.each([
+    { status: 403 }, { status: 404 }, { status: 429 }, { code: 'rate_limited' }, { code: 'grant_expired' },
+  ])('does not retry a permanent refusal or host-owned rate limit: %o', async error => {
+    const listTree = vi.fn().mockRejectedValue(error);
+    const resolve = createWorkspacePathResolver({ listTree }, { threadId: 't' }, '/workspace');
+    expect(await resolve('missing/file.xyz')).toBe(false);
+    expect(await resolve('missing/another.xyz')).toBe(false);
+    expect(listTree).toHaveBeenCalledOnce();
+  });
+  it('stops retrying a persistently unavailable host', async () => {
+    vi.useFakeTimers();
+    try {
+      const listTree = vi.fn().mockRejectedValue({ status: 503 });
+      const resolve = createWorkspacePathResolver({ listTree }, { threadId: 't' }, '/workspace');
+      const result = resolve('results/water.xyz');
+      await vi.advanceTimersByTimeAsync(120_000);
+      expect(await result).toBe(false);
+      expect(listTree).toHaveBeenCalledTimes(2);
+    } finally { vi.useRealTimers(); }
+  });
   it('normalizes relative, absolute, trailing directory slash and Windows line references', () => {
     expect(parseWorkspacePathText('docs/proposals/naming/pocketteam/', '/code')).toEqual({ path: 'docs/proposals/naming/pocketteam' });
     expect(parseWorkspacePathText('./.temp/result.md', '/code')).toEqual({ path: '.temp/result.md' });

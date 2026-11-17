@@ -59,6 +59,18 @@ function StableCodeRenderer(props: CodeRendererProps) {
   return render?.({ ...props, insideMarkdownLink }) ?? null;
 }
 
+// A new `a` component on each render remounts VerifiedWorkspacePath, temporarily
+// replacing verified links with text. Context updates behavior without remounting.
+type LinkRendererProps = ComponentProps<'a'> & { node?: unknown };
+const LinkRendererContext = createContext<((props: LinkRendererProps) => ReactElement | null) | null>(null);
+function StableLinkRenderer(props: LinkRendererProps) {
+  return useContext(LinkRendererContext)?.(props) ?? null;
+}
+function TableRenderer({ children }: ComponentProps<'table'>) {
+  useI18n();
+  return <div className="thread-markdown-table-scroll" tabIndex={0} role="region" aria-label={translate("chat.table")}><table>{children}</table></div>;
+}
+
 type OpenWorkspaceFileHandler = (input: {
   path: string;
   line?: number;
@@ -394,55 +406,59 @@ export const GraphChatMessageContent = memo(function GraphChatMessageContent({
       : inlineCode;
   };
 
+  const LinkRenderer = ({ href, children: originalChildren, node: _node, ...props }: LinkRendererProps) => {
+    const children = <MarkdownLinkContext.Provider value={true}><MarkdownImageLinkContext.Provider value={true}>{originalChildren}</MarkdownImageLinkContext.Provider></MarkdownLinkContext.Provider>;
+    if (href?.startsWith('workspace-auto:')) {
+      let value = '';
+      try { value = decodeURIComponent(href.slice('workspace-auto:'.length)); } catch { /* Invalid path remains plain text. */ }
+      const target = parseWorkspacePathText(value, workspaceRootPath);
+      return !readOnly && target && resolveWorkspacePath && onOpenWorkspaceFile
+        ? <VerifiedWorkspacePath target={target} resolve={resolveWorkspacePath} onOpen={onOpenWorkspaceFile}>{children}</VerifiedWorkspacePath>
+        : <>{children}</>;
+    }
+    if (readOnly && (!href || !/^https?:\/\//i.test(href))) return <span>{children}</span>;
+    const workspaceTarget = parseWorkspaceFileHref(href, workspaceRootPath);
+    if (workspaceTarget && onOpenWorkspaceFile) {
+      return (
+        <WorkspaceFileLink {...workspaceTarget} onOpen={onOpenWorkspaceFile}>{children}</WorkspaceFileLink>
+      );
+    }
+    const resolvedHref = href ? (resolveHref?.(href) ?? href) : href;
+    return (
+      <a
+        {...props}
+        {...externalLinkProps(resolvedHref)}
+        href={resolvedHref}
+        className="thread-inline-link"
+      >
+        {children}
+      </a>
+    );
+  };
+
   return (
     <div ref={rootRef} data-markdown-ready={highlighter ? 'true' : 'false'} className={`thread-graph-message-markdown ${className}`}>
       <CodeRendererContext.Provider value={CodeBlockRenderer}>
+      <LinkRendererContext.Provider value={LinkRenderer}>
       <ReactMarkdown
         urlTransform={url => !readOnly && url.startsWith('workspace-auto:') ? url : !readOnly && localFileHref(url, typeof window === 'undefined' ? undefined : window.location.origin) ? url : defaultUrlTransform(url)}
         remarkPlugins={[remarkGfm, remarkMath, remarkLatex, remarkCjkFriendly, ...(!readOnly && resolveWorkspacePath ? [remarkWorkspacePaths] : [])]}
         rehypePlugins={[...markdownHtmlPlugins, rehypeKatex]}
         components={{
-          a({ href, children: originalChildren, node: _node, ...props }) {
-            const children = <MarkdownLinkContext.Provider value={true}><MarkdownImageLinkContext.Provider value={true}>{originalChildren}</MarkdownImageLinkContext.Provider></MarkdownLinkContext.Provider>;
-            if (href?.startsWith('workspace-auto:')) {
-              let value = '';
-              try { value = decodeURIComponent(href.slice('workspace-auto:'.length)); } catch { /* Invalid path remains plain text. */ }
-              const target = parseWorkspacePathText(value, workspaceRootPath);
-              return !readOnly && target && resolveWorkspacePath && onOpenWorkspaceFile
-                ? <VerifiedWorkspacePath target={target} resolve={resolveWorkspacePath} onOpen={onOpenWorkspaceFile}>{children}</VerifiedWorkspacePath>
-                : <>{children}</>;
-            }
-            if (readOnly && (!href || !/^https?:\/\//i.test(href))) return <span>{children}</span>;
-            const workspaceTarget = parseWorkspaceFileHref(href, workspaceRootPath);
-            if (workspaceTarget && onOpenWorkspaceFile) {
-              return (
-                <WorkspaceFileLink {...workspaceTarget} onOpen={onOpenWorkspaceFile}>{children}</WorkspaceFileLink>
-              );
-            }
-            const resolvedHref = href ? (resolveHref?.(href) ?? href) : href;
-            return (
-              <a
-                {...props}
-                {...externalLinkProps(resolvedHref)}
-                href={resolvedHref}
-                className="thread-inline-link"
-              >
-                {children}
-              </a>
-            );
-          },
+          a: StableLinkRenderer,
           img({src, alt, width, height}) {
             const resolved = src ? (resolveHref?.(src) ?? src) : undefined;
             if (readOnly && !resolved?.startsWith('data:image/') && !/^https?:\/\//i.test(resolved ?? '')) return <span>{alt || translate("chat.imageUnavailable")}</span>;
             return resolved ? <ZoomableImage src={resolved} alt={alt ?? ''} width={width} height={height} /> : <span>{alt || translate("chat.imageUnavailable")}</span>;
           },
           code: StableCodeRenderer,
-          table: ({children}) => <div className="thread-markdown-table-scroll" tabIndex={0} role="region" aria-label={translate("chat.table")}><table>{children}</table></div>,
+          table: TableRenderer,
           pre: PreRenderer,
         }}
       >
         {processedContent}
       </ReactMarkdown>
+      </LinkRendererContext.Provider>
       </CodeRendererContext.Provider>
     </div>
   );

@@ -270,6 +270,35 @@ it('makes verified inline and plain paths clickable while leaving missing paths,
   expect(open).toHaveBeenCalledWith({ path: 'docs/readme.md' });
 });
 
+it.each(['plain', 'inline code'] as const)('restores the %s XYZ file link after a transient failure across reply updates', async (format) => {
+  vi.useFakeTimers();
+  try {
+    const path = 'water_comparison_repeat_01/optimization/h2o_gfn2_opt.xyz';
+    const content = format === 'plain' ? `Saved files: ${path}` : `Saved files: \`${path}\``;
+    const listTree = vi.fn().mockRejectedValueOnce({ code: 'request_timeout' }).mockResolvedValue({
+      name: 'optimization', path: 'water_comparison_repeat_01/optimization', kind: 'directory',
+      children: [{ name: 'h2o_gfn2_opt.xyz', path, kind: 'file' }],
+    });
+    const resolve = createWorkspacePathResolver({ listTree }, { threadId: 't' }, '/workspace');
+    const open = vi.fn();
+    let element!: HTMLDivElement;
+    await act(async () => {
+      element = render(<GraphChatMessageContent workspaceRootPath="/workspace" resolveWorkspacePath={resolve}
+        onOpenWorkspaceFile={open} content={content} />);
+    });
+    expect(element.querySelector('a')).toBeNull();
+    expect(element.textContent).toContain(path);
+    await act(async () => { root!.render(<GraphChatMessageContent workspaceRootPath="/workspace"
+      resolveWorkspacePath={resolve} onOpenWorkspaceFile={open} content={content} className="updated" />); });
+    expect(listTree).toHaveBeenCalledTimes(1);
+    await act(async () => { await vi.advanceTimersByTimeAsync(15_000); });
+    expect(element.querySelector('a')?.textContent).toBe(path);
+    act(() => element.querySelector('a')!.click());
+    expect(open).toHaveBeenCalledWith({ path });
+    expect(listTree).toHaveBeenCalledTimes(2);
+  } finally { vi.useRealTimers(); }
+});
+
 it('links an auto-detected path under a folder hidden by default (ELA-260)', async () => {
   const open = vi.fn();
   // runs/ is in .workbenchignore: only a listing with hidden entries contains it.
@@ -286,4 +315,57 @@ it('links an auto-detected path under a folder hidden by default (ELA-260)', asy
   await vi.waitFor(() => expect(Array.from(element.querySelectorAll('a')).map(link => link.textContent)).toEqual(['runs/abc/x.out']));
   act(() => element.querySelector('a')!.click());
   expect(open).toHaveBeenCalledWith({ path: 'runs/abc/x.out' });
+});
+
+it.each(['plain', 'inline code', 'table'] as const)('retains verified %s file links and their open menu across message updates', async (format) => {
+  const path = 'water/gfn2_xtb_opt/water_optimized.xyz';
+  const content = format === 'plain' ? `Optimized structure: ${path}`
+    : format === 'inline code' ? `Optimized structure: \`${path}\``
+    : `| Output |\n| --- |\n| ${path} |`;
+  const resolve = vi.fn(async () => true);
+  const open = vi.fn();
+  let element!: HTMLDivElement;
+  await act(async () => {
+    element = render(<GraphChatMessageContent workspaceRootPath="/workspace" resolveWorkspacePath={resolve}
+      onOpenWorkspaceFile={open} content={content} />);
+  });
+  await vi.waitFor(() => expect(element.querySelector('a')).not.toBeNull());
+  const link = element.querySelector('a')!;
+  const calls = resolve.mock.calls.length;
+  act(() => link.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true })));
+  expect(document.querySelector('[role="menu"]')).not.toBeNull();
+  const updatedOpen = vi.fn();
+  for (let i = 0; i < 3; i++) {
+    // Assert synchronously, before another verification promise could resolve:
+    // a lost anchor for even one commit changes the pointer and flashes styling.
+    act(() => root!.render(<GraphChatMessageContent workspaceRootPath="/workspace" resolveWorkspacePath={resolve}
+      onOpenWorkspaceFile={updatedOpen} content={`${content}\n\nUpdate ${i}`} className={`update-${i}`} />));
+    expect(element.querySelector('a')).toBe(link);
+    expect(document.querySelector('[role="menu"]')).not.toBeNull();
+    expect(resolve).toHaveBeenCalledTimes(calls);
+  }
+  act(() => link.click());
+  expect(updatedOpen).toHaveBeenCalledWith({ path });
+  expect(open).not.toHaveBeenCalled();
+});
+
+it('does not reuse a verified link or a late verification after switching workspace resolvers', async () => {
+  const path = 'water/gfn2_xtb_opt/water_optimized.xyz';
+  const open = vi.fn();
+  const first = vi.fn(async () => true);
+  let finishOld!: (exists: boolean) => void;
+  const pending = vi.fn(() => new Promise<boolean>(resolve => { finishOld = resolve; }));
+  const missing = vi.fn(async () => false);
+  const paint = (resolve: (path: string) => Promise<boolean>, rootPath = '/workspace') =>
+    <GraphChatMessageContent workspaceRootPath={rootPath} resolveWorkspacePath={resolve}
+      onOpenWorkspaceFile={open} content={`Optimized structure: ${path}`} />;
+  let element!: HTMLDivElement;
+  await act(async () => { element = render(paint(first)); });
+  await vi.waitFor(() => expect(element.querySelector('a')).not.toBeNull());
+  act(() => root!.render(paint(pending, '/other')));
+  expect(element.querySelector('a')).toBeNull();
+  await act(async () => { root!.render(paint(missing, '/third')); });
+  await act(async () => { finishOld(true); });
+  expect(element.querySelector('a')).toBeNull();
+  expect(element.textContent).toContain(path);
 });
