@@ -336,6 +336,14 @@ export function ThreadDetailSurface({
     openThread,
     cancelPendingSteer,
   } = adapter;
+  // Link verification belongs to the workspace, not to unrelated timeline
+  // callbacks that hosts may replace as usage and runtime snapshots arrive.
+  const resolveWorkspacePath = useMemo(
+    () => detail && adapter.workspace
+      ? createWorkspacePathResolver(adapter.workspace, { threadId: detail.thread.id, workspaceId: detail.workspace.id }, detail.workspace.absPath)
+      : undefined,
+    [adapter.workspace, detail?.thread.id, detail?.workspace.id, detail?.workspace.absPath],
+  );
   const timelineAdapter = useMemo(
     () => ({
       ...(getImageAssetUrl
@@ -358,7 +366,7 @@ export function ThreadDetailSurface({
         return adapter.workspace.getRawFileUrl({threadId: detail.thread.id, workspaceId: detail.workspace.id, path: relative ?? path});
       },
       workspaceRootPath: detail?.workspace.absPath,
-      ...(detail && adapter.workspace ? { resolveWorkspacePath: createWorkspacePathResolver(adapter.workspace, { threadId: detail.thread.id, workspaceId: detail.workspace.id }, detail.workspace.absPath) } : {}),
+      ...(resolveWorkspacePath ? { resolveWorkspacePath } : {}),
       onOpenLinkedThread: openThread,
       ...(adapter.resolveArtifact ? { resolveArtifact: adapter.resolveArtifact } : {}),
       ...(adapter.getThreadHref ? { getThreadHref: adapter.getThreadHref } : {}),
@@ -375,6 +383,7 @@ export function ThreadDetailSurface({
       detail?.workspace.id,
       detail?.thread.id,
       adapter.workspace,
+      resolveWorkspacePath,
       adapter.resolveArtifact,
       adapter.getThreadHref,
       adapter.describeThread,
