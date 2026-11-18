@@ -79,6 +79,7 @@ import { ComposerPendingQueue } from './composer/ComposerPendingQueue';
 import { ComposerToolbar } from './composer/ComposerToolbar';
 import { useComposerAttachments } from './composer/useComposerAttachments';
 import { useAttachmentPreviewUrls } from './composer/useAttachmentPreviewUrls';
+import { useAttachmentMetadata } from './composer/useAttachmentMetadata';
 import { useComposerDraft } from './composer/useComposerDraft';
 import { useComposerForkActions } from './composer/useComposerForkActions';
 import { useComposerGoal } from './composer/useComposerGoal';
@@ -406,6 +407,7 @@ export function ThreadComposer({
     attachments,
     isShellView,
   });
+  const attachmentMetadata = useAttachmentMetadata(attachments, !isShellView);
   const {
     displayedCollaborationMode,
     updateSettings: handleUpdateSettings,
@@ -720,6 +722,7 @@ export function ThreadComposer({
     prompt,
     promptSegments,
     attachmentPreviewUrls,
+    attachmentMetadata,
     previewSignature,
     pendingSelectionRef,
     pendingInsertedAttachmentIdsRef,

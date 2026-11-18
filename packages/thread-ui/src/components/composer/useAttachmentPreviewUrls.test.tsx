@@ -98,7 +98,7 @@ describe('useAttachmentPreviewUrls', () => {
     vi.restoreAllMocks();
   });
 
-  it('creates preview URLs only for photo attachments and reuses cached URLs', async () => {
+  it('creates preview URLs for photos and reuses cached URLs', async () => {
     const photo = makeAttachment('photo-a', 'photo');
     const file = makeAttachment('file-a', 'file');
     const harness = renderHookHarness({
@@ -122,6 +122,26 @@ describe('useAttachmentPreviewUrls', () => {
     });
     expect(createObjectUrl).toHaveBeenCalledTimes(1);
     expect(revokeObjectUrl).not.toHaveBeenCalled();
+    harness.unmount();
+  });
+
+  it('previews images picked as files, and revokes a replaced File even when its client ID is reused', async () => {
+    const first = { ...makeAttachment('same-id', 'file'), file: new File(['svg'], 'picture.svg') };
+    const harness = renderHookHarness({ attachments: [first], isShellView: false });
+    await vi.waitFor(() => expect(latestPreviewUrls).toEqual({ 'same-id': 'blob:preview-1' }));
+    const second = { ...first, file: new File(['new svg'], 'picture.svg') };
+    harness.rerender({ attachments: [second], isShellView: false });
+    await vi.waitFor(() => expect(latestPreviewUrls).toEqual({ 'same-id': 'blob:preview-2' }));
+    expect(revokeObjectUrl).toHaveBeenCalledWith('blob:preview-1');
+    harness.unmount();
+    expect(revokeObjectUrl).toHaveBeenCalledWith('blob:preview-2');
+  });
+
+  it('previews an extensionless image by MIME without changing its upload kind', async () => {
+    const image = { ...makeAttachment('mime-image', 'file'), file: new File(['png'], 'Screenshot', { type: 'image/png' }) };
+    const harness = renderHookHarness({ attachments: [image], isShellView: false });
+    await vi.waitFor(() => expect(latestPreviewUrls).toEqual({ 'mime-image': 'blob:preview-1' }));
+    expect(image.kind).toBe('file');
     harness.unmount();
   });
 
