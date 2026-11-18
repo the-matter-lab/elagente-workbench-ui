@@ -1,4 +1,4 @@
-import { translate, useI18n } from '../../i18n';
+import { useI18n } from '../../i18n';
 import {
   useLayoutEffect,
   type MutableRefObject,
@@ -6,12 +6,11 @@ import {
 } from 'react';
 
 import {
-  attachmentDisplayLabel,
-  basenameFromAttachmentPath,
   type PromptSegment,
   type PromptSelectionRange,
 } from './composerUtils';
-import { FILE_GLYPH_SVG, fileBadge, fileFamily, shortFileName } from '../attachments/attachmentFiles';
+import { composerAttachmentName, createPromptAttachmentToken } from './composerAttachmentToken';
+import { sharedFilenameSuffix, type ComposerFileMetadata } from './composerFileChips';
 import { restoreSelectionAfterInsertedAttachments } from './contentEditablePrompt';
 
 interface UseComposerPromptDomSyncInput {
@@ -20,6 +19,7 @@ interface UseComposerPromptDomSyncInput {
   prompt: string;
   promptSegments: PromptSegment[];
   attachmentPreviewUrls: Record<string, string>;
+  attachmentMetadata?: Record<string, ComposerFileMetadata>;
   previewSignature: string;
   pendingSelectionRef: MutableRefObject<PromptSelectionRange | null>;
   pendingInsertedAttachmentIdsRef: MutableRefObject<string[]>;
@@ -31,62 +31,11 @@ interface UseComposerPromptDomSyncInput {
   restoreSelection: (selection: PromptSelectionRange | null) => void;
 }
 
-// The same tile as a sent prompt's attachment: a glyph (or a photo's thumbnail)
-// over its shortened name. Tapping it opens its card (see ComposerPromptEditor),
-// which reads the details kept on the token.
-function createPromptAttachmentToken(
-  segment: Extract<PromptSegment, { type: 'attachment' }>,
-  attachmentPreviewUrls: Record<string, string>,
-) {
-  const { attachment } = segment;
-  const name = basenameFromAttachmentPath(attachment.originalName || attachmentDisplayLabel(attachment)) || attachmentDisplayLabel(attachment);
-  const family = fileFamily(name, attachment.kind, attachment.file?.type);
-  const token = document.createElement('span');
-  token.dataset.segmentType = 'attachment';
-  token.dataset.clientId = attachment.clientId;
-  token.dataset.placeholder = attachment.placeholder;
-  token.dataset.family = family;
-  token.dataset.kind = attachment.kind;
-  token.dataset.name = name;
-  if (attachment.file) token.dataset.size = String(attachment.file.size);
-  token.contentEditable = 'false';
-  token.className = 'attachment-tile';
-  token.setAttribute('role', 'button');
-  token.setAttribute('aria-label', translate('chat.attachmentDetails', { name }));
-  token.title = name;
-  token.tabIndex = 0;
-
-  const icon = document.createElement('span');
-  icon.className = 'attachment-tile-icon';
-  const previewUrl = attachment.kind === 'photo' ? attachmentPreviewUrls[attachment.clientId] : undefined;
-  if (previewUrl) {
-    const image = document.createElement('img');
-    image.src = previewUrl;
-    image.alt = '';
-    image.draggable = false;
-    icon.append(image);
-  } else {
-    const glyph = document.createElement('span');
-    glyph.className = 'attachment-tile-glyph';
-    glyph.innerHTML = FILE_GLYPH_SVG;
-    icon.append(glyph);
-    const badge = fileBadge(name);
-    if (badge) {
-      const mark = document.createElement('b');
-      mark.textContent = badge;
-      icon.append(mark);
-    }
-  }
-  const label = document.createElement('span');
-  label.className = 'attachment-tile-name';
-  label.textContent = shortFileName(name);
-  token.append(icon, label);
-  return token;
-}
-
 function buildPromptFragment(
   promptSegments: PromptSegment[],
   attachmentPreviewUrls: Record<string, string>,
+  suffix: string,
+  metadata: Record<string, ComposerFileMetadata>,
 ) {
   const fragment = document.createDocumentFragment();
 
@@ -98,7 +47,7 @@ function buildPromptFragment(
       continue;
     }
 
-    fragment.append(createPromptAttachmentToken(segment, attachmentPreviewUrls));
+    fragment.append(createPromptAttachmentToken(segment, attachmentPreviewUrls, suffix, metadata[segment.attachment.clientId]));
   }
 
   return fragment;
@@ -110,6 +59,7 @@ export function useComposerPromptDomSync({
   prompt,
   promptSegments,
   attachmentPreviewUrls,
+  attachmentMetadata = {},
   previewSignature,
   pendingSelectionRef,
   pendingInsertedAttachmentIdsRef,
@@ -119,7 +69,7 @@ export function useComposerPromptDomSync({
   readLatestPrompt,
   restoreSelection,
 }: UseComposerPromptDomSyncInput) {
-  useI18n();
+  const { locale } = useI18n();
   useLayoutEffect(() => {
     const editor = promptRef.current;
     if (!editor || isShellView || editor.dataset.imeComposing === 'true') {
@@ -135,11 +85,13 @@ export function useComposerPromptDomSync({
     const shouldSyncDom = editorPrompt !== prompt &&
       !(latestPrompt !== prompt && editorPrompt === latestPrompt);
 
+    const attachmentSegments = promptSegments.filter(segment => segment.type === 'attachment');
+    const suffix = sharedFilenameSuffix(attachmentSegments.map(composerAttachmentName));
     if (shouldSyncDom) {
       editor.replaceChildren(
-        buildPromptFragment(promptSegments, attachmentPreviewUrls),
+        buildPromptFragment(promptSegments, attachmentPreviewUrls, suffix, attachmentMetadata),
       );
-    } else if (renderedPreviewSignatureRef.current !== previewSignature) {
+    } else {
       // A thumbnail becoming available must not replace the text nodes tracked
       // by native dictation/autocorrection, or disturb its live selection.
       const attachments = new Map(promptSegments.flatMap(segment =>
@@ -147,7 +99,7 @@ export function useComposerPromptDomSync({
       ));
       for (const token of editor.querySelectorAll<HTMLElement>('[data-segment-type="attachment"]')) {
         const segment = attachments.get(token.dataset.clientId ?? '');
-        if (segment) token.replaceWith(createPromptAttachmentToken(segment, attachmentPreviewUrls));
+        if (segment) createPromptAttachmentToken(segment, attachmentPreviewUrls, suffix, attachmentMetadata[segment.attachment.clientId], token);
       }
     }
     renderedPreviewSignatureRef.current = previewSignature;
@@ -171,6 +123,8 @@ export function useComposerPromptDomSync({
     pendingInsertedAttachmentIdsRef.current = [];
   }, [
     attachmentPreviewUrls,
+    attachmentMetadata,
+    locale,
     isShellView,
     previewSignature,
     prompt,

@@ -101,6 +101,58 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe('composer filename chips', () => {
+  it('keeps exact names, dims only shared endings, and removes directly without submitting', async () => {
+    await render();
+    const files = ['Caffeine_openbabel.xyz', 'theobromine_openbabel.xyz'].map(name => new File(['original'], name));
+    await chooseFile(1, files);
+    const chips = [...host.querySelectorAll<HTMLElement>('.composer-file-chip')];
+    expect(chips.map(chip => chip.querySelector('.composer-file-name')?.textContent)).toEqual(files.map(file => file.name));
+    expect(chips.map(chip => chip.querySelector('.composer-file-badge')?.textContent)).toEqual(['XYZ', 'XYZ']);
+    expect(chips.map(chip => [...chip.querySelectorAll('.composer-file-name-shared')].map(part => part.textContent).join(''))).toEqual(['_openbabel.xyz', '_openbabel.xyz']);
+    expect(chips[0].title).toBe(files[0].name);
+    await act(async () => chips[0].querySelector<HTMLButtonElement>('[data-remove-attachment]')?.click());
+    expect(host.querySelectorAll('.composer-file-chip')).toHaveLength(1);
+    expect(host.querySelector('.composer-file-name-shared')).toBeNull();
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 190)); });
+    expect(draft.attachments).toHaveLength(1);
+    expect(draft.attachments[0].file).toBe(files[1]);
+    expect(submit).not.toHaveBeenCalled();
+  });
+
+  it('uses thumbnails for an image picked as File, and keeps mixed filenames normal', async () => {
+    await render();
+    const files = [new File(['svg'], 'exact Picture.svg', { type: 'image/svg+xml' }), new File(['text'], 'report.OUT')];
+    await chooseFile(1, files);
+    expect(host.querySelector('.composer-file-thumbnail img')?.getAttribute('src')).toBe('blob:preview');
+    expect(host.querySelectorAll('.composer-file-name-shared')).toHaveLength(0);
+    expect(host.querySelector('.composer-file-meta')?.textContent).toBe('4 B');
+    expect(draft.attachments[0].kind).toBe('file');
+    const image = host.querySelector('img')!;
+    await act(async () => image.dispatchEvent(new Event('error')));
+    expect(host.querySelector('.composer-file-badge')?.textContent).toBe('SVG');
+  });
+
+  it('retains long names and exact File objects on submit; keyboard removal never submits', async () => {
+    await render();
+    const name = 'A very long uploaded molecule Name with a charged ion and unicode CO₂.XYZ';
+    const files = [new File(['bytes'], name), new File(['notes'], 'unknown.qwe')];
+    await chooseFile(1, files);
+    const chip = host.querySelector<HTMLElement>('.composer-file-chip')!;
+    expect(chip.querySelector('.composer-file-name')?.textContent).toBe(name);
+    expect(chip.querySelector('.composer-file-name-tail')?.textContent).toMatch(/\.XYZ$/);
+    expect(chip.title).toBe(name);
+    expect(host.querySelectorAll('.composer-file-badge')[1].textContent).toBe('FILE');
+    await act(async () => host.querySelectorAll<HTMLButtonElement>('[data-remove-attachment]')[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })));
+    await act(async () => { await new Promise(resolve => setTimeout(resolve, 190)); });
+    expect(draft.attachments).toHaveLength(1);
+    expect(submit).not.toHaveBeenCalled();
+    await act(async () => host.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
+    expect(submit).toHaveBeenCalledOnce();
+    expect(submit.mock.calls[0][0].attachments[0].file).toBe(files[0]);
+  });
+});
+
 describe('composer attachment capability admission', () => {
   it('dismisses a rejection while busy without submitting or losing the draft, then shows a new rejection', async () => {
     await render({ files: true, images: false }, { prompt: 'Keep this draft', attachments: [] });

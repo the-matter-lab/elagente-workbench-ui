@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { ComposerAttachmentDraft } from './composerUtils';
+import { composerImageFile } from './composerFileChips';
 
 export type AttachmentPreviewMap = Record<string, string>;
+type CachedPreview = { file: File; url: string };
 
 function samePreviewUrls(current: AttachmentPreviewMap, next: AttachmentPreviewMap) {
   const keys = Object.keys(next);
@@ -10,9 +12,9 @@ function samePreviewUrls(current: AttachmentPreviewMap, next: AttachmentPreviewM
     keys.every((clientId) => current[clientId] === next[clientId]);
 }
 
-function revokeCachedPreviewUrls(previewUrlCache: Map<string, string>) {
-  for (const previewUrl of previewUrlCache.values()) {
-    URL.revokeObjectURL(previewUrl);
+function revokeCachedPreviewUrls(previewUrlCache: Map<string, CachedPreview>) {
+  for (const preview of previewUrlCache.values()) {
+    URL.revokeObjectURL(preview.url);
   }
   previewUrlCache.clear();
 }
@@ -24,7 +26,7 @@ export function useAttachmentPreviewUrls({
   attachments: ComposerAttachmentDraft[];
   isShellView: boolean;
 }) {
-  const previewUrlCacheRef = useRef<Map<string, string>>(new Map());
+  const previewUrlCacheRef = useRef<Map<string, CachedPreview>>(new Map());
   const [attachmentPreviewUrls, setAttachmentPreviewUrls] =
     useState<AttachmentPreviewMap>({});
   const shownPreviewUrlsRef = useRef(attachmentPreviewUrls);
@@ -50,24 +52,25 @@ export function useAttachmentPreviewUrls({
     const activeClientIds = new Set<string>();
 
     for (const attachment of attachments) {
-      if (attachment.kind !== 'photo') {
+      if (attachment.kind !== 'photo' && !attachment.file.type.startsWith('image/') && !composerImageFile(attachment.file.name)) {
         continue;
       }
 
       activeClientIds.add(attachment.clientId);
-      let previewUrl = previewUrlCache.get(attachment.clientId);
-      if (!previewUrl) {
-        previewUrl = URL.createObjectURL(attachment.file);
-        previewUrlCache.set(attachment.clientId, previewUrl);
+      let preview = previewUrlCache.get(attachment.clientId);
+      if (preview?.file !== attachment.file) {
+        if (preview) URL.revokeObjectURL(preview.url);
+        preview = { file: attachment.file, url: URL.createObjectURL(attachment.file) };
+        previewUrlCache.set(attachment.clientId, preview);
       }
-      nextPreviewUrls[attachment.clientId] = previewUrl;
+      nextPreviewUrls[attachment.clientId] = preview.url;
     }
 
-    for (const [clientId, previewUrl] of previewUrlCache.entries()) {
+    for (const [clientId, preview] of previewUrlCache.entries()) {
       if (activeClientIds.has(clientId)) {
         continue;
       }
-      URL.revokeObjectURL(previewUrl);
+      URL.revokeObjectURL(preview.url);
       previewUrlCache.delete(clientId);
     }
 
