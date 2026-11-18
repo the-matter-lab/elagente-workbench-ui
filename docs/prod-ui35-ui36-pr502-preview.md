@@ -1,6 +1,6 @@
 # UI35 + UI36 preview for infrastructure PR502
 
-Package: `@remote-codex/thread-ui@0.1.33-preview.ui35-ui36.1`.
+Package: `@remote-codex/thread-ui@0.1.33+preview.ui35.ui36.1`.
 
 This isolated preview starts at stable UI 0.1.33 source
 `858979f2fdae34239ab7cb9c86671c7d5c59cb53` and applies the exact reviewed changes:
@@ -35,3 +35,9 @@ Pin the root and Web direct UI dependencies to the identical preview tarball.
 Package integrity, source commit, exact validation commands, focused test counts,
 and installability evidence are recorded beside the immutable TGZ under
 `/Users/nanyang/ElAgente/.local/prod-ui35-ui36-pr502-20261118/ui/`.
+
+The preview uses SemVer build metadata so the existing Forjador and Grafico
+plugin peer ranges accept the 0.1.33 core version. The earlier prerelease
+archive and its records are retained separately; its XYZ-only install check did
+not establish compatibility with the complete host plugin set. This metadata
+correction leaves all built JavaScript, declarations, and styles byte-identical.
