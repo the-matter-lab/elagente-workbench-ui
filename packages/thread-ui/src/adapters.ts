@@ -3,6 +3,7 @@ import type {
   ShellSessionDto,
   ThreadDto,
   ThreadHistoryItemDetailDto,
+  ThreadHistoryItemDto,
   ThreadShellStateDto,
   ThreadTurnDto,
   UpdateShellInput,
@@ -46,7 +47,25 @@ export interface ThreadToolArtifact {
   size?: number | undefined;
 }
 
+/** Content rendered inside a user bubble; the shared frame keeps its metadata. */
+export interface ThreadUserMessageContentInput {
+  threadId?: string | undefined;
+  messageId: string;
+  item: ThreadHistoryItemDto;
+  /** Original stored text, before prompt-envelope parsing or presentation. */
+  content: string;
+  /** Shared body, including attachments and Show more. Omit text for the default. */
+  renderDefaultContent: (content?: string) => ReactNode;
+  /** Call before host disclosure changes so the timeline can preserve its anchor. */
+  onBeforeResize?: ((anchor?: Element | null) => void) | undefined;
+}
+
 export interface ThreadTimelineAdapter {
+  /**
+   * Replaces user bubble content. Return null/undefined to keep the shared body.
+   * Peer envelope headers and system notices retain their shared presentation.
+   */
+  renderUserMessageContent?: (input: ThreadUserMessageContentInput) => ReactNode;
   /** Resolves an artifact a tool reported; null when the host does not know it. */
   resolveArtifact?: (artifactId: string) => ThreadToolArtifact | null;
   resolveWorkspacePath?: (path: string) => Promise<boolean>;
@@ -275,6 +294,7 @@ export interface ThreadShellAdapter {
 }
 
 export interface ThreadDetailUiAdapter {
+  renderUserMessageContent?: ThreadTimelineAdapter['renderUserMessageContent'];
   openThread(threadId: string): void;
   /** Resolves artifacts a tool reported, so tool cards can show them (images inline). */
   resolveArtifact?: (artifactId: string) => ThreadToolArtifact | null;

@@ -1,6 +1,6 @@
 {
   "name": "@remote-codex/thread-ui",
-  "version": "0.1.32",
+  "version": "0.1.32-pr34.5875241-usercontent.1",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
