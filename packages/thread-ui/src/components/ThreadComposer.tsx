@@ -141,6 +141,8 @@ export interface ThreadComposerProps {
   onPickAttachment?: ThreadComposerAttachmentPicker | undefined;
   /** Omitted flags retain the generic composer's existing attachment behavior. */
   attachmentCapabilities?: { files: boolean; images: boolean };
+  /** Host attachment count and send limit; omitted means no UI limit. */
+  attachmentLimit?: { count: number; max: number };
   skillsState?: SlashPanelState<ThreadSkillsDto>;
   mcpState?: SlashPanelState<ThreadMcpServersDto>;
   hooksState?: SlashPanelState<ThreadHooksDto>;
@@ -226,6 +228,7 @@ export function ThreadComposer({
   settingsBusy = false,
   compactBusy = false,
   error,
+  attachmentLimit,
   model = null,
   agentLabel = null,
   reasoningEffort = null,
@@ -763,6 +766,13 @@ export function ThreadComposer({
     if (submitInFlightRef.current) {
       return;
     }
+    // Input events can lead the controlled host render (ELA-229). Validate
+    // the latest local draft as well as the host's displayed count.
+    const draft = readLatestDraft();
+    if (!isShellView && attachmentLimit &&
+      (attachmentLimit.count > attachmentLimit.max || draft.attachments.length > attachmentLimit.max)) {
+      return;
+    }
     submitInFlightRef.current = true;
 
     try {
@@ -777,7 +787,6 @@ export function ThreadComposer({
 
       // The latest local draft, not the rendered one: a render can lag behind
       // the editor's input events (ELA-229).
-      const draft = readLatestDraft();
       const submitInput = buildComposerSubmitInput({
         prompt: draft.prompt,
         attachments: draft.attachments,
@@ -1043,6 +1052,7 @@ export function ThreadComposer({
   });
   const toolbarProps = useComposerToolbarProps({
     attachmentCapabilities,
+    sendDisabled: !isShellView && !!attachmentLimit && attachmentLimit.count > attachmentLimit.max,
     slashQuery,
     slashActive,
     isShellView,
@@ -1238,6 +1248,7 @@ export function ThreadComposer({
       shellClassName={composerShellClassName}
       inputGroupClassName={graphChatInputGroupClassName}
       error={error ?? attachmentError}
+      attachmentLimit={attachmentLimit}
       onDismissError={error == null && attachmentError ? () => setAttachmentError(null) : undefined}
       followTail={followTail}
       attachmentCapabilities={attachmentCapabilities}
