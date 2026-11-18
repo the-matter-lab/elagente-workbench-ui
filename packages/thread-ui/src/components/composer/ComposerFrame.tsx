@@ -1,5 +1,5 @@
 import { usePhoneDock } from '../workbench/phoneDockContext';
-import { X } from 'lucide-react';
+import { CircleAlert, X } from 'lucide-react';
 import { translate, useI18n } from '../../i18n';
 import type {
   FormEvent,
@@ -27,6 +27,7 @@ export interface ComposerFrameProps {
   onDismissError?: (() => void) | undefined;
   followTail: boolean;
   attachmentCapabilities?: { files: boolean; images: boolean } | undefined;
+  attachmentLimit?: { count: number; max: number };
   photoInputRef: MutableRefObject<HTMLInputElement | null>;
   fileInputRef: MutableRefObject<HTMLInputElement | null>;
   onAppendAttachments: (
@@ -60,6 +61,7 @@ export function ComposerFrame({
   onDismissError,
   followTail,
   attachmentCapabilities,
+  attachmentLimit,
   photoInputRef,
   fileInputRef,
   onAppendAttachments,
@@ -81,6 +83,9 @@ export function ComposerFrame({
   const { expanded, focusOwner, ...focusEvents } = useCompactComposer(formRef, activeView === 'chat');
   // The phone dock's status bar shows usage instead.
   const dock = usePhoneDock();
+  const invalidAttachmentLimit = activeView === 'chat' && attachmentLimit && attachmentLimit.count > attachmentLimit.max
+    ? attachmentLimit
+    : null;
   const usage = !dock && activeView === 'chat' && visibleSubscriptionWindows(subscriptionUsage).length > 0
     ? <ComposerSubscriptionUsage usage={subscriptionUsage} />
     : null;
@@ -118,8 +123,19 @@ export function ComposerFrame({
         <div
           className={`${shellClassName} relative flex w-full flex-col overflow-visible rounded-[16px] sm:rounded-[18px]`}
         >
-          <InputGroup className={inputGroupClassName}>
+          <InputGroup
+            className={inputGroupClassName}
+            data-attachment-limit-exceeded={invalidAttachmentLimit ? 'true' : undefined}
+          >
             {promptSlot}
+            {invalidAttachmentLimit ? (
+              <div role="alert" className="composer-attachment-limit-alert">
+                <CircleAlert aria-hidden="true" />
+                <span>
+                  <strong>{invalidAttachmentLimit.count}</strong> {invalidAttachmentLimit.count === 1 ? 'file' : 'files'} attached, max <strong>{invalidAttachmentLimit.max}</strong>. Remove {invalidAttachmentLimit.count - invalidAttachmentLimit.max} to send.
+                </span>
+              </div>
+            ) : null}
             {toolbarSlot}
           </InputGroup>
 

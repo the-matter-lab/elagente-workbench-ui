@@ -75,6 +75,7 @@ export interface UseComposerToolbarPropsInput {
   goalStatus: ThreadGoalDto['status'] | undefined;
   activeView: 'chat' | 'shell';
   disabled: boolean;
+  sendDisabled?: boolean;
   promptEmpty?: boolean;
   model: string | null | undefined;
   agent?: string | undefined;
@@ -167,6 +168,7 @@ export interface UseComposerToolbarPropsInput {
 
 export function useComposerToolbarProps({
   isShellView,
+  sendDisabled = false,
   attachmentCapabilities,
   canToggleShellView,
   isMobileShell,
@@ -428,6 +430,7 @@ export function useComposerToolbarProps({
         goalBusy,
         activeView,
         disabled,
+        sendDisabled,
         ...(promptEmpty !== undefined ? { promptEmpty } : {}),
         fastMode,
         sendButtonLabel,
