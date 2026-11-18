@@ -181,6 +181,29 @@ export const GraphChatCompactMessageItem = memo(
       );
     }
 
+    const renderDefaultContent = (content = envelope?.type === 'peer' ? envelope.body : item.text) => (
+      <GraphChatUserMessageBody
+        messageId={item.id}
+        scrollRootRef={scrollRootRef}
+        onBeforeResize={onBeforeMessageResize}
+        threadId={threadId}
+        text={content}
+        attachmentPreviewUrls={item.attachmentPreviewUrls}
+        getImageAssetUrl={adapter?.getImageAssetUrl}
+        onOpenWorkspaceFile={adapter?.onOpenWorkspaceFile}
+      />
+    );
+    const userContent = item.kind === 'userMessage'
+      ? adapter?.renderUserMessageContent?.({
+          threadId,
+          messageId: item.id,
+          item,
+          content: item.text,
+          renderDefaultContent,
+          onBeforeResize: onBeforeMessageResize,
+        }) ?? renderDefaultContent()
+      : null;
+
     return (
       <GraphChatMessageFrame
         messageId={item.id}
@@ -233,16 +256,7 @@ export const GraphChatCompactMessageItem = memo(
         ) : (
           <>
           {envelope?.type === 'peer' ? <PromptEnvelopeHeader envelope={envelope} /> : null}
-          <GraphChatUserMessageBody
-            messageId={item.id}
-            scrollRootRef={scrollRootRef}
-            onBeforeResize={onBeforeMessageResize}
-            threadId={threadId}
-            text={envelope?.type === 'peer' ? envelope.body : item.text}
-            attachmentPreviewUrls={item.attachmentPreviewUrls}
-            getImageAssetUrl={adapter?.getImageAssetUrl}
-            onOpenWorkspaceFile={adapter?.onOpenWorkspaceFile}
-          />
+          {userContent}
           </>
         )}
       </GraphChatMessageFrame>
