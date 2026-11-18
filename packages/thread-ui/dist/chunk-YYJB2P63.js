@@ -5,7 +5,7 @@ import {
 import {
   translate,
   useI18n
-} from "./chunk-D5VSPJC3.js";
+} from "./chunk-JOUZDWAW.js";
 
 // src/components/shell/terminalClipboard.ts
 async function copyText(text) {

@@ -1,7 +1,7 @@
 import * as react from 'react';
 import { ReactNode, MutableRefObject } from 'react';
 import * as _remote_codex_shared from '@remote-codex/shared';
-import { PromptAttachmentManifestEntryDto, ThreadDto, UpdateThreadSettingsInput, ThreadHistoryItemDetailDto, ThreadTurnDto, ThreadShellStateDto, ShellSessionDto, UpdateShellInput, ShellEventEnvelope, PluginDto, ImportPluginInput, UpdatePluginInput, ThreadArtifactDto, ThreadDetailDto, AgentRuntimeStatusDto } from '@remote-codex/shared';
+import { PromptAttachmentManifestEntryDto, ThreadHistoryItemDto, ThreadHistoryItemDetailDto, ThreadTurnDto, ThreadDto, UpdateThreadSettingsInput, ThreadShellStateDto, ShellSessionDto, UpdateShellInput, ShellEventEnvelope, PluginDto, ImportPluginInput, UpdatePluginInput, ThreadArtifactDto, ThreadDetailDto, AgentRuntimeStatusDto } from '@remote-codex/shared';
 import { F as FrontendPluginModule, E as ExtensionHostAdapter, m as ViewerToolbarContribution, f as ThreadPanelContribution, a as ExtensionRenderContext, U as UpstreamConnectionHost, T as ThreadPluginAdapter, e as PluginSettingsSnapshot, A as ArtifactRenderContext, I as InlineCodeRenderContext, b as MessagePresentationContext, M as MessagePresentation, P as PluginActionOutputContext, g as ThreadPluginDto, i as ThreadPluginSettingsSnapshot, h as ThreadPluginSettingsInput } from './plugin-types-BkQJk-w8.js';
 
 interface PromptAttachmentUpload extends PromptAttachmentManifestEntryDto {
@@ -59,7 +59,24 @@ interface ThreadToolArtifact {
     url?: string | undefined;
     size?: number | undefined;
 }
+/** Content rendered inside a user bubble; the shared frame keeps its metadata. */
+interface ThreadUserMessageContentInput {
+    threadId?: string | undefined;
+    messageId: string;
+    item: ThreadHistoryItemDto;
+    /** Original stored text, before prompt-envelope parsing or presentation. */
+    content: string;
+    /** Shared body, including attachments and Show more. Omit text for the default. */
+    renderDefaultContent: (content?: string) => ReactNode;
+    /** Call before host disclosure changes so the timeline can preserve its anchor. */
+    onBeforeResize?: ((anchor?: Element | null) => void) | undefined;
+}
 interface ThreadTimelineAdapter {
+    /**
+     * Replaces user bubble content. Return null/undefined to keep the shared body.
+     * Peer envelope headers and system notices retain their shared presentation.
+     */
+    renderUserMessageContent?: (input: ThreadUserMessageContentInput) => ReactNode;
     /** Resolves an artifact a tool reported; null when the host does not know it. */
     resolveArtifact?: (artifactId: string) => ThreadToolArtifact | null;
     resolveWorkspacePath?: (path: string) => Promise<boolean>;
@@ -343,6 +360,7 @@ interface ThreadShellAdapter {
     connectSocket(handlers: ShellSocketHandlers): ShellSocketConnection;
 }
 interface ThreadDetailUiAdapter {
+    renderUserMessageContent?: ThreadTimelineAdapter['renderUserMessageContent'];
     openThread(threadId: string): void;
     /** Resolves artifacts a tool reported, so tool cards can show them (images inline). */
     resolveArtifact?: (artifactId: string) => ThreadToolArtifact | null;
@@ -570,4 +588,4 @@ interface ThreadGraphWorkspaceFeatures {
 declare function ThreadGraphWorkspacePanel({ detail, status, plugins, workspaceAdapter, metaContent, settingsContent, activeView, features: featureConfig, focusPathRequest, onActiveFileChange, hostPanels, hostPanelRequest, }: ThreadGraphWorkspacePanelProps): react.JSX.Element | null;
 declare const MemoizedThreadGraphWorkspacePanel: react.MemoExoticComponent<typeof ThreadGraphWorkspacePanel>;
 
-export { createDefaultPluginContextValue as A, createExtensionPluginApi as B, extensionModuleAvailable as C, type DescribeThread as D, type ExtensionPluginApi as E, mergePluginState as F, ThreadGraphWorkspacePanel as G, MemoizedThreadGraphWorkspacePanel as M, type PromptAttachmentUpload as P, type SettingsSection as S, type ThreadShellControlState as T, type WorkspaceHostPanel as W, type ThreadTimelineAdapter as a, type ThreadShellAdapter as b, type ThreadGraphWorkspacePanelProps as c, type PluginContextValue as d, type ThreadDetailUiAdapter as e, type ThreadGraphWorkspaceFeatures as f, type WorkspaceHostPanelRequest as g, SettingsPanels as h, type ThreadWorkspaceAdapter as i, PluginContext as j, PluginProvider as k, type PluginProviderAdapter as l, type SendPromptInput as m, type ShellSocketConnection as n, type ShellSocketHandlers as o, type ThreadImageAssetVariant as p, type ThreadLinkInfo as q, type ThreadToolArtifact as r, type ThreadWorkspaceArchiveFormat as s, type ThreadWorkspaceCapabilities as t, type ThreadWorkspaceTrashEntry as u, type ThreadWorkspaceTrashList as v, type WorkspaceDocumentSaveInput as w, type WorkspaceDocumentSnapshot as x, type WorkspaceSaveReceipt as y, type WorkspaceTab as z };
+export { type WorkspaceTab as A, createDefaultPluginContextValue as B, createExtensionPluginApi as C, type DescribeThread as D, type ExtensionPluginApi as E, extensionModuleAvailable as F, mergePluginState as G, ThreadGraphWorkspacePanel as H, MemoizedThreadGraphWorkspacePanel as M, type PromptAttachmentUpload as P, type SettingsSection as S, type ThreadShellControlState as T, type WorkspaceHostPanel as W, type ThreadTimelineAdapter as a, type ThreadShellAdapter as b, type ThreadGraphWorkspacePanelProps as c, type PluginContextValue as d, type ThreadDetailUiAdapter as e, type ThreadGraphWorkspaceFeatures as f, type WorkspaceHostPanelRequest as g, SettingsPanels as h, type ThreadWorkspaceAdapter as i, PluginContext as j, PluginProvider as k, type PluginProviderAdapter as l, type SendPromptInput as m, type ShellSocketConnection as n, type ShellSocketHandlers as o, type ThreadImageAssetVariant as p, type ThreadLinkInfo as q, type ThreadToolArtifact as r, type ThreadUserMessageContentInput as s, type ThreadWorkspaceArchiveFormat as t, type ThreadWorkspaceCapabilities as u, type ThreadWorkspaceTrashEntry as v, type ThreadWorkspaceTrashList as w, type WorkspaceDocumentSaveInput as x, type WorkspaceDocumentSnapshot as y, type WorkspaceSaveReceipt as z };

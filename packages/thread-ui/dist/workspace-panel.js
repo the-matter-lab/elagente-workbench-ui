@@ -30,18 +30,18 @@ import {
   useFilePanel,
   useLongPress,
   useTabScrollEdges
-} from "./chunk-EAQDO4PS.js";
+} from "./chunk-YYJB2P63.js";
 import {
   followedArtifactForFile,
   latestArtifactForObject,
   structureDisplayName
-} from "./chunk-XYEZGBFO.js";
+} from "./chunk-MHABUTWX.js";
 import {
   CubeFormatError,
   GraphMoleculeViewer,
   MAX_CUBE_GRID_POINTS,
   readCubeHeader
-} from "./chunk-N4F533XD.js";
+} from "./chunk-5KDQJ3KK.js";
 import {
   useMenuKeyboard
 } from "./chunk-OCACD4WT.js";
@@ -51,7 +51,7 @@ import {
   isBinaryPreview,
   isDownloadOnlyPath,
   isDrawioPath
-} from "./chunk-RSJGL24T.js";
+} from "./chunk-GI3L3LTC.js";
 import {
   IMAGE_EXTENSIONS,
   MOLECULAR_EXTENSIONS,
@@ -75,13 +75,13 @@ import {
   useThemeFeature,
   workspaceRelativeFocusPath,
   workspaceTreeNodeToGraphNode
-} from "./chunk-GE2URZMZ.js";
+} from "./chunk-JNCEUSM7.js";
 import {
   en,
   getLocale,
   translate,
   useI18n
-} from "./chunk-D5VSPJC3.js";
+} from "./chunk-JOUZDWAW.js";
 
 // src/components/ThreadGraphWorkspacePanel.tsx
 import { memo as memo2, useEffect as useEffect13, useMemo as useMemo9, useState as useState11 } from "react";
@@ -4258,7 +4258,7 @@ function WorkspaceFileTabs({
 // src/components/graph-workspace/GraphWorkspacePreviewPane.tsx
 import { Fragment as Fragment6, jsx as jsx12, jsxs as jsxs10 } from "react/jsx-runtime";
 var GraphWorkspaceMonacoEditor = lazy(
-  () => import("./GraphWorkspaceMonacoEditor-UMLY3PKF.js")
+  () => import("./GraphWorkspaceMonacoEditor-YFJRCBXQ.js")
 );
 var isHostFilePath = (path) => path.startsWith("/") || /^[a-z]:[\\/]/i.test(path);
 function fileSizeLabel(size) {
@@ -4357,7 +4357,7 @@ function translateReadOnly(reason) {
   const key = `files.safeReason.${reason}`;
   return Object.hasOwn(en, key) ? translate(key) : reason;
 }
-var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-ELT4GTAA.js"));
+var WorkspaceDocumentDiff = lazy(() => import("./GraphWorkspaceMonacoDiff-HKBGJBI7.js"));
 var SMALL_TEXT_FILE_MAX_BYTES = 50 * 1024;
 var SMALL_TEXT_FILE_MAX_LINES = 1e3;
 var MARKDOWN_EXTENSIONS = /* @__PURE__ */ new Set(["md", "markdown"]);

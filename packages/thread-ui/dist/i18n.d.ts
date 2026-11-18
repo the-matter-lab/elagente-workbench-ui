@@ -3493,6 +3493,14 @@ declare const en: {
     readonly "chat.attachmentView": "View full size";
     readonly "chat.attachmentOpenInFiles": "Open in files";
     readonly "chat.attachmentRemove": "Remove";
+    readonly "chat.attachmentPages": {
+        readonly one: "{{count}} page";
+        readonly other: "{{count}} pages";
+    };
+    readonly "chat.attachmentFiles": {
+        readonly one: "{{count}} file";
+        readonly other: "{{count}} files";
+    };
     readonly "chat.dismissAttachmentError": "Dismiss attachment error";
     readonly "chat.usageUnavailable": "Usage unavailable: {{value1}}";
     readonly "chat.table": "Table";
@@ -7636,6 +7644,14 @@ declare const zhCN: {
     "chat.attachmentView": "查看大图";
     "chat.attachmentOpenInFiles": "在文件中打开";
     "chat.attachmentRemove": "移除";
+    "chat.attachmentPages": {
+        readonly one: "{{count}} 页";
+        readonly other: "{{count}} 页";
+    };
+    "chat.attachmentFiles": {
+        readonly one: "{{count}} 个文件";
+        readonly other: "{{count}} 个文件";
+    };
     "chat.dismissAttachmentError": "关闭附件错误提示";
     "chat.usageUnavailable": "用量不可用：{{value1}}";
     "chat.table": "表格";
@@ -11801,6 +11817,14 @@ declare const resources: {
         readonly "chat.attachmentView": "View full size";
         readonly "chat.attachmentOpenInFiles": "Open in files";
         readonly "chat.attachmentRemove": "Remove";
+        readonly "chat.attachmentPages": {
+            readonly one: "{{count}} page";
+            readonly other: "{{count}} pages";
+        };
+        readonly "chat.attachmentFiles": {
+            readonly one: "{{count}} file";
+            readonly other: "{{count}} files";
+        };
         readonly "chat.dismissAttachmentError": "Dismiss attachment error";
         readonly "chat.usageUnavailable": "Usage unavailable: {{value1}}";
         readonly "chat.table": "Table";
@@ -15943,6 +15967,14 @@ declare const resources: {
         "chat.attachmentView": "查看大图";
         "chat.attachmentOpenInFiles": "在文件中打开";
         "chat.attachmentRemove": "移除";
+        "chat.attachmentPages": {
+            readonly one: "{{count}} 页";
+            readonly other: "{{count}} 页";
+        };
+        "chat.attachmentFiles": {
+            readonly one: "{{count}} 个文件";
+            readonly other: "{{count}} 个文件";
+        };
         "chat.dismissAttachmentError": "关闭附件错误提示";
         "chat.usageUnavailable": "用量不可用：{{value1}}";
         "chat.table": "表格";
