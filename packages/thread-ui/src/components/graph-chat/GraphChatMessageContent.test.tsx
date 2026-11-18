@@ -385,7 +385,7 @@ it('keeps an inline image preview open through resolver and streamed text refres
   expect(element.querySelector('.thread-graph-zoomable-image-trigger')).toBe(trigger);
   expect(document.querySelector('.thread-graph-image-lightbox')).toBe(dialog);
   expect(dialog?.querySelector('img')?.getAttribute('src')).toBe('/renewed/comparison.png');
-  const close = dialog?.querySelector<HTMLButtonElement>('[aria-label="Close image preview"]')!;
+  const close = dialog!.querySelector<HTMLButtonElement>('[aria-label="Close image preview"]')!;
   act(() => close.click());
   expect(document.querySelector('.thread-graph-image-lightbox')).toBeNull();
 });
