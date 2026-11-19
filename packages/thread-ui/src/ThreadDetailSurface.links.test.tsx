@@ -7,13 +7,17 @@ import type { ThreadDetailUiAdapter, ThreadTimelineAdapter } from './adapters';
 import { ThreadDetailSurface } from './ThreadDetailSurface';
 import { GraphChatMessageContent } from './components/graph-chat/GraphChatMessageContent';
 
+const { captureTimelineAdapter } = vi.hoisted(() => ({ captureTimelineAdapter: vi.fn() }));
+
 // Exercise the surface's resolver lifecycle without unrelated layout/viewer UI.
 vi.mock('./components/ThreadWorkspaceLayout', () => ({
   ThreadWorkspaceLayout: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
 vi.mock('./components/graph-chat/GraphChatThreadChatPanel', () => ({
-  GraphChatThreadChatPanel: ({ timelineAdapter }: { timelineAdapter: ThreadTimelineAdapter }) =>
-    <GraphChatMessageContent content="Output: water/result.xyz" {...timelineAdapter} />,
+  GraphChatThreadChatPanel: ({ timelineAdapter }: { timelineAdapter: ThreadTimelineAdapter }) => {
+    captureTimelineAdapter(timelineAdapter);
+    return <GraphChatMessageContent content="Output: water/result.xyz" {...timelineAdapter} />;
+  },
 }));
 
 let root: Root | undefined;
@@ -39,14 +43,17 @@ it('keeps links and verification cache when unrelated host callbacks or snapshot
   const workspace = { listTree, readFile: vi.fn(async () => { throw new Error('Link verification must not read file contents'); }) };
   const paint = (adapter: ThreadDetailUiAdapter) => <ThreadDetailSurface threads={[]} detail={detail()}
     loading={false} error={null} adapter={adapter} workspaceContent={<span />} />;
-  const adapter = { workspace, sendPrompt: vi.fn(async () => {}), openThread: vi.fn(), openWorkspaceFile: vi.fn() };
+  const adapter = { workspace, sendPrompt: vi.fn(async () => {}), openThread: vi.fn(), openWorkspaceFile: vi.fn(), renderUserMessageContent: vi.fn(() => null) };
   host = document.createElement('div'); document.body.append(host); root = createRoot(host);
   await act(async () => { root!.render(paint(adapter)); });
   await vi.waitFor(() => expect(host.querySelector('a')).not.toBeNull());
   const link = host.querySelector('a');
   const calls = listTree.mock.calls.length;
   const open = vi.fn();
-  act(() => root!.render(paint({ ...adapter, openThread: vi.fn(), openWorkspaceFile: open })));
+  expect(captureTimelineAdapter.mock.lastCall?.[0].renderUserMessageContent).toBe(adapter.renderUserMessageContent);
+  const renderUserMessageContent = vi.fn(() => null);
+  act(() => root!.render(paint({ ...adapter, openThread: vi.fn(), openWorkspaceFile: open, renderUserMessageContent })));
+  expect(captureTimelineAdapter.mock.lastCall?.[0].renderUserMessageContent).toBe(renderUserMessageContent);
   expect(host.querySelector('a')).toBe(link);
   expect(listTree).toHaveBeenCalledTimes(calls);
   expect(workspace.readFile).not.toHaveBeenCalled();

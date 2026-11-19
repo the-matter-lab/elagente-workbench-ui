@@ -8,6 +8,7 @@ import { createHash } from 'node:crypto';
 import { PluginProvider } from '../../plugins/PluginProvider';
 import { contentQualityPlugin } from '../../plugins/content-quality-plugin';
 import type { PolishedReplyDto, ThreadHistoryItemDto } from '@remote-codex/shared';
+import type { ThreadTimelineAdapter } from '../../adapters';
 
 import { GraphChatCompactMessageItem } from "./GraphChatCompactMessageItem";
 import { GraphChatContextCompactionItem } from './GraphChatHistoryItems';
@@ -43,6 +44,116 @@ describe("GraphChatCompactMessageItem", () => {
     cleanup = () => { root.unmount(); container.remove(); };
     return { container, root };
   }
+
+  it('renders host attachments inside the user bubble while preserving metadata, copy, and shared text expansion', async () => {
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockResolvedValue(undefined) } });
+    const { container, root } = mount();
+    const narrative = `${'Keep this requirement. '.repeat(100)}PROMPT TAIL`;
+    const content = `${narrative}\n[FILE report.pdf]`;
+    const item = { id: 'sent-attachment', kind: 'userMessage' as const, text: content, status: 'Awaiting response' };
+    const onBeforeMessageResize = vi.fn();
+    const renderUserMessageContent = vi.fn<NonNullable<ThreadTimelineAdapter['renderUserMessageContent']>>(
+      ({ renderDefaultContent }) => <>{renderDefaultContent(narrative)}<button data-testid="host-attachment">report.pdf</button></>,
+    );
+    const paint = (adapter: ThreadTimelineAdapter) => <GraphChatCompactMessageItem item={item} threadId="thread-1"
+      scrollRootRef={{ current: null }} adapter={adapter} timeLabel="10:32" timeTitle="Tuesday"
+      onBeforeMessageResize={onBeforeMessageResize} />;
+    await act(async () => root.render(paint({ renderUserMessageContent })));
+    expect(renderUserMessageContent).toHaveBeenLastCalledWith(expect.objectContaining({ threadId: 'thread-1', messageId: item.id, content }));
+    const attachment = container.querySelector('[data-testid="host-attachment"]');
+    expect(container.querySelector('.thread-graph-message-bubble')?.contains(attachment)).toBe(true);
+    expect(container.querySelector('.thread-graph-message-time')?.textContent).toBe('10:32');
+    expect(container.querySelector('.thread-graph-message-time')?.getAttribute('title')).toBe('Tuesday');
+    expect(container.querySelector('.thread-graph-message-status')?.textContent).toBe('Awaiting response');
+    expect(container.querySelector('.attachment-tile')).toBeNull();
+    expect(container.textContent).not.toContain('PROMPT TAIL');
+    await act(async () => container.querySelector<HTMLButtonElement>('.thread-graph-show-more')!.click());
+    expect(container.textContent).toContain('PROMPT TAIL');
+    expect(onBeforeMessageResize).toHaveBeenCalled();
+    await act(async () => root.render(paint({ renderUserMessageContent: input => renderUserMessageContent(input), onOpenWorkspaceFile: vi.fn() })));
+    expect(container.textContent).toContain('PROMPT TAIL');
+    expect(container.querySelector('[data-testid="host-attachment"]')).toBe(attachment);
+    await act(async () => container.querySelector<HTMLButtonElement>('[aria-label="Copy prompt"]')!.click());
+    expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(content);
+  });
+
+  it.each([false, true])('suppresses only FILE tiles with the host option (photos=%s), retaining the original prompt', async photos => {
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockResolvedValue(undefined) } });
+    const { container, root } = mount();
+    const content = `${'Keep every instruction. '.repeat(100)}FULL PROMPT TAIL\n[FILE report.pdf]${photos ? ' [PHOTO screenshot.png]' : ''}`;
+    const onBeforeMessageResize = vi.fn();
+    const adapter: ThreadTimelineAdapter = {
+      renderUserMessageContent: input => <>{input.renderDefaultContent(undefined, { fileAttachments: false })}<div data-testid="actual-files-table">Actual persisted files</div></>,
+    };
+    await act(async () => root.render(<GraphChatCompactMessageItem
+      item={{ id: 'host-files', kind: 'userMessage', text: content, attachmentPreviewUrls: { 'screenshot.png': '/shot.png' } }}
+      threadId="thread-1" scrollRootRef={{ current: null }} adapter={adapter}
+      timeLabel="10:32" timeTitle="Tuesday" onBeforeMessageResize={onBeforeMessageResize} />));
+    expect(container.querySelectorAll('.attachment-tile')).toHaveLength(photos ? 1 : 0);
+    expect(container.querySelector('[aria-label="report.pdf, show details"]')).toBeNull();
+    expect(container.textContent).not.toContain('[FILE');
+    expect(container.textContent).not.toContain('FULL PROMPT TAIL');
+    expect(container.querySelector('.thread-graph-message-time')?.textContent).toBe('10:32');
+    expect(container.querySelector('.thread-graph-message-bubble')?.contains(container.querySelector('[data-testid="actual-files-table"]'))).toBe(true);
+    await act(async () => container.querySelector<HTMLButtonElement>('.thread-graph-show-more')!.click());
+    expect(container.textContent).toContain('FULL PROMPT TAIL');
+    expect(onBeforeMessageResize).toHaveBeenCalled();
+    expect(container.querySelector('[aria-label="report.pdf, show details"]')).toBeNull();
+    if (photos) {
+      expect(container.querySelector('img')?.getAttribute('src')).toBe('/shot.png');
+      await act(async () => container.querySelector<HTMLButtonElement>('[aria-label="screenshot.png, show details"]')!.click());
+      const view = [...document.querySelectorAll<HTMLButtonElement>('.attachment-float button')].find(button => button.textContent === 'View full size')!;
+      await act(async () => view.click());
+      const dialog = document.querySelector('[aria-label="Image preview: screenshot.png"]');
+      expect(dialog?.querySelector('img')?.getAttribute('src')).toBe('/shot.png');
+      await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })));
+    }
+    await act(async () => container.querySelector<HTMLButtonElement>('[aria-label="Copy prompt"]')!.click());
+    expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(content);
+  });
+
+  it.each(['absent', 'null', 'undefined', 'helper'] as const)('keeps default attachments and file actions when the hook is %s', async mode => {
+    const { container, root } = mount();
+    const open = vi.fn();
+    const renderUserMessageContent: ThreadTimelineAdapter['renderUserMessageContent'] = mode === 'absent' ? undefined
+      : input => mode === 'helper' ? input.renderDefaultContent() : mode === 'null' ? null : undefined;
+    await act(async () => root.render(<GraphChatCompactMessageItem
+      item={{ id: 'fallback', kind: 'userMessage', text: 'Read [FILE report.pdf] [PHOTO screenshot.png]', attachmentPreviewUrls: { 'screenshot.png': '/shot.png' } }}
+      threadId="thread-1" scrollRootRef={{ current: null }}
+      adapter={{ onOpenWorkspaceFile: open, ...(renderUserMessageContent ? { renderUserMessageContent } : {}) }} />));
+    expect(container.querySelectorAll('.attachment-tile')).toHaveLength(2);
+    expect(container.querySelector('img')?.getAttribute('src')).toBe('/shot.png');
+    await act(async () => container.querySelector<HTMLButtonElement>('[aria-label="report.pdf, show details"]')!.click());
+    const openButton = [...document.querySelectorAll<HTMLButtonElement>('.attachment-float button')].find(button => button.textContent === 'Open in files')!;
+    await act(async () => openButton.click());
+    expect(open).toHaveBeenCalledWith({ path: 'report.pdf' });
+  });
+
+  it('does not call the user renderer for assistant messages or system notices', async () => {
+    const { container, root } = mount();
+    const renderUserMessageContent = vi.fn(() => <span>Host override</span>);
+    for (const item of [
+      { id: 'agent', kind: 'agentMessage' as const, text: 'Assistant reply' },
+      { id: 'notice', kind: 'userMessage' as const, text: '[Pockymoe inbox reminder]\n- result: Finished' },
+    ]) {
+      await act(async () => root.render(<GraphChatCompactMessageItem item={item} scrollRootRef={{ current: null }} adapter={{ renderUserMessageContent }} />));
+    }
+    expect(renderUserMessageContent).not.toHaveBeenCalled();
+    expect(container.textContent).toContain('Finished');
+  });
+
+  it('passes original peer content while keeping the shared envelope header and parsed default body', async () => {
+    const { container, root } = mount();
+    const content = '[Pockymoe task from thread bf8cee0b-f8f6-4f33-bac6-40ae6713768c | Review attachments]\nRead [FILE report.pdf]';
+    const renderUserMessageContent = vi.fn<NonNullable<ThreadTimelineAdapter['renderUserMessageContent']>>(input => input.renderDefaultContent());
+    await act(async () => root.render(<GraphChatCompactMessageItem item={{ id: 'peer', kind: 'userMessage', text: content }}
+      scrollRootRef={{ current: null }} adapter={{ renderUserMessageContent }} />));
+    expect(renderUserMessageContent).toHaveBeenCalledWith(expect.objectContaining({ content }));
+    expect(container.querySelector('[data-variant="envelope"]')).not.toBeNull();
+    expect(container.textContent).toContain('Review attachments');
+    expect(container.textContent).not.toContain('[Pockymoe');
+    expect(container.querySelector('.attachment-tile')).not.toBeNull();
+  });
 
   it('shows one polished body by default, toggles original text, and copies the selected full reply while keeping expansion', async () => {
     const digest = mockDigest();

@@ -371,6 +371,7 @@ export function ThreadDetailSurface({
       ...(adapter.resolveArtifact ? { resolveArtifact: adapter.resolveArtifact } : {}),
       ...(adapter.getThreadHref ? { getThreadHref: adapter.getThreadHref } : {}),
       ...(adapter.describeThread ? { describeThread: adapter.describeThread } : {}),
+      ...(adapter.renderUserMessageContent ? { renderUserMessageContent: adapter.renderUserMessageContent } : {}),
       ...(openWorkspaceFile ? { onOpenWorkspaceFile: openWorkspaceFile } : {}),
       ...(loadHistoryItemDetail
         ? { onLoadHistoryItemDetail: loadHistoryItemDetail }
@@ -387,6 +388,7 @@ export function ThreadDetailSurface({
       adapter.resolveArtifact,
       adapter.getThreadHref,
       adapter.describeThread,
+      adapter.renderUserMessageContent,
       cancelPendingSteer,
       getImageAssetUrl,
       loadHistoryItemDetail,
