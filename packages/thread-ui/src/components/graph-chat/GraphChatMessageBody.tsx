@@ -353,6 +353,7 @@ export const GraphChatUserMessageBody = memo(
   function GraphChatUserMessageBody({
     threadId,
     text,
+    fileAttachments = true,
     attachmentPreviewUrls,
     getImageAssetUrl,
     onOpenWorkspaceFile,
@@ -365,6 +366,7 @@ export const GraphChatUserMessageBody = memo(
     onBeforeResize?: ((anchor?: Element | null) => void) | undefined;
     threadId?: string | undefined;
     text: string;
+    fileAttachments?: boolean | undefined;
     attachmentPreviewUrls?: Record<string, string> | undefined;
     getImageAssetUrl?: ThreadTimelineAdapter['getImageAssetUrl'] | undefined;
     onOpenWorkspaceFile?: ThreadTimelineAdapter['onOpenWorkspaceFile'] | undefined;
@@ -421,6 +423,8 @@ export const GraphChatUserMessageBody = memo(
             return <MessageAttachment key={segment.key} kind="photo" path={segment.path} name={label}
               thumbnailUrl={imageUrl} fullUrl={fullImageUrl} />;
           }
+
+          if (!fileAttachments) return null;
 
           const fileName = basenameFromAssetPath(segment.path) || translate("chat.attachedFile");
           return <MessageAttachment key={segment.key} kind="file" path={segment.path} name={fileName}

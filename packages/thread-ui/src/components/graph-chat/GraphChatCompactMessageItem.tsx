@@ -11,7 +11,7 @@ import { Brain } from 'lucide-react';
 import { CopyButton } from '../copy/CopyButton';
 
 import type { ThreadHistoryItemDto } from '@remote-codex/shared';
-import type { ThreadTimelineAdapter } from '../../adapters';
+import type { ThreadTimelineAdapter, ThreadUserMessageContentOptions } from '../../adapters';
 import { useMessagePresentation } from '../../plugins/useMessagePresentation';
 import {
   GraphChatAgentMessageBody,
@@ -181,6 +181,30 @@ export const GraphChatCompactMessageItem = memo(
       );
     }
 
+    const renderDefaultContent = (content = envelope?.type === 'peer' ? envelope.body : item.text, options?: ThreadUserMessageContentOptions) => (
+      <GraphChatUserMessageBody
+        messageId={item.id}
+        scrollRootRef={scrollRootRef}
+        onBeforeResize={onBeforeMessageResize}
+        threadId={threadId}
+        text={content}
+        fileAttachments={options?.fileAttachments}
+        attachmentPreviewUrls={item.attachmentPreviewUrls}
+        getImageAssetUrl={adapter?.getImageAssetUrl}
+        onOpenWorkspaceFile={adapter?.onOpenWorkspaceFile}
+      />
+    );
+    const userContent = item.kind === 'userMessage'
+      ? adapter?.renderUserMessageContent?.({
+          threadId,
+          messageId: item.id,
+          item,
+          content: item.text,
+          renderDefaultContent,
+          onBeforeResize: onBeforeMessageResize,
+        }) ?? renderDefaultContent()
+      : null;
+
     return (
       <GraphChatMessageFrame
         messageId={item.id}
@@ -233,16 +257,7 @@ export const GraphChatCompactMessageItem = memo(
         ) : (
           <>
           {envelope?.type === 'peer' ? <PromptEnvelopeHeader envelope={envelope} /> : null}
-          <GraphChatUserMessageBody
-            messageId={item.id}
-            scrollRootRef={scrollRootRef}
-            onBeforeResize={onBeforeMessageResize}
-            threadId={threadId}
-            text={envelope?.type === 'peer' ? envelope.body : item.text}
-            attachmentPreviewUrls={item.attachmentPreviewUrls}
-            getImageAssetUrl={adapter?.getImageAssetUrl}
-            onOpenWorkspaceFile={adapter?.onOpenWorkspaceFile}
-          />
+          {userContent}
           </>
         )}
       </GraphChatMessageFrame>

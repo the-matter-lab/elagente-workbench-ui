@@ -36,3 +36,24 @@ panel pages through `rows` itself. Each frame is single-frame XYZ/extXYZ text
 rendered by the shared molecule viewer; the viewer is keyed by stream, so new
 frames keep the camera. `ThreadTimeline`'s `renderTurnContent(turnId)` places
 host content such as this panel below a turn, open or folded.
+
+## Host-rendered sent files
+
+`ThreadTimelineAdapter.renderUserMessageContent` can reuse the shared prompt body
+while replacing FILE tiles with a host-owned list of actual persisted attachments:
+
+```tsx
+renderUserMessageContent: input => (
+  <>
+    {input.renderDefaultContent(undefined, { fileAttachments: false })}
+    <PersistedFilesTable item={input.item} />
+  </>
+)
+```
+
+Omitting the first argument retains the parsed default prompt body, including peer
+envelopes. The option suppresses only FILE tiles; PHOTO thumbnails and full-size
+previews, text expansion, metadata and copying the complete original prompt retain
+their shared behavior. Omitting options keeps the existing tiles. This is a
+presentation option, not upload or workspace-file validation. Hosts remain
+responsible for deriving their table from actual persisted attachment metadata.
