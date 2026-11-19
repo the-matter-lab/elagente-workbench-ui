@@ -66,6 +66,20 @@ const LinkRendererContext = createContext<((props: LinkRendererProps) => ReactEl
 function StableLinkRenderer(props: LinkRendererProps) {
   return useContext(LinkRendererContext)?.(props) ?? null;
 }
+// Image state (including the open lightbox) must survive host callback refreshes.
+// Context keeps resolution and read-only policy current without changing the type.
+const ImageRendererContext = createContext<{
+  resolveHref?: ((href: string) => string) | undefined;
+  readOnly: boolean;
+}>({ readOnly: false });
+function StableImageRenderer({ src, alt, width, height }: ComponentProps<'img'>) {
+  useI18n();
+  const { resolveHref, readOnly } = useContext(ImageRendererContext);
+  const resolved = typeof src === 'string' ? (resolveHref?.(src) ?? src) : undefined;
+  if (readOnly && !resolved?.startsWith('data:image/') && !/^https?:\/\//i.test(resolved ?? '')) return <span>{alt || translate("chat.imageUnavailable")}</span>;
+  return resolved ? <ZoomableImage src={resolved} alt={alt ?? ''} width={width} height={height} /> : <span>{alt || translate("chat.imageUnavailable")}</span>;
+}
+
 function TableRenderer({ children }: ComponentProps<'table'>) {
   useI18n();
   return <div className="thread-markdown-table-scroll" tabIndex={0} role="region" aria-label={translate("chat.table")}><table>{children}</table></div>;
@@ -440,17 +454,14 @@ export const GraphChatMessageContent = memo(function GraphChatMessageContent({
     <div ref={rootRef} data-markdown-ready={highlighter ? 'true' : 'false'} className={`thread-graph-message-markdown ${className}`}>
       <CodeRendererContext.Provider value={CodeBlockRenderer}>
       <LinkRendererContext.Provider value={LinkRenderer}>
+      <ImageRendererContext.Provider value={{ resolveHref, readOnly }}>
       <ReactMarkdown
         urlTransform={url => !readOnly && url.startsWith('workspace-auto:') ? url : !readOnly && localFileHref(url, typeof window === 'undefined' ? undefined : window.location.origin) ? url : defaultUrlTransform(url)}
         remarkPlugins={[remarkGfm, remarkMath, remarkLatex, remarkCjkFriendly, ...(!readOnly && resolveWorkspacePath ? [remarkWorkspacePaths] : [])]}
         rehypePlugins={[...markdownHtmlPlugins, rehypeKatex]}
         components={{
           a: StableLinkRenderer,
-          img({src, alt, width, height}) {
-            const resolved = src ? (resolveHref?.(src) ?? src) : undefined;
-            if (readOnly && !resolved?.startsWith('data:image/') && !/^https?:\/\//i.test(resolved ?? '')) return <span>{alt || translate("chat.imageUnavailable")}</span>;
-            return resolved ? <ZoomableImage src={resolved} alt={alt ?? ''} width={width} height={height} /> : <span>{alt || translate("chat.imageUnavailable")}</span>;
-          },
+          img: StableImageRenderer,
           code: StableCodeRenderer,
           table: TableRenderer,
           pre: PreRenderer,
@@ -458,6 +469,7 @@ export const GraphChatMessageContent = memo(function GraphChatMessageContent({
       >
         {processedContent}
       </ReactMarkdown>
+      </ImageRendererContext.Provider>
       </LinkRendererContext.Provider>
       </CodeRendererContext.Provider>
     </div>

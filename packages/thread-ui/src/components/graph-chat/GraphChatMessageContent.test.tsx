@@ -369,3 +369,33 @@ it('does not reuse a verified link or a late verification after switching worksp
   expect(element.querySelector('a')).toBeNull();
   expect(element.textContent).toContain(path);
 });
+
+
+it('keeps an inline image preview open through resolver and streamed text refreshes', () => {
+  const content = '![Comparison figure](comparison.png)';
+  const element = render(<GraphChatMessageContent content={content} resolveHref={path => `/files/${path}`} />);
+  const trigger = element.querySelector<HTMLButtonElement>('.thread-graph-zoomable-image-trigger')!;
+  act(() => trigger.click());
+  const dialog = document.querySelector('.thread-graph-image-lightbox');
+  expect(dialog).not.toBeNull();
+  act(() => root?.render(<GraphChatMessageContent content={content} resolveHref={path => `/files/${path}`} />));
+  expect(element.querySelector('.thread-graph-zoomable-image-trigger')).toBe(trigger);
+  expect(document.querySelector('.thread-graph-image-lightbox')).toBe(dialog);
+  act(() => root?.render(<GraphChatMessageContent content={content + '\n\nAdditional analysis.'} streaming resolveHref={path => `/renewed/${path}`} />));
+  expect(element.querySelector('.thread-graph-zoomable-image-trigger')).toBe(trigger);
+  expect(document.querySelector('.thread-graph-image-lightbox')).toBe(dialog);
+  expect(dialog?.querySelector('img')?.getAttribute('src')).toBe('/renewed/comparison.png');
+  const close = dialog!.querySelector<HTMLButtonElement>('[aria-label="Close image preview"]')!;
+  act(() => close.click());
+  expect(document.querySelector('.thread-graph-image-lightbox')).toBeNull();
+});
+
+it('applies updated read-only image filtering without retaining a disallowed preview', () => {
+  const content = '![Comparison figure](comparison.png)';
+  const element = render(<GraphChatMessageContent content={content} resolveHref={path => `/files/${path}`} />);
+  act(() => element.querySelector<HTMLButtonElement>('.thread-graph-zoomable-image-trigger')!.click());
+  expect(document.querySelector('.thread-graph-image-lightbox')).not.toBeNull();
+  act(() => root?.render(<GraphChatMessageContent content={content} readOnly resolveHref={path => `/files/${path}`} />));
+  expect(element.querySelector('.thread-graph-zoomable-image-trigger')).toBeNull();
+  expect(document.querySelector('.thread-graph-image-lightbox')).toBeNull();
+});
