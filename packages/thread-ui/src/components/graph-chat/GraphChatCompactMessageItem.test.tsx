@@ -77,6 +77,41 @@ describe("GraphChatCompactMessageItem", () => {
     expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(content);
   });
 
+  it.each([false, true])('suppresses only FILE tiles with the host option (photos=%s), retaining the original prompt', async photos => {
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockResolvedValue(undefined) } });
+    const { container, root } = mount();
+    const content = `${'Keep every instruction. '.repeat(100)}FULL PROMPT TAIL\n[FILE report.pdf]${photos ? ' [PHOTO screenshot.png]' : ''}`;
+    const onBeforeMessageResize = vi.fn();
+    const adapter: ThreadTimelineAdapter = {
+      renderUserMessageContent: input => <>{input.renderDefaultContent(undefined, { fileAttachments: false })}<div data-testid="actual-files-table">Actual persisted files</div></>,
+    };
+    await act(async () => root.render(<GraphChatCompactMessageItem
+      item={{ id: 'host-files', kind: 'userMessage', text: content, attachmentPreviewUrls: { 'screenshot.png': '/shot.png' } }}
+      threadId="thread-1" scrollRootRef={{ current: null }} adapter={adapter}
+      timeLabel="10:32" timeTitle="Tuesday" onBeforeMessageResize={onBeforeMessageResize} />));
+    expect(container.querySelectorAll('.attachment-tile')).toHaveLength(photos ? 1 : 0);
+    expect(container.querySelector('[aria-label="report.pdf, show details"]')).toBeNull();
+    expect(container.textContent).not.toContain('[FILE');
+    expect(container.textContent).not.toContain('FULL PROMPT TAIL');
+    expect(container.querySelector('.thread-graph-message-time')?.textContent).toBe('10:32');
+    expect(container.querySelector('.thread-graph-message-bubble')?.contains(container.querySelector('[data-testid="actual-files-table"]'))).toBe(true);
+    await act(async () => container.querySelector<HTMLButtonElement>('.thread-graph-show-more')!.click());
+    expect(container.textContent).toContain('FULL PROMPT TAIL');
+    expect(onBeforeMessageResize).toHaveBeenCalled();
+    expect(container.querySelector('[aria-label="report.pdf, show details"]')).toBeNull();
+    if (photos) {
+      expect(container.querySelector('img')?.getAttribute('src')).toBe('/shot.png');
+      await act(async () => container.querySelector<HTMLButtonElement>('[aria-label="screenshot.png, show details"]')!.click());
+      const view = [...document.querySelectorAll<HTMLButtonElement>('.attachment-float button')].find(button => button.textContent === 'View full size')!;
+      await act(async () => view.click());
+      const dialog = document.querySelector('[aria-label="Image preview: screenshot.png"]');
+      expect(dialog?.querySelector('img')?.getAttribute('src')).toBe('/shot.png');
+      await act(async () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })));
+    }
+    await act(async () => container.querySelector<HTMLButtonElement>('[aria-label="Copy prompt"]')!.click());
+    expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(content);
+  });
+
   it.each(['absent', 'null', 'undefined', 'helper'] as const)('keeps default attachments and file actions when the hook is %s', async mode => {
     const { container, root } = mount();
     const open = vi.fn();

@@ -71,6 +71,7 @@ export type {
   ThreadShellAdapter,
   ThreadTimelineAdapter,
   ThreadUserMessageContentInput,
+  ThreadUserMessageContentOptions,
   ThreadToolArtifact,
   ThreadWorkspaceAdapter,
   ThreadWorkspaceCapabilities,

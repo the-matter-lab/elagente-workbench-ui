@@ -47,6 +47,12 @@ export interface ThreadToolArtifact {
   size?: number | undefined;
 }
 
+/** Presentation of the shared user body; stored content and copy remain intact. */
+export interface ThreadUserMessageContentOptions {
+  /** Show FILE tiles. Disable when the host renders its own file list. Photos remain visible. */
+  fileAttachments?: boolean | undefined;
+}
+
 /** Content rendered inside a user bubble; the shared frame keeps its metadata. */
 export interface ThreadUserMessageContentInput {
   threadId?: string | undefined;
@@ -55,7 +61,7 @@ export interface ThreadUserMessageContentInput {
   /** Original stored text, before prompt-envelope parsing or presentation. */
   content: string;
   /** Shared body, including attachments and Show more. Omit text for the default. */
-  renderDefaultContent: (content?: string) => ReactNode;
+  renderDefaultContent: (content?: string, options?: ThreadUserMessageContentOptions) => ReactNode;
   /** Call before host disclosure changes so the timeline can preserve its anchor. */
   onBeforeResize?: ((anchor?: Element | null) => void) | undefined;
 }
