@@ -588,6 +588,8 @@ export const chatEn = {
   "chat.attachmentView": "View full size",
   "chat.attachmentOpenInFiles": "Open in files",
   "chat.attachmentRemove": "Remove",
+  "chat.attachmentPages": { one: "{{count}} page", other: "{{count}} pages" },
+  "chat.attachmentFiles": { one: "{{count}} file", other: "{{count}} files" },
   "chat.dismissAttachmentError": "Dismiss attachment error",
   "chat.usageUnavailable": "Usage unavailable: {{value1}}",
   "chat.table": "Table",

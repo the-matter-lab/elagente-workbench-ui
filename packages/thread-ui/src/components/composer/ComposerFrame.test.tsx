@@ -91,6 +91,47 @@ describe('ComposerFrame', () => {
     expect(container.querySelector('[data-slot="shell-prompt"]')).toBeTruthy();
   });
 
+  it.each([
+    [11, 10, '11 files attached, max 10. Remove 1 to send.'],
+    [30, 10, '30 files attached, max 10. Remove 20 to send.'],
+    [1, 0, '1 file attached, max 0. Remove 1 to send.'],
+  ])('shows the structured %i/%i warning between prompt and toolbar', (count, max, message) => {
+    const container = renderFrame({ ...baseProps(), attachmentLimit: { count, max } });
+    const alert = container.querySelector('[role="alert"]')!;
+    expect(alert.textContent).toBe(message);
+    expect([...alert.querySelectorAll('strong')].map(node => node.textContent)).toEqual([String(count), String(max)]);
+    expect(alert.querySelector('svg[aria-hidden="true"]')).toBeTruthy();
+    expect(alert.querySelector('button')).toBeNull();
+    expect(alert.parentElement?.getAttribute('data-slot')).toBe('input-group');
+    expect(alert.previousElementSibling?.getAttribute('data-slot')).toBe('prompt');
+    expect(alert.nextElementSibling?.getAttribute('data-slot')).toBe('toolbar');
+  });
+
+  it.each([undefined, { count: 0, max: 10 }, { count: 10, max: 10 }])('omits the warning for %j', attachmentLimit => {
+    const container = renderFrame({ ...baseProps(), attachmentLimit });
+    expect(container.querySelector('[role="alert"]')).toBeNull();
+    expect(container.querySelector('[data-attachment-limit-exceeded]')).toBeNull();
+  });
+
+  it('does not show the attachment limit in shell view', () => {
+    const container = renderFrame({ ...baseProps(), activeView: 'shell', attachmentLimit: { count: 30, max: 10 } });
+    expect(container.querySelector('[role="alert"]')).toBeNull();
+  });
+
+  it('preserves a separate generic error and dismiss action while the limit remains invalid', () => {
+    const onDismissError = vi.fn();
+    const container = renderFrame({
+      ...baseProps(), attachmentLimit: { count: 11, max: 10 }, error: 'Upload failed', onDismissError,
+    });
+    const alerts = container.querySelectorAll('[role="alert"]');
+    expect(alerts).toHaveLength(2);
+    expect(alerts[1].textContent).toBe('Upload failed');
+    expect(alerts[1].closest('[data-slot="input-group"]')).toBeNull();
+    alerts[1].querySelector('button')?.click();
+    expect(onDismissError).toHaveBeenCalledOnce();
+    expect(alerts[0].textContent).toBe('11 files attached, max 10. Remove 1 to send.');
+  });
+
   const subscriptionUsage = {
     provider: 'claude' as const,
     authKind: 'subscription' as const,

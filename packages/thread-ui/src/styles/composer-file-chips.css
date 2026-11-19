@@ -1,0 +1,79 @@
+/* Draft attachments are filename chips, independent of sent-message tiles.
+   The full name stays in the DOM and title; only the head ellipsizes in CSS. */
+.composer-file-chip {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  max-width: min(100%, 28rem);
+  min-width: 0;
+  height: 32px;
+  margin: 2px 3px 2px 0;
+  padding: 0 3px 0 6px;
+  vertical-align: middle;
+  border: 1px solid var(--theme-border);
+  border-radius: 7px;
+  background: var(--theme-surface);
+  color: var(--theme-fg);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  text-align: start;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.composer-file-details {
+  display: inline-flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 6px;
+  height: 100%;
+  cursor: pointer;
+}
+.composer-file-details:focus-visible,
+.composer-file-remove:focus-visible {
+  outline: 2px solid var(--theme-accent-solid);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.composer-file-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--theme-hover);
+  color: var(--theme-fg-soft, var(--theme-fg));
+  font: 600 9px/16px var(--font-mono, monospace);
+  letter-spacing: .02em;
+}
+.composer-file-thumbnail { width: 22px; height: 22px; padding: 0; overflow: hidden; }
+.composer-file-thumbnail > img { width: 100%; height: 100%; object-fit: cover; }
+.composer-file-name { display: inline-flex; min-width: 0; white-space: pre; direction: ltr; unicode-bidi: isolate; }
+.composer-file-name-head { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.composer-file-name-tail { flex: none; }
+.composer-file-name-shared { color: var(--theme-fg-muted); }
+.composer-file-meta { flex: none; color: var(--theme-fg-muted); font-size: 11px; }
+.composer-file-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 24px;
+  height: 26px;
+  margin-left: 3px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--theme-fg-muted);
+  cursor: pointer;
+}
+.composer-file-remove > svg { width: 14px; height: 14px; }
+.composer-file-remove:hover { background: var(--theme-hover); color: var(--theme-fg); }
+:root[data-theme-preset='terminal'] .composer-file-chip { border-radius: 0; }
+[data-composer-layout='collapsed'] .composer-file-chip { height: 22px; margin-block: 0; }
+[data-composer-layout='collapsed'] .composer-file-remove { height: 20px; }
+[data-composer-layout='collapsed'] .composer-file-thumbnail { width: 16px; height: 16px; }

@@ -7,6 +7,36 @@
   display: grid; grid-template-columns: minmax(0, 1fr) max-content;
   align-items: end; column-gap: 8px; height: auto; padding: 0; overflow: visible;
 }
+
+/* Keep the invalid draft editable, with the warning inside the frame and
+   above the controls in both folded and expanded layouts. The pale surface
+   has its own dark foreground so it stays readable in every theme. */
+.composer-attachment-limit-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid #fda4af;
+  border-radius: 10px;
+  background: #fff1f2;
+  color: #9f1239;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.composer-attachment-limit-alert > svg { flex: 0 0 16px; width: 16px; height: 16px; margin-top: 2px; }
+.composer-attachment-limit-alert > span { min-width: 0; }
+.composer-attachment-limit-alert strong { font-weight: 700; }
+[data-composer-layout] .composer-attachment-limit-alert { grid-column: 1 / -1; grid-row: 2; }
+[data-composer-layout] [data-attachment-limit-exceeded] > .thread-graph-composer-prompt-region { grid-column: 1 / -1; }
+[data-composer-layout] [data-attachment-limit-exceeded] > .thread-graph-composer-toolbar,
+.thread-ui-shell .matter-workbench [data-composer-layout] [data-attachment-limit-exceeded] > .thread-graph-composer-toolbar {
+  grid-column: 1 / -1; grid-row: 3; width: auto; justify-self: stretch;
+  justify-content: space-between; padding-top: 4px; margin: 0 -6px -4px;
+}
 [data-composer-layout] .thread-graph-composer-prompt-region {
   min-width: 0; width: auto; grid-column: 1; grid-row: 1; align-self: center;
 }

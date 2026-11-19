@@ -76,6 +76,15 @@ export function ComposerPromptEditor({
   function attachmentTile(target: EventTarget | null) {
     return target instanceof Element ? target.closest<HTMLElement>('[data-segment-type="attachment"]') : null;
   }
+  function isRemove(target: EventTarget | null) {
+    return target instanceof Element && Boolean(target.closest('[data-remove-attachment]'));
+  }
+  function removeAttachment(tile: HTMLElement) {
+    tile.remove();
+    setDetails(null);
+    onInput();
+    promptRef.current?.focus({ preventScroll: true });
+  }
   const detailsImage = details?.querySelector('img');
   const view = details && detailsImage ? () => {
     previewTrigger.current = details;
@@ -106,7 +115,11 @@ export function ComposerPromptEditor({
           suppressContentEditableWarning
           onClick={event => {
             const tile = attachmentTile(event.target);
-            if (tile) { event.preventDefault(); setDetails(current => current === tile ? null : tile); }
+            if (tile) {
+              event.preventDefault();
+              if (isRemove(event.target)) removeAttachment(tile);
+              else setDetails(current => current === tile ? null : tile);
+            }
           }}
           onPointerDown={(event) => {
             if (attachmentTile(event.target)) { event.preventDefault(); return; }
@@ -134,7 +147,10 @@ export function ComposerPromptEditor({
             if (event.currentTarget.dataset.imeComposing === 'true' || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
             const tile = attachmentTile(event.target);
             if (tile && (event.key === 'Enter' || event.key === ' ')) {
-              event.preventDefault(); setDetails(tile); return;
+              event.preventDefault();
+              if (isRemove(event.target)) removeAttachment(tile);
+              else setDetails(tile);
+              return;
             }
             onKeyDown(event);
           }}
@@ -155,10 +171,7 @@ export function ComposerPromptEditor({
             actions={<>
               {view ? <ViewAction onClick={view} /> : null}
               <button type="button" className="is-danger" onClick={() => {
-                details.remove();
-                setDetails(null);
-                onInput();
-                promptRef.current?.focus({ preventScroll: true });
+                removeAttachment(details);
               }}><X aria-hidden="true" />{translate('chat.attachmentRemove')}</button>
             </>} />
         </FloatingCard>

@@ -6,6 +6,44 @@ import { expect, it } from 'vitest';
 import { serializeEditorPrompt } from './contentEditablePrompt';
 import { useComposerPromptDomSync } from './useComposerPromptDomSync';
 import type { PromptSegment } from './composerUtils';
+import { setLocale } from '../../i18n';
+
+it('refreshes count text and action labels when language changes without replacing the attachment identity', () => {
+  setLocale('en', false);
+  const editor = document.createElement('div');
+  document.body.append(editor);
+  const editorRef = { current: editor };
+  const segments: PromptSegment[] = [{ type: 'attachment', key: 'pdf', attachment: {
+    clientId: 'pdf', placeholder: '[FILE report.pdf]', kind: 'file', originalName: 'report.pdf', file: new File([], 'report.pdf'),
+  } }];
+  const metadata = { pdf: { pageCount: 3 } };
+  const pending = { current: null }, inserted = { current: [] }, preview = { current: '' };
+  const urls = {};
+  function Harness() {
+    useComposerPromptDomSync({ promptRef: editorRef, isShellView: false,
+      prompt: '[FILE report.pdf]', promptSegments: segments, attachmentMetadata: metadata,
+      attachmentPreviewUrls: urls, previewSignature: '', pendingSelectionRef: pending,
+      pendingInsertedAttachmentIdsRef: inserted, selectionSnapshotRef: pending,
+      renderedPreviewSignatureRef: preview, serializeEditorPrompt: () => serializeEditorPrompt(editor), restoreSelection: () => {},
+    });
+    return null;
+  }
+  const root = createRoot(document.createElement('div'));
+  try {
+    flushSync(() => root.render(<Harness />));
+    const token = editor.firstChild;
+    expect(editor.querySelector('.composer-file-meta')?.textContent).toBe('3 pages');
+    flushSync(() => setLocale('zh-CN', false));
+    expect(editor.firstChild).toBe(token);
+    expect(editor.querySelector('.composer-file-meta')?.textContent).toBe('3 页');
+    expect(editor.querySelector('[data-remove-attachment]')?.getAttribute('aria-label')).toBe('移除: report.pdf');
+    expect(serializeEditorPrompt(editor)).toBe('[FILE report.pdf]');
+  } finally {
+    flushSync(() => root.unmount());
+    setLocale('en', false);
+    editor.remove();
+  }
+});
 
 it('updates an asynchronous image preview without replacing dictation text or moving its selection', () => {
   const editor = document.createElement('div');

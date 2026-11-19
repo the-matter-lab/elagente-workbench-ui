@@ -49,6 +49,7 @@ export function ComposerSettingsToolbar({
   goalBusy,
   activeView,
   disabled,
+  sendDisabled = false,
   promptEmpty = false,
   sendButtonLabel,
   sendButtonClassName,
@@ -82,6 +83,8 @@ export function ComposerSettingsToolbar({
   goalBusy: boolean;
   activeView: 'chat' | 'shell';
   disabled: boolean;
+  /** Block sending while leaving editing and other controls available. */
+  sendDisabled?: boolean;
   /** No text or attachment to send yet. */
   promptEmpty?: boolean;
   fastMode: boolean;
@@ -277,7 +280,7 @@ export function ComposerSettingsToolbar({
         aria-label={sendIntentLabel}
         aria-disabled={sendEmpty || undefined}
         title={sendLocked ? sendButtonLabel : sendEmpty ? translate('chat.typeToSend') : sendLater || goalComposeMode ? sendIntentLabel : sendButtonLabel}
-        disabled={goalBusy || (activeView === 'chat' ? disabled : false)}
+        disabled={sendDisabled || goalBusy || (activeView === 'chat' ? disabled : false)}
         className={`${sendButtonBaseClassName} h-9 w-9 rounded-full text-sm font-medium disabled:cursor-not-allowed sm:h-8 sm:w-8 ${sendButtonClassName}`}
       >
         {goalComposeMode ? (
