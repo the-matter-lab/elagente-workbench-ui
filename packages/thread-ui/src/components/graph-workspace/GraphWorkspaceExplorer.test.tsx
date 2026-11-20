@@ -258,18 +258,25 @@ describe('GraphWorkspaceExplorer', () => {
     expect(host!.querySelector('[role="menuitemcheckbox"]')?.getAttribute('aria-checked')).toBe('true');
   });
 
-  describe('links into folders hidden by default (ELA-260)', () => {
-    // `.workbenchignore` hides runs/ and tool-images/ from file/list; file/read still works.
+  describe('Show hidden files (ELA-412)', () => {
+    // `.workbenchignore` hides runs/ and tool-images/ from file/list; the Explorer
+    // also leaves out `.*` entries such as .agents/ until Show hidden files is on.
     function createHiddenAdapter() {
+      const agents: Record<string, ThreadWorkspaceTreeNode> = {
+        '.agents': directory('.agents', [directory('.agents/run1', [], false)]),
+        '.agents/run1': directory('.agents/run1', [file('.agents/run1/report.md')]),
+      };
       const visible: Record<string, ThreadWorkspaceTreeNode> = {
-        '': directory('', [directory('src', [], false), file('README.md')]),
+        '': directory('', [directory('.agents', [], false), directory('src', [], false), file('.env'), file('README.md')]),
         src: directory('src', [file('src/index.ts')]),
+        ...agents,
       };
       const hidden: Record<string, ThreadWorkspaceTreeNode> = {
-        '': directory('', [directory('runs', [], false), directory('src', [], false), directory('tool-images', [], false), file('README.md')]),
-        src: directory('src', [file('src/index.ts')]),
+        ...visible,
+        '': directory('', [directory('.agents', [], false), directory('runs', [], false), directory('src', [], false), directory('tool-images', [], false), file('.env'), file('README.md')]),
         runs: directory('runs', [directory('runs/abc', [], false), directory('runs/def', [], false)]),
-        'runs/abc': directory('runs/abc', [file('runs/abc/x.out'), file('runs/abc/y.log')]),
+        'runs/abc': directory('runs/abc', [directory('runs/abc/sub', [], false), file('runs/abc/x.out'), file('runs/abc/y.log')]),
+        'runs/abc/sub': directory('runs/abc/sub', [file('runs/abc/sub/a.txt')]),
         'tool-images': directory('tool-images', [file('tool-images/a.png')]),
       };
       const listTree = vi.fn<ThreadWorkspaceAdapter['listTree']>(async ({ path, showHidden }) => {
@@ -278,80 +285,159 @@ describe('GraphWorkspaceExplorer', () => {
         return tree;
       });
       const readFile = vi.fn<ThreadWorkspaceAdapter['readFile']>(async ({ path }) => filePreview(path));
-      return { adapter: { listTree, readFile, hiddenFiles: true } satisfies ThreadWorkspaceAdapter, listTree, readFile };
+      let notify: (() => void) | null = null;
+      const adapter = {
+        listTree, readFile, hiddenFiles: true,
+        subscribeWorkspaceChanged: (_identity: unknown, listener: () => void) => { notify = listener; return () => { notify = null; }; },
+      } satisfies ThreadWorkspaceAdapter;
+      return { adapter, listTree, readFile, workspaceChanged: () => notify?.() };
     }
     const row = (path: string) => host?.querySelector<HTMLElement>(`[data-explorer-path="${path}"]`) ?? null;
     const preview = () => host?.querySelector('[data-testid="preview-file"]');
+    const selectedPaths = () => [...host!.querySelectorAll('[aria-selected="true"]')].map((item) => item.getAttribute('data-explorer-path'));
+    const more = () => host!.querySelector<HTMLButtonElement>('button[aria-label="More Explorer actions"]')!;
+    const toggle = () => [...host!.querySelectorAll<HTMLButtonElement>('[role="menuitemcheckbox"]')].find((item) => item.textContent?.includes('Show hidden files'))!;
+    const hiddenRows = ['.agents', '.env', 'runs', 'tool-images'];
+    async function clickToggle() {
+      act(() => more().click());
+      await act(async () => toggle().click());
+    }
 
-    it('opens the target and reveals only its chain, marked hidden by default, without the global toggle', async () => {
+    it('is off by default: neither ignored nor dot entries are listed', async () => {
+      const { adapter, listTree } = createHiddenAdapter();
+      await renderExplorer(adapter);
+      await vi.waitFor(() => expect(row('README.md')).not.toBeNull());
+      for (const path of hiddenRows) expect(row(path)).toBeNull();
+      expect(listTree.mock.calls.some(([input]) => input.showHidden)).toBe(false);
+      act(() => more().click());
+      expect(toggle().getAttribute('aria-checked')).toBe('false');
+      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBeNull();
+    });
+
+    it('turns on and off, persists the choice and restores it on the next load', async () => {
+      const { adapter } = createHiddenAdapter();
+      await renderExplorer(adapter);
+      await vi.waitFor(() => expect(row('README.md')).not.toBeNull());
+      await clickToggle();
+      await vi.waitFor(() => { for (const path of hiddenRows) expect(row(path)).not.toBeNull(); });
+      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBe('true');
+
+      await clickToggle();
+      await vi.waitFor(() => { for (const path of hiddenRows) expect(row(path)).toBeNull(); });
+      expect(row('README.md')).not.toBeNull();
+      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBe('false');
+
+      window.localStorage.setItem('workbench.explorer.showHidden', 'true');
+      act(() => root?.unmount());
+      root = createRoot(host!);
+      await renderExplorer(adapter);
+      await vi.waitFor(() => expect(row('.agents')).not.toBeNull());
+      act(() => more().click());
+      expect(toggle().getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('turns the toggle on for a link into an ignored folder, then reveals and selects the file', async () => {
       const { adapter, listTree, readFile } = createHiddenAdapter();
       await renderExplorer(adapter, { path: '/workspace/demo/runs/abc/x.out', requestId: 1 });
       await vi.waitFor(() => expect(preview()?.textContent).toBe('runs/abc/x.out'));
       expect(readFile).toHaveBeenCalledWith(expect.objectContaining({ path: 'runs/abc/x.out' }));
-      const target = row('runs/abc/x.out')!;
-      expect(target.getAttribute('aria-selected')).toBe('true');
-      expect(target.getAttribute('data-hidden-by-default')).toBe('true');
-      expect(target.textContent).toContain('hidden by default');
-      expect(row('runs/abc')?.getAttribute('data-hidden-by-default')).toBe('true');
-      // Other hidden entries stay hidden.
-      for (const path of ['tool-images', 'runs/def', 'runs/abc/y.log']) expect(row(path)).toBeNull();
-      expect(row('src')?.getAttribute('data-hidden-by-default')).toBeNull();
-      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBeNull();
-      expect(preview()?.getAttribute('data-error')).toBeNull();
-      // Only the chain is listed with showHidden; nothing hidden is listed without it.
-      expect(listTree.mock.calls.filter(([input]) => input.showHidden).map(([input]) => input.path)).toEqual(['', 'runs', 'runs/abc']);
-      expect(listTree.mock.calls.some(([input]) => !input.showHidden && String(input.path).startsWith('runs'))).toBe(false);
-
-      // A refresh keeps the revealed file open.
-      readFile.mockClear();
-      const refreshes = listTree.mock.calls.length;
-      await act(async () => host!.querySelector<HTMLButtonElement>('button[aria-label="Refresh workspace"]')!.click());
-      await vi.waitFor(() => expect(listTree.mock.calls.length).toBeGreaterThan(refreshes));
-      expect(row('runs/abc/x.out')?.getAttribute('aria-selected')).toBe('true');
-      expect(preview()?.textContent).toBe('runs/abc/x.out');
-    });
-
-    it('opens a linked hidden folder with its contents, still without its hidden siblings', async () => {
-      const { adapter } = createHiddenAdapter();
-      await renderExplorer(adapter, { path: 'runs/abc', requestId: 1 });
-      await vi.waitFor(() => expect(row('runs/abc/y.log')).not.toBeNull());
+      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBe('true');
+      expect(selectedPaths()).toEqual(['runs/abc/x.out']);
+      expect(row('runs')?.getAttribute('aria-expanded')).toBe('true');
       expect(row('runs/abc')?.getAttribute('aria-expanded')).toBe('true');
-      expect(row('runs/abc/x.out')?.getAttribute('data-hidden-by-default')).toBe('true');
-      expect(row('runs/def')).toBeNull();
-      expect(row('tool-images')).toBeNull();
+      // The whole tree is the listed one: siblings are rows too, each once.
+      for (const path of ['tool-images', 'runs/def', 'runs/abc/y.log', '.agents']) expect(row(path)).not.toBeNull();
+      expect(host!.querySelectorAll('[data-explorer-path="runs/abc/x.out"]')).toHaveLength(1);
+      expect(preview()?.getAttribute('data-error')).toBeNull();
+      act(() => more().click());
+      expect(toggle().getAttribute('aria-checked')).toBe('true');
+      act(() => more().click());
+
+      // Juan's broken state: a subfolder of the revealed chain loads once, with its contents.
+      const before = listTree.mock.calls.length;
+      await act(async () => row('runs/abc/sub')!.querySelector<HTMLButtonElement>('button[aria-label^="Expand"]')!.click());
+      await vi.waitFor(() => expect(row('runs/abc/sub/a.txt')).not.toBeNull());
+      await act(async () => new Promise((resolve) => setTimeout(resolve, 50)));
+      const subLists = listTree.mock.calls.slice(before).filter(([input]) => input.path === 'runs/abc/sub');
+      expect(subLists).toHaveLength(1);
+      expect(subLists[0]![0].showHidden).toBe(true);
     });
 
-    it('shows the missing view for an absent file under a hidden folder and for .elagente paths', async () => {
-      const { adapter, listTree } = createHiddenAdapter();
+    it('turns the toggle on for a link into a dot folder the host lists', async () => {
+      const { adapter } = createHiddenAdapter();
+      await renderExplorer(adapter, { path: '.agents/run1/report.md', requestId: 1 });
+      await vi.waitFor(() => expect(selectedPaths()).toEqual(['.agents/run1/report.md']));
+      expect(preview()?.textContent).toBe('.agents/run1/report.md');
+      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBe('true');
+      expect(row('.agents/run1')?.getAttribute('aria-expanded')).toBe('true');
+    });
+
+    it('leaves a sane tree when turned off while a hidden file is open', async () => {
+      const { adapter, workspaceChanged } = createHiddenAdapter();
+      await renderExplorer(adapter, { path: 'runs/abc/x.out', requestId: 1 });
+      await vi.waitFor(() => expect(selectedPaths()).toEqual(['runs/abc/x.out']));
+      await clickToggle();
+      await vi.waitFor(() => expect(row('runs')).toBeNull());
+      await vi.waitFor(() => expect(selectedPaths()).toHaveLength(1));
+      const [selected] = selectedPaths();
+      // A listed, visible file is selected and shown; the original link does not turn it back on.
+      expect(['README.md', 'src/index.ts']).toContain(selected);
+      expect(row(selected!)).not.toBeNull();
+      await vi.waitFor(() => expect(preview()?.textContent).toBe(selected));
+      for (const path of hiddenRows) expect(row(path)).toBeNull();
+      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBe('false');
+
+      await act(async () => { workspaceChanged(); await new Promise((resolve) => setTimeout(resolve, 250)); });
+      expect(row('runs')).toBeNull();
+      expect(selectedPaths()).toEqual([selected]);
+    });
+
+    it('does not turn the toggle on to restore a hidden selection on the next load', async () => {
+      const { adapter } = createHiddenAdapter();
+      await renderExplorer(adapter, { path: 'runs/abc/x.out', requestId: 1 });
+      await vi.waitFor(() => expect(selectedPaths()).toEqual(['runs/abc/x.out']));
+      act(() => root?.unmount());
+      window.localStorage.setItem('workbench.explorer.showHidden', 'false');
+      root = createRoot(host!);
+      await renderExplorer(adapter);
+      await vi.waitFor(() => expect(selectedPaths()).toHaveLength(1));
+      expect(['README.md', 'src/index.ts']).toContain(selectedPaths()[0]);
+      for (const path of hiddenRows) expect(row(path)).toBeNull();
+      expect(preview()?.getAttribute('data-missing-path')).toBeNull();
+      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBe('false');
+    });
+
+    it('keeps a visible selection when the toggle changes', async () => {
+      const { adapter } = createHiddenAdapter();
+      await renderExplorer(adapter, { path: 'src/index.ts', requestId: 1 });
+      await vi.waitFor(() => expect(selectedPaths()).toEqual(['src/index.ts']));
+      await clickToggle();
+      await vi.waitFor(() => expect(row('runs')).not.toBeNull());
+      await vi.waitFor(() => expect(selectedPaths()).toEqual(['src/index.ts']));
+      await clickToggle();
+      await vi.waitFor(() => expect(row('runs')).toBeNull());
+      await vi.waitFor(() => expect(selectedPaths()).toEqual(['src/index.ts']));
+    });
+
+    it('shows the missing view with nothing selected for absent and .elagente links, and keeps it on refresh', async () => {
+      const { adapter, listTree, workspaceChanged } = createHiddenAdapter();
       await renderExplorer(adapter, { path: 'runs/abc/nope.out', requestId: 1 });
       await vi.waitFor(() => expect(preview()?.getAttribute('data-missing-path')).toBe('runs/abc/nope.out'));
       expect(preview()?.getAttribute('data-error')).toBeNull();
-      expect(row('runs/abc/x.out')).toBeNull();
+      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBeNull();
       expect(row('runs')).toBeNull();
+      expect(selectedPaths()).toEqual([]);
 
       listTree.mockClear();
       await renderExplorer(adapter, { path: '.elagente/state.json', requestId: 2 });
       await vi.waitFor(() => expect(preview()?.getAttribute('data-missing-path')).toBe('.elagente/state.json'));
-      expect(preview()?.getAttribute('data-error')).toBeNull();
       expect(listTree.mock.calls.some(([input]) => String(input.path).startsWith('.elagente'))).toBe(false);
-      const calls = listTree.mock.calls.length;
-      await act(async () => new Promise((resolve) => setTimeout(resolve, 20)));
-      expect(listTree.mock.calls.length).toBe(calls);
-    });
+      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBeNull();
 
-    it('leaves the global Show hidden files toggle as it was, and shows every hidden entry once it is on', async () => {
-      const { adapter, listTree } = createHiddenAdapter();
-      await renderExplorer(adapter, { path: 'runs/abc/x.out', requestId: 1 });
-      await vi.waitFor(() => expect(row('runs/abc/x.out')).not.toBeNull());
-      const more = () => host!.querySelector<HTMLButtonElement>('button[aria-label="More Explorer actions"]')!;
-      act(() => more().click());
-      const toggle = () => [...host!.querySelectorAll<HTMLButtonElement>('[role="menuitemcheckbox"]')].find((item) => item.textContent?.includes('Show hidden files'))!;
-      expect(toggle().getAttribute('aria-checked')).toBe('false');
-      await act(async () => toggle().click());
-      await vi.waitFor(() => expect(row('tool-images')).not.toBeNull());
-      expect(host!.querySelectorAll('[data-explorer-path="runs/abc/x.out"]')).toHaveLength(1);
-      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBe('true');
-      expect(listTree.mock.calls.some(([input]) => input.path === '' && input.showHidden === true)).toBe(true);
+      await act(async () => { workspaceChanged(); await new Promise((resolve) => setTimeout(resolve, 250)); });
+      expect(selectedPaths()).toEqual([]);
+      expect(preview()?.getAttribute('data-missing-path')).toBe('.elagente/state.json');
+      expect(preview()?.textContent).toBe('none');
     });
   });
 
