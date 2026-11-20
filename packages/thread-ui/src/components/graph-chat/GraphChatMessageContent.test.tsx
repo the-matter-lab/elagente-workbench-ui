@@ -399,3 +399,60 @@ it('applies updated read-only image filtering without retaining a disallowed pre
   expect(element.querySelector('.thread-graph-zoomable-image-trigger')).toBeNull();
   expect(document.querySelector('.thread-graph-image-lightbox')).toBeNull();
 });
+
+describe('workspace figures', () => {
+  const content = '![Temperature trace](runs/md-1/thermo.png)';
+  // Like the host: workspace paths map to the file route, remote URLs pass through.
+  const resolveHref = (path: string) => /^https?:/.test(path) ? path : `/files/thr?path=${encodeURIComponent(path)}`;
+  afterEach(() => document.documentElement.classList.remove('dark'));
+
+  it('frames a workspace image with Download of the original and Show in Files', () => {
+    const open = vi.fn();
+    const element = render(<GraphChatMessageContent content={content} resolveHref={resolveHref} onOpenWorkspaceFile={open} />);
+    const figure = element.querySelector('.thread-graph-figure')!;
+    expect(figure.querySelector('.thread-graph-zoomable-image-trigger img')?.getAttribute('src')).toBe(resolveHref('runs/md-1/thermo.png'));
+    const download = figure.querySelector<HTMLAnchorElement>('a.thread-graph-figure-action')!;
+    expect(download.getAttribute('href')).toBe('/files/thr?path=runs%2Fmd-1%2Fthermo.png&download=1');
+    expect(download.getAttribute('download')).toBe('thermo.png');
+    act(() => figure.querySelector<HTMLButtonElement>('button.thread-graph-figure-action')!.click());
+    expect(open).toHaveBeenCalledWith({ path: 'runs/md-1/thermo.png' });
+  });
+
+  it('shows the .dark.png sibling in the dark theme and still downloads the original', async () => {
+    document.documentElement.classList.add('dark');
+    const resolve = vi.fn(async (path: string) => path === 'runs/md-1/thermo.dark.png');
+    const element = render(<GraphChatMessageContent content={content} resolveHref={resolveHref} resolveWorkspacePath={resolve} />);
+    await vi.waitFor(() => expect(element.querySelector('.thread-graph-figure')?.getAttribute('data-figure-variant')).toBe('dark'));
+    const figure = element.querySelector('.thread-graph-figure')!;
+    expect(figure.querySelector('img')?.getAttribute('src')).toBe(resolveHref('runs/md-1/thermo.dark.png'));
+    expect(figure.classList.contains('is-light-on-dark')).toBe(false);
+    expect(figure.querySelector('a')?.getAttribute('href')).toContain('thermo.png&download=1');
+    act(() => figure.querySelector<HTMLButtonElement>('.thread-graph-zoomable-image-trigger')!.click());
+    expect(document.querySelector('.thread-graph-image-lightbox img')?.getAttribute('src')).toBe(resolveHref('runs/md-1/thermo.dark.png'));
+    act(() => document.querySelector<HTMLButtonElement>('[aria-label="Close image preview"]')!.click());
+  });
+
+  it('keeps the original on paper in the dark theme when no dark variant exists', async () => {
+    document.documentElement.classList.add('dark');
+    const resolve = vi.fn(async () => false);
+    const element = render(<GraphChatMessageContent content={content} resolveHref={resolveHref} resolveWorkspacePath={resolve} />);
+    await vi.waitFor(() => expect(resolve).toHaveBeenCalledWith('runs/md-1/thermo.dark.png'));
+    const figure = element.querySelector('.thread-graph-figure')!;
+    expect(figure.getAttribute('data-figure-variant')).toBe('original');
+    expect(figure.classList.contains('is-light-on-dark')).toBe(true);
+    expect(figure.querySelector('img')?.getAttribute('src')).toBe(resolveHref('runs/md-1/thermo.png'));
+  });
+
+  it('does not probe for a dark variant in the light theme', () => {
+    const resolve = vi.fn(async () => true);
+    const element = render(<GraphChatMessageContent content={content} resolveHref={resolveHref} resolveWorkspacePath={resolve} />);
+    expect(element.querySelector('.thread-graph-figure')?.getAttribute('data-figure-variant')).toBe('original');
+    expect(resolve).not.toHaveBeenCalledWith('runs/md-1/thermo.dark.png');
+  });
+
+  it('leaves remote images as plain zoomable previews', () => {
+    const element = render(<GraphChatMessageContent content={'![Logo](https://example.com/logo.png)'} resolveHref={resolveHref} />);
+    expect(element.querySelector('.thread-graph-figure')).toBeNull();
+    expect(element.querySelector('.thread-graph-zoomable-image-trigger img')?.getAttribute('src')).toBe('https://example.com/logo.png');
+  });
+});

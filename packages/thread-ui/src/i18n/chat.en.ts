@@ -678,4 +678,8 @@ export const chatEn = {
   "chat.liveTrajectoryFilePending": "The trajectory file will be available when the run syncs.",
   "chat.liveTrajectoryOpenFile": "Open trajectory file",
   "chat.liveTrajectoryClose": "Close trajectory {{id}}",
+  "chat.figureDownload": "Download {{value1}}",
+  "chat.figureDownloadShort": "Download",
+  "chat.figureShowInFiles": "Show {{value1}} in Files",
+  "chat.figureShowInFilesShort": "Show in Files",
 } as const;

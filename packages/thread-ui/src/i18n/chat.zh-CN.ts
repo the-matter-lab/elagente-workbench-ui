@@ -678,4 +678,8 @@ export const chatZhCN = {
   "chat.liveTrajectoryFilePending": "运行同步后即可打开轨迹文件。",
   "chat.liveTrajectoryOpenFile": "打开轨迹文件",
   "chat.liveTrajectoryClose": "关闭轨迹 {{id}}",
+  "chat.figureDownload": "下载 {{value1}}",
+  "chat.figureDownloadShort": "下载",
+  "chat.figureShowInFiles": "在文件中显示 {{value1}}",
+  "chat.figureShowInFilesShort": "在文件中显示",
 } as const;

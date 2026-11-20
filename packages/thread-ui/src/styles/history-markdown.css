@@ -863,6 +863,70 @@
   object-fit: contain;
 }
 
+/* A workspace figure in a reply: a framed card, wider than a plain preview,
+   with its file actions underneath. Spans keep it valid inside a paragraph. */
+.thread-ui-shell .thread-graph-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  width: fit-content;
+  max-width: min(100%, 45rem);
+  margin: 0.75rem auto;
+  padding: 0.5rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 0.5rem;
+  background: var(--theme-surface);
+}
+
+.thread-ui-shell .thread-graph-figure .thread-graph-zoomable-image-trigger > img {
+  max-width: min(100%, 44rem);
+  max-height: min(34rem, 70dvh);
+  border-radius: 0.25rem;
+}
+
+/* A light-only figure in the dark theme keeps its paper edge inside the card. */
+.thread-ui-shell .thread-graph-figure.is-light-on-dark .thread-graph-zoomable-image-trigger > img {
+  box-shadow: 0 0 0 1px var(--theme-border);
+}
+
+.thread-ui-shell .thread-graph-figure-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+/* Beats the Markdown link color and underline. */
+.thread-ui-shell .thread-graph-figure .thread-graph-figure-actions .thread-graph-figure-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.45rem;
+  border: 0;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--theme-fg-muted);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.thread-ui-shell .thread-graph-figure .thread-graph-figure-actions .thread-graph-figure-action > svg {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex: none;
+}
+
+.thread-ui-shell .thread-graph-figure .thread-graph-figure-actions .thread-graph-figure-action:hover {
+  background: var(--theme-hover);
+  color: var(--theme-fg);
+}
+
+.thread-ui-shell .thread-graph-figure .thread-graph-figure-actions .thread-graph-figure-action:focus-visible {
+  outline: 2px solid var(--theme-focus-ring);
+  outline-offset: 1px;
+}
+
 
 .thread-graph-image-lightbox {
   position: fixed;

@@ -24,6 +24,7 @@ import 'katex/dist/katex.min.css';
 
 import { localFileHref, relativeWorkspacePath } from '../workspacePaths';
 import { ZoomableImage, MarkdownImageLinkContext } from '../ZoomableImage';
+import { WorkspaceFigure } from './WorkspaceFigure';
 import { markdownHtmlPlugins } from '../markdownHtml';
 import { WorkspaceFileLink } from '../WorkspaceFileLink';
 import { VerifiedWorkspacePath } from '../VerifiedWorkspacePath';
@@ -71,13 +72,25 @@ function StableLinkRenderer(props: LinkRendererProps) {
 const ImageRendererContext = createContext<{
   resolveHref?: ((href: string) => string) | undefined;
   readOnly: boolean;
-}>({ readOnly: false });
+  dark: boolean;
+  resolveWorkspacePath?: WorkspacePathResolver | undefined;
+  onOpenWorkspaceFile?: OpenWorkspaceFileHandler | undefined;
+}>({ readOnly: false, dark: false });
 function StableImageRenderer({ src, alt, width, height }: ComponentProps<'img'>) {
   useI18n();
-  const { resolveHref, readOnly } = useContext(ImageRendererContext);
+  const { resolveHref, readOnly, dark, resolveWorkspacePath, onOpenWorkspaceFile } = useContext(ImageRendererContext);
   const resolved = typeof src === 'string' ? (resolveHref?.(src) ?? src) : undefined;
   if (readOnly && !resolved?.startsWith('data:image/') && !/^https?:\/\//i.test(resolved ?? '')) return <span>{alt || translate("chat.imageUnavailable")}</span>;
-  return resolved ? <ZoomableImage src={resolved} alt={alt ?? ''} width={width} height={height} /> : <span>{alt || translate("chat.imageUnavailable")}</span>;
+  if (!resolved) return <span>{alt || translate("chat.imageUnavailable")}</span>;
+  // Workspace files the host can serve become figures; remote and data images stay plain.
+  const path = typeof src === 'string' && resolveHref && resolved !== src
+    ? localFileHref(src, typeof window === 'undefined' ? undefined : window.location.origin)
+    : null;
+  if (!readOnly && path) {
+    return <WorkspaceFigure src={resolved} path={path} alt={alt ?? ''} width={width} height={height} dark={dark}
+      resolveHref={resolveHref} resolveWorkspacePath={resolveWorkspacePath} onOpenWorkspaceFile={onOpenWorkspaceFile} />;
+  }
+  return <ZoomableImage src={resolved} alt={alt ?? ''} width={width} height={height} />;
 }
 
 function TableRenderer({ children }: ComponentProps<'table'>) {
@@ -454,7 +467,7 @@ export const GraphChatMessageContent = memo(function GraphChatMessageContent({
     <div ref={rootRef} data-markdown-ready={highlighter ? 'true' : 'false'} className={`thread-graph-message-markdown ${className}`}>
       <CodeRendererContext.Provider value={CodeBlockRenderer}>
       <LinkRendererContext.Provider value={LinkRenderer}>
-      <ImageRendererContext.Provider value={{ resolveHref, readOnly }}>
+      <ImageRendererContext.Provider value={{ resolveHref, readOnly, dark, resolveWorkspacePath, onOpenWorkspaceFile }}>
       <ReactMarkdown
         urlTransform={url => !readOnly && url.startsWith('workspace-auto:') ? url : !readOnly && localFileHref(url, typeof window === 'undefined' ? undefined : window.location.origin) ? url : defaultUrlTransform(url)}
         remarkPlugins={[remarkGfm, remarkMath, remarkLatex, remarkCjkFriendly, ...(!readOnly && resolveWorkspacePath ? [remarkWorkspacePaths] : [])]}
