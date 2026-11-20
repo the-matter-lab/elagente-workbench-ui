@@ -392,6 +392,21 @@ describe('GraphWorkspaceExplorer', () => {
       expect(selectedPaths()).toEqual([selected]);
     });
 
+    it('does not turn the toggle on to restore a hidden selection on the next load', async () => {
+      const { adapter } = createHiddenAdapter();
+      await renderExplorer(adapter, { path: 'runs/abc/x.out', requestId: 1 });
+      await vi.waitFor(() => expect(selectedPaths()).toEqual(['runs/abc/x.out']));
+      act(() => root?.unmount());
+      window.localStorage.setItem('workbench.explorer.showHidden', 'false');
+      root = createRoot(host!);
+      await renderExplorer(adapter);
+      await vi.waitFor(() => expect(selectedPaths()).toHaveLength(1));
+      expect(['README.md', 'src/index.ts']).toContain(selectedPaths()[0]);
+      for (const path of hiddenRows) expect(row(path)).toBeNull();
+      expect(preview()?.getAttribute('data-missing-path')).toBeNull();
+      expect(window.localStorage.getItem('workbench.explorer.showHidden')).toBe('false');
+    });
+
     it('keeps a visible selection when the toggle changes', async () => {
       const { adapter } = createHiddenAdapter();
       await renderExplorer(adapter, { path: 'src/index.ts', requestId: 1 });

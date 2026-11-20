@@ -804,7 +804,8 @@ export function useWorkspaceExplorerController({
         const virtual = [
           ...flattenWorkspaceNodes(fallbackTreeRef.current).values(),
         ].some((node) => node.path === persistedPath);
-        void focusWorkspacePath(persistedPath);
+        // A restored selection never turns Show hidden files on by itself.
+        void focusWorkspacePath(persistedPath, { restore: true });
         if (virtual) void refreshWorkspaceTree();
       } else void refreshWorkspaceTree();
     }
